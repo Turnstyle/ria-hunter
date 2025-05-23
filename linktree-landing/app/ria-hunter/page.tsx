@@ -24,7 +24,7 @@ const BunnyComingSoonModal: React.FC<BunnyComingSoonModalProps> = ({ isOpen, onC
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-center text-purple-600 dark:text-purple-400">
+          <DialogTitle className="text-2xl font-bold text-center text-blue-600 dark:text-blue-400">
             <Rabbit className="inline-block h-8 w-8 mr-2 animate-bounce" />
             Hold Your Horses, Detective!
           </DialogTitle>
@@ -41,13 +41,13 @@ const BunnyComingSoonModal: React.FC<BunnyComingSoonModalProps> = ({ isOpen, onC
             <span className="font-bold text-slate-700 dark:text-slate-200">Coming</span>
             <Sparkles className="inline-block h-6 w-6 text-amber-300 mx-1" />
             <span className="font-bold text-slate-700 dark:text-slate-200">Soon!</span>
-            <Rabbit className="absolute -right-6 -bottom-2 h-10 w-10 text-purple-500 transform rotate-12" />
+            <Rabbit className="absolute -right-6 -bottom-2 h-10 w-10 text-blue-500 transform rotate-12" />
           </div>
         </div>
         <DialogFooter className="sm:justify-center flex-col sm:flex-col sm:space-x-0 space-y-2">
           <Button
             type="button"
-            className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
             onClick={() => {
               onOpenWaitlist();
               onClose();
@@ -123,7 +123,7 @@ const WaitlistFormModal: React.FC<WaitlistFormModalProps> = ({ isOpen, onClose }
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-lg bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-center text-purple-600 dark:text-purple-400">
+          <DialogTitle className="text-2xl font-bold text-center text-blue-600 dark:text-blue-400">
              <Mail className="inline-block h-8 w-8 mr-2" />
             Join the RIA Hunter Waitlist!
           </DialogTitle>
@@ -159,7 +159,7 @@ const WaitlistFormModal: React.FC<WaitlistFormModalProps> = ({ isOpen, onClose }
             <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
               Cancel
             </Button>
-            <Button type="submit" className="bg-purple-600 hover:bg-purple-700 text-white" disabled={isSubmitting}>
+            <Button type="submit" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white" disabled={isSubmitting}>
               {isSubmitting ? "Submitting..." : "Request Early Access"}
             </Button>
           </DialogFooter>
@@ -190,7 +190,7 @@ export default function RiaHunterPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-100 font-sans">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-purple-950 text-slate-100 font-sans">
       {/* Header */}
       <header className="py-4 px-6 md:px-10 flex justify-between items-center border-b border-slate-700/50">
         <div className="flex items-center space-x-3">
@@ -199,11 +199,11 @@ export default function RiaHunterPage() {
             <span className="sr-only">Open Menu</span>
           </Button>
           <div className="text-2xl font-bold tracking-tighter">
-            RIA <span className="text-purple-400">Hunter</span>
+            RIA <span className="text-blue-400">Hunter</span>
           </div>
         </div>
         <div className="space-x-3">
-          <Button variant="outline" className="text-slate-100 border-slate-600 hover:bg-slate-800 hover:text-white hover:scale-[1.03] hover:shadow-lg hover:shadow-purple-500/30 transition-all duration-200" onClick={() => setIsBunnyModalOpen(true)}>
+          <Button variant="outline" className="text-slate-100 border-slate-600 hover:bg-slate-800 hover:text-white hover:scale-[1.03] hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-200" onClick={() => setIsBunnyModalOpen(true)}>
             <UserPlus className="mr-2 h-4 w-4" /> Sign Up
           </Button>
           <Button variant="ghost" className="text-slate-300 hover:bg-slate-800 hover:text-white" onClick={() => setIsBunnyModalOpen(true)}>
@@ -215,11 +215,11 @@ export default function RiaHunterPage() {
       {/* Main Content */}
       <main className="flex-grow flex flex-col items-center justify-center p-6 text-center">
         <div className="max-w-3xl w-full">
-          <Sparkles className="h-16 w-16 text-yellow-300 mx-auto mb-6 animate-pulse [animation:pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite,shimmer_3s_ease-in-out_infinite] [filter:drop-shadow(0_0_4px_theme(colors.yellow.300))_drop-shadow(0_0_8px_theme(colors.yellow.400))]" />
+          <Sparkles className="h-16 w-16 text-yellow-300 mx-auto mb-6 animate-pulse [animation:pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite,shimmer_3s_ease-in-out_infinite] [filter:drop-shadow(0_0_4px_theme(colors.yellow.300))_drop-shadow(0_0_8px_theme(colors.yellow.400))]\" />
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-6 leading-tight">
             Uncover Who Invests Privately.
             <br />
-            <span className="block whitespace-nowrap text-yellow-300 text-3xl sm:text-4xl md:text-5xl lg:text-6xl [text-shadow:0_0_1px_theme(colors.white),_0_0_4px_theme(colors.yellow.300),_0_0_7px_theme(colors.yellow.400),_0_0_12px_theme(colors.yellow.500)]">System Booting... Standby!</span>
+            <span className="block whitespace-nowrap text-yellow-300 text-3xl sm:text-4xl md:text-5xl lg:text-6xl [text-shadow:0_0_1px_theme(colors.white),_0_0_2px_theme(colors.yellow.300),_0_0_4px_theme(colors.yellow.400),_0_0_7px_theme(colors.yellow.500)]">System Booting... Standby!</span>
           </h1>
           <p className="text-xl text-slate-400 mb-10 max-w-2xl mx-auto">
             Ask your toughest questions of SEC Form ADV data,
@@ -230,7 +230,7 @@ export default function RiaHunterPage() {
           {/* Faux Chat Interface */}
           <div className="bg-slate-800/70 p-6 rounded-xl shadow-2xl border border-slate-700/50 max-w-2xl mx-auto mb-12">
             <div className="flex items-center space-x-3 mb-4">
-              <div className="h-10 w-10 rounded-full bg-purple-500 flex items-center justify-center text-white">
+              <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white">
                 <Search className="h-5 w-5" />
               </div>
               <div>
@@ -240,19 +240,23 @@ export default function RiaHunterPage() {
             </div>
             <div className="space-y-2 text-sm text-left mb-4 h-16 overflow-y-auto p-3 bg-slate-900/50 rounded-md border border-slate-700">
                 {/* Removed first message */}
-                <p className="text-slate-400"><span className="font-medium text-purple-300">Wealth Hunter:</span> Compiling dossiers on the most elusive RIAs... get ready for deep insights!</p>
+                <p className="text-slate-400"><span className="font-medium text-blue-300">Wealth Hunter:</span> Compiling dossiers on the most elusive RIAs... get ready for deep insights!</p>
             </div>
             <div className="flex space-x-3">
               <Input
                 type="text"
                 placeholder="Type your query here, detective... (coming soon!)"
-                className="flex-grow bg-slate-700 border-slate-600 text-slate-200 placeholder-slate-500 focus:ring-purple-500 focus:border-purple-500"
+                className="flex-grow bg-slate-700 border-slate-600 text-slate-200 placeholder-slate-500 focus:ring-blue-500 focus:border-blue-500"
                 value={chatInputValue}
                 onChange={(e) => setChatInputValue(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleChatAttempt()}
               />
-              <Button className="bg-purple-600 hover:bg-purple-700 text-white" onClick={handleChatAttempt}>
-                <Send className="h-5 w-5" />
+              <Button
+                type="button"
+                onClick={handleChatAttempt}
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transform transition-all duration-150 ease-in-out active:scale-95 flex items-center justify-center"
+              >
+                <Send className="mr-2 h-5 w-5" /> Be an Investigator (Join Waitlist)
               </Button>
             </div>
           </div>
