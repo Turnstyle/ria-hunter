@@ -67,34 +67,37 @@ const mainIconVariants: Variants = {
 };
 
 const particleIcons = [
-  <Zap key="zap" className="h-4 w-4 text-app-foundation-accent-light" />,
-  <Code key="code" className="h-5 w-5 text-app-foundation-accent-light" />,
-  <Cog key="cog" className="h-4 w-4 text-app-foundation-accent-light" />,
-  <Plus key="plus" className="h-3 w-3 text-app-foundation-accent-light" />,
-  <Share2 key="share" className="h-4 w-4 text-app-foundation-accent-light" />,
-  <GitBranch key="branch" className="h-5 w-5 text-app-foundation-accent-light" />,
-  <Puzzle key="puzzle" className="h-4 w-4 text-app-foundation-accent-light" />,
-  <Zap key="zap2" className="h-3 w-3 text-app-foundation-accent-light" />,
-  <Code key="code2" className="h-4 w-4 text-app-foundation-accent-light" />,
-  <Cog key="cog2" className="h-5 w-5 text-app-foundation-accent-light" />,
+  { key: "zap", icon: Zap, size: "h-4 w-4" },
+  { key: "code", icon: Code, size: "h-5 w-5" },
+  { key: "cog", icon: Cog, size: "h-4 w-4" },
+  { key: "plus", icon: Plus, size: "h-3 w-3" },
+  { key: "share", icon: Share2, size: "h-4 w-4" },
+  { key: "branch", icon: GitBranch, size: "h-5 w-5" },
+  { key: "puzzle", icon: Puzzle, size: "h-4 w-4" },
+  { key: "zap2", icon: Zap, size: "h-3 w-3" },
+  { key: "code2", icon: Code, size: "h-4 w-4" },
+  { key: "cog2", icon: Cog, size: "h-5 w-5" },
 ];
 
 const GenesisBlockAnimation: React.FC = () => {
   return (
     <div className="relative h-24 w-24 mx-auto mb-8 flex items-center justify-center">
-      {particleIcons.map((icon, i) => (
-        <motion.div
-          key={i}
-          custom={i}
-          variants={iconVariants}
-          initial="hidden"
-          animate={["visible", "coalesce"]}
-          className="absolute"
-          style={{ originX: '50%', originY: '50%' }}
-        >
-          {icon}
-        </motion.div>
-      ))}
+      {particleIcons.map((item, i) => {
+        const IconComponent = item.icon;
+        return (
+          <motion.div
+            key={item.key}
+            custom={i}
+            variants={iconVariants}
+            initial="hidden"
+            animate={["visible", "coalesce"]}
+            className="absolute text-app-foundation-accent-light"
+            style={{ originX: '50%', originY: '50%' }}
+          >
+            <IconComponent className={item.size} />
+          </motion.div>
+        );
+      })}
       <motion.div
         variants={mainIconVariants}
         initial="hidden"
