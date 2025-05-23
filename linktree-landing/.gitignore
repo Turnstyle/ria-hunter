@@ -25,3 +25,43 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Ignore a custom file for form submissions
+form_submissions.txt
+
+# Next.js build output
+.next/
+out/
+
+# Node.js dependencies
+node_modules/
+
+# Environment variables
+.env*.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# IDE / Editor specific
+.vscode/
+.idea/
+*.sublime-workspace
+
+# macOS specific
+.DS_Store
+
+# Optional Sentry files
+.sentryclirc
+
+# Optional Cypress files
+cypress.json
+cypress.env.json
+cypress/videos/
+cypress/screenshots/
+
+# Blitz auto-generated files
+blitz.config.js
+blitz-env.d.ts

@@ -81,7 +81,7 @@ interface WaitlistFormData {
 }
 
 const WaitlistFormModal: React.FC<WaitlistFormModalProps> = ({ isOpen, onClose }) => {
-  const [formData, setFormData] = useState<WaitlistFormData>({ name: "", email: "", phone: "", company: "", purpose: "" });
+  const [formData, setFormData] = useState<WaitlistFormData & { formType: string }>({ name: "", email: "", phone: "", company: "", purpose: "", formType: "riaHunterWaitlist" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState<string | null>(null);
 
@@ -94,21 +94,22 @@ const WaitlistFormModal: React.FC<WaitlistFormModalProps> = ({ isOpen, onClose }
     setIsSubmitting(true);
     setSubmitMessage(null);
 
-    // Simulate API call
     try {
-      const response = await fetch('/api/ria-hunter-waitlist', {
+      // Changed API endpoint and ensure formType is part of formData
+      const response = await fetch('/api/save-form-data', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, formType: "riaHunterWaitlist" }), // Explicitly add/ensure formType
       });
-      const result = await response.json();
+      // const result = await response.json(); // We might not need to parse JSON if the new endpoint is simple
 
       if (response.ok) {
         setSubmitMessage("Thanks! You're on the list. We'll be in touch, detective!");
-        setFormData({ name: "", email: "", phone: "", company: "", purpose: "" }); // Reset form
+        setFormData({ name: "", email: "", phone: "", company: "", purpose: "", formType: "riaHunterWaitlist" }); // Reset form
         // Optionally close modal after a delay: setTimeout(onClose, 3000);
       } else {
-        setSubmitMessage(result.message || "Something went wrong. Please try again.");
+        const errorResult = await response.json(); // Get error details
+        setSubmitMessage(errorResult.message || "Something went wrong. Please try again.");
       }
     } catch (error) {
       setSubmitMessage("Network error. Please check your connection and try again.");

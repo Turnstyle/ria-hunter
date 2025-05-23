@@ -19,6 +19,7 @@ export function ContactForm({ onClose }: ContactFormProps) {
     email: "",
     phone: "",
     message: "",
+    formType: "contact",
   })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -26,15 +27,30 @@ export function ContactForm({ onClose }: ContactFormProps) {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setFormState("submitting")
 
-    // Simulate form submission
-    setTimeout(() => {
-      console.log("Form submitted:", formData)
-      setFormState("success")
-    }, 1500)
+    try {
+      const response = await fetch('/api/save-form-data', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        console.log("Form submitted:", formData)
+        setFormState("success")
+      } else {
+        console.error("Failed to save form data", await response.text());
+        setFormState("idle");
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      setFormState("idle");
+    }
   }
 
   if (formState === "success") {
