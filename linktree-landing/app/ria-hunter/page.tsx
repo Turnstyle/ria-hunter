@@ -101,7 +101,7 @@ const WaitlistFormModal: React.FC<WaitlistFormModalProps> = ({ isOpen, onClose }
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...formData, formType: "riaHunterWaitlist" }), // Explicitly add/ensure formType
       });
-      // const result = await response.json(); // We might not need to parse JSON if the new endpoint is simple
+      // We might not need to parse JSON if the new endpoint is simple
 
       if (response.ok) {
         setSubmitMessage("Thanks! You're on the list. We'll be in touch, detective!");
