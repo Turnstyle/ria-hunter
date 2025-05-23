@@ -1,3 +1,5 @@
+'use client'
+
 import type { Metadata } from "next"
 import { useState } from "react"
 import { SocialLinks } from "@/components/social-links"
