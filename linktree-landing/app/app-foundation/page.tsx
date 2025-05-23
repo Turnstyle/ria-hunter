@@ -21,7 +21,7 @@ export default function AppFoundationPage() {
           </a>
         </div>
         <nav className="hidden md:flex items-center space-x-3">
-          <Button variant="outline" className="text-slate-100 border-slate-600 hover:bg-emerald-700 hover:border-emerald-600 hover:text-white hover:scale-[1.03] hover:shadow-lg hover:shadow-emerald-500/30 transition-all duration-200" asChild>
+          <Button className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700 hover:scale-[1.03] hover:shadow-lg hover:shadow-emerald-500/30 transition-all duration-200" asChild>
             <a href="https://github.com/Turnstyle" target="_blank" rel="noopener noreferrer">
               <Github className="mr-2 h-4 w-4" /> My GitHub
             </a>
