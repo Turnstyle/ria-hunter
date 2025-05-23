@@ -53,9 +53,9 @@ const mainIconVariants: Variants = {
   pulse: {
     scale: [1, 1.1, 1],
     filter: [
-        "drop-shadow(0_0_8px_theme(colors.app-foundation-accent-light)) drop-shadow(0_0_16px_theme(colors.app-foundation-end))",
-        "drop-shadow(0_0_12px_theme(colors.app-foundation-accent-light)) drop-shadow(0_0_24px_theme(colors.app-foundation-end))",
-        "drop-shadow(0_0_8px_theme(colors.app-foundation-accent-light)) drop-shadow(0_0_16px_theme(colors.app-foundation-end))",
+        "drop-shadow(0 0 8px #5eead4) drop-shadow(0 0 16px #14b8a6)",
+        "drop-shadow(0 0 12px #5eead4) drop-shadow(0 0 24px #14b8a6)",
+        "drop-shadow(0 0 8px #5eead4) drop-shadow(0 0 16px #14b8a6)",
     ],
     transition: {
       delay: 2.5, // Start pulsing after appearing
