@@ -229,8 +229,8 @@ export default function RiaHunterPage() {
           </a>
         </div>
 
-        {/* Desktop Navigation (centered) */}
-        <nav className="hidden md:flex flex-grow justify-center items-center space-x-1 lg:space-x-2">
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex items-center space-x-1 lg:space-x-2">
           <Button variant="ghost" className="text-purple-300 hover:bg-purple-700/50 hover:text-white px-3 py-2 text-sm lg:text-base" asChild>
             <a href="#features">Features</a>
           </Button>
