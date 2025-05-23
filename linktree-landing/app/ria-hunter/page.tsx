@@ -190,7 +190,7 @@ export default function RiaHunterPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-purple-950 text-slate-100 font-sans">
+    <div className="flex flex-col min-h-screen bg-gradient-to-b from-primary-blue to-gradient-purple-end text-slate-100 font-sans">
       {/* Header */}
       <header className="py-4 px-6 md:px-10 flex justify-between items-center border-b border-slate-700/50">
         <div className="flex items-center space-x-3">
@@ -199,12 +199,12 @@ export default function RiaHunterPage() {
             <span className="sr-only">Open Menu</span>
           </Button>
           <div className="text-2xl font-bold tracking-tighter">
-            RIA <span className="text-blue-400">Hunter</span>
+            RIA <span className="text-header-hunter-text">Hunter</span>
           </div>
         </div>
         <div className="space-x-3">
-          <Button variant="outline" className="text-slate-100 border-slate-600 hover:bg-slate-800 hover:text-white hover:scale-[1.03] hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-200" onClick={() => setIsBunnyModalOpen(true)}>
-            <UserPlus className="mr-2 h-4 w-4" /> Sign Up
+          <Button variant="outline" className="text-signup-cta-gold border-signup-cta-gold hover:bg-signup-cta-gold/10 hover:text-yellow-300 hover:scale-[1.03] hover:shadow-lg hover:shadow-yellow-500/30 transition-all duration-200" onClick={() => setIsBunnyModalOpen(true)}>
+            <UserPlus className="mr-2 h-4 w-4 text-signup-cta-gold" /> Sign Up
           </Button>
           <Button variant="ghost" className="text-slate-300 hover:bg-slate-800 hover:text-white" onClick={() => setIsBunnyModalOpen(true)}>
             <LogIn className="mr-2 h-4 w-4" /> Sign In
@@ -279,17 +279,17 @@ export default function RiaHunterPage() {
           <p className="text-lg text-slate-400 mb-10">Here's the kind of intelligence you'll command:</p>
           <div className="grid md:grid-cols-3 gap-8">
             <div className="bg-slate-700/50 p-6 rounded-lg shadow-lg border border-slate-600/50">
-              <Search className="h-10 w-10 text-purple-400 mx-auto mb-4" />
+              <Search className="h-10 w-10 text-blue-700 mx-auto mb-4" />
               <h3 className="text-xl font-semibold mb-2 text-slate-100">Pinpoint Private Investors</h3>
               <p className="text-slate-400 text-sm">Zero in on RIAs active in private markets within your target zone (St. Louis MSA, 2020-Present).</p>
             </div>
             <div className="bg-slate-700/50 p-6 rounded-lg shadow-lg border border-slate-600/50">
-              <User className="h-10 w-10 text-purple-400 mx-auto mb-4" /> {/* User as proxy for profile */}
+              <User className="h-10 w-10 text-blue-700 mx-auto mb-4" /> {/* User as proxy for profile */}
               <h3 className="text-xl font-semibold mb-2 text-slate-100">Build Your Case Files</h3>
               <p className="text-slate-400 text-sm">Create "Living Profiles" with your own notes, tags, and links to enrich SEC data.</p>
             </div>
             <div className="bg-slate-700/50 p-6 rounded-lg shadow-lg border border-slate-600/50">
-              <Sparkles className="h-10 w-10 text-purple-400 mx-auto mb-4" /> {/* Sparkles for AI */}
+              <Sparkles className="h-10 w-10 text-blue-700 mx-auto mb-4" /> {/* Sparkles for AI */}
               <h3 className="text-xl font-semibold mb-2 text-slate-100">Unlock Strategic Matches</h3>
               <p className="text-slate-400 text-sm">Our "Investment Thesis Matcher" will use AI to find RIAs that align with your unique strategies.</p>
             </div>
