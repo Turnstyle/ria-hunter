@@ -205,7 +205,7 @@ export default function RiaHunterPage() {
         <div className="space-x-3">
           <Button 
             variant="outline" 
-            className="text-[#eab308] border-slate-600 hover:bg-slate-800 hover:text-[#eab308] hover:border-[#eab308]/50 hover:scale-[1.03] hover:shadow-lg hover:shadow-yellow-500/30 transition-all duration-200"
+            className="text-[#eab308] bg-slate-700 border-slate-600 hover:bg-slate-800 hover:text-[#eab308] hover:border-[#eab308]/50 hover:scale-[1.03] hover:shadow-lg hover:shadow-yellow-500/30 transition-all duration-200"
             onClick={() => setIsBunnyModalOpen(true)}
           >
             <UserPlus className="mr-2 h-4 w-4 text-[#eab308]" /> Sign Up
