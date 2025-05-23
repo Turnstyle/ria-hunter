@@ -4,7 +4,7 @@ import { useState, FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
-import { Lock, Flame, Mail, Send, AlertTriangle, CheckCircle } from "lucide-react";
+import { Lock, Sparkles, Mail, Send, AlertTriangle, CheckCircle } from "lucide-react";
 
 interface JobSparcComingSoonModalProps {
   isOpen: boolean;
@@ -31,7 +31,7 @@ export const JobSparcComingSoonModal: React.FC<JobSparcComingSoonModalProps> = (
       setMessageType("error");
     } else {
       // For now, all codes lead to this message
-      setMessage("Hmm, that code didn't quite unlock the gates. No worries! If you're super keen to jump in, feel free to send a smoke signal (or an email) to the creator – they might just have a secret handshake for you!");
+      setMessage("Access not yet granted with this code. If you super badly need it, please email the creator directly!");
       setMessageType("error"); // Or "info" if you have a style for it
     }
     setIsSubmitting(false);
@@ -53,7 +53,7 @@ export const JobSparcComingSoonModal: React.FC<JobSparcComingSoonModalProps> = (
     <Dialog open={isOpen} onOpenChange={handleCloseDialog}>
       <DialogContent className="sm:max-w-md bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border-slate-200 dark:border-slate-700/50 shadow-2xl rounded-2xl overflow-hidden">
         <DialogHeader className="p-6 text-center">
-          <Flame className="mx-auto h-12 w-12 text-orange-500 animate-pulse mb-3" />
+          <Sparkles className="mx-auto h-12 w-12 text-orange-500 animate-pulse mb-3" />
           <DialogTitle className="text-2xl font-bold text-slate-800 dark:text-slate-100">
             JobSparc is Igniting Soon!
           </DialogTitle>
@@ -113,7 +113,7 @@ export const JobSparcComingSoonModal: React.FC<JobSparcComingSoonModalProps> = (
                   Request Access
                 </>
               )}
-              <Flame className="absolute top-0 right-0 mt-1 mr-1 h-4 w-4 text-yellow-300 opacity-0 group-hover:opacity-100 group-hover:animate-ping transition-opacity duration-500" />
+              <Sparkles className="absolute top-0 right-0 mt-1 mr-1 h-4 w-4 text-yellow-300 opacity-0 group-hover:opacity-100 group-hover:animate-ping transition-opacity duration-500" />
             </Button>
           </DialogFooter>
         </form>

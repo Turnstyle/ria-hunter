@@ -37,7 +37,7 @@ export function PageContent() {
             <LinkCard
               title="AppFoundation Test"
               description="A breeding ground for my earliest vibe coding projects"
-              href="/app-foundation"
+              href="#"
               ctaText="Give It A Try"
               gradient="from-emerald-500 to-teal-500"
               icon="layers"

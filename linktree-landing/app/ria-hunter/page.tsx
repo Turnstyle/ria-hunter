@@ -5,26 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
-import { Search, UserPlus, LogIn, Mail, Send, Rabbit, Sparkles, Building, Phone, User, Menu, X, Filter, BarChart3 } from "lucide-react";
-
-// Define FeatureCard component
-interface FeatureCardProps {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-}
-
-const FeatureCard: React.FC<FeatureCardProps> = ({ icon, title, description }) => {
-  return (
-    <div className="group bg-purple-800/40 p-6 rounded-xl shadow-xl border border-purple-700/60 hover:bg-purple-700/50 transition-all duration-300 transform hover:scale-105">
-      <div className="flex justify-center mb-4">
-        {icon}
-      </div>
-      <h3 className="text-xl font-semibold mb-3 text-center text-purple-100 group-hover:text-white">{title}</h3>
-      <p className="text-purple-300 text-sm text-center group-hover:text-purple-200">{description}</p>
-    </div>
-  );
-};
+import { Search, UserPlus, LogIn, Mail, Send, Rabbit, Sparkles, Building, Phone, User, Menu } from "lucide-react";
 
 // TODO: Create these modal components in separate files
 // For now, basic placeholders or inline for simplicity in this step.
@@ -193,7 +174,6 @@ export default function RiaHunterPage() {
   const [isBunnyModalOpen, setIsBunnyModalOpen] = useState(false);
   const [isWaitlistModalOpen, setIsWaitlistModalOpen] = useState(false);
   const [chatInputValue, setChatInputValue] = useState("");
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleChatAttempt = () => {
     if (chatInputValue.trim() !== "") {
@@ -210,93 +190,27 @@ export default function RiaHunterPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-ria-hunter-gradient-start via-ria-hunter-gradient-mid to-ria-hunter-gradient-end text-slate-100 font-sans">
-      {/* Header - Restored to a known good state with dark theme and mobile menu */}
-      <header className="sticky top-0 z-50 py-3 px-4 md:px-8 flex justify-between items-center border-b border-purple-700/40 bg-slate-900/80 backdrop-blur-lg">
-        <div className="flex items-center space-x-2 md:space-x-3">
-          {/* Mobile Menu Button */}
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="md:hidden text-purple-300 hover:bg-purple-700/50 hover:text-white focus-visible:ring-1 focus-visible:ring-purple-400"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          >
-            {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            <span className="sr-only">Toggle Menu</span>
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-100 font-sans">
+      {/* Header */}
+      <header className="py-4 px-6 md:px-10 flex justify-between items-center border-b border-slate-700/50">
+        <div className="flex items-center space-x-3">
+          <Button variant="ghost" size="icon" className="text-slate-300 hover:bg-slate-800 hover:text-white" onClick={() => setIsBunnyModalOpen(true)}>
+            <Menu className="h-6 w-6" />
+            <span className="sr-only">Open Menu</span>
           </Button>
-          <a href="/" className="text-xl md:text-2xl font-bold tracking-tighter flex items-center text-purple-200 hover:text-purple-100 transition-colors">
-            RIA <span className="text-purple-400 hover:text-purple-300">Hunter</span>
-          </a>
+          <div className="text-2xl font-bold tracking-tighter">
+            RIA <span className="text-purple-400">Hunter</span>
+          </div>
         </div>
-
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-1 lg:space-x-2">
-          <Button variant="ghost" className="text-purple-300 hover:bg-purple-700/50 hover:text-white px-3 py-2 text-sm lg:text-base" asChild>
-            <a href="#features">Features</a>
+        <div className="space-x-3">
+          <Button variant="outline" className="text-slate-100 border-slate-600 hover:bg-slate-800 hover:text-white hover:scale-[1.03] hover:shadow-lg hover:shadow-purple-500/30 transition-all duration-200" onClick={() => setIsBunnyModalOpen(true)}>
+            <UserPlus className="mr-2 h-4 w-4" /> Sign Up
           </Button>
-          <Button variant="ghost" className="text-purple-300 hover:bg-purple-700/50 hover:text-white px-3 py-2 text-sm lg:text-base" asChild>
-            <a href="#about">About</a>
+          <Button variant="ghost" className="text-slate-300 hover:bg-slate-800 hover:text-white" onClick={() => setIsBunnyModalOpen(true)}>
+            <LogIn className="mr-2 h-4 w-4" /> Sign In
           </Button>
-          <Button variant="ghost" className="text-purple-300 hover:bg-purple-700/50 hover:text-white px-3 py-2 text-sm lg:text-base" asChild>
-            <a href="#contact">Contact</a>
-          </Button>
-        </nav>
-
-        {/* Sign Up / Sign In Buttons (Desktop) */}
-        <div className="hidden md:flex items-center space-x-2 md:space-x-3">
-          <Button 
-            variant="outline" 
-            className="text-ria-hunter-signup-text border-ria-hunter-signup-text/70 hover:bg-ria-hunter-signup-text/10 hover:text-yellow-300 hover:border-yellow-400/80 hover:scale-[1.03] hover:shadow-md hover:shadow-yellow-500/20 transition-all duration-200 text-sm px-3 py-1.5 lg:px-4 lg:py-2"
-            onClick={() => setIsWaitlistModalOpen(true)}
-          >
-            <UserPlus className="mr-1.5 h-3.5 w-3.5 lg:mr-2 lg:h-4 lg:w-4" /> Sign Up
-          </Button>
-          <Button 
-            variant="ghost" 
-            className="text-purple-300 hover:bg-purple-700/50 hover:text-white text-sm px-3 py-1.5 lg:px-4 lg:py-2" 
-            onClick={() => setIsBunnyModalOpen(true)}
-          >
-            <LogIn className="mr-1.5 h-3.5 w-3.5 lg:mr-2 lg:h-4 lg:w-4" /> Sign In
-          </Button>
-        </div>
-
-        {/* Mobile Sign Up Button (Replaces Sign In on mobile header for primary CTA) */}
-        <div className="md:hidden">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="text-ria-hunter-signup-text border-ria-hunter-signup-text/60 hover:bg-ria-hunter-signup-text/10 hover:text-yellow-300 hover:border-yellow-400/70 px-2.5 py-1 text-xs"
-              onClick={() => setIsWaitlistModalOpen(true)}
-            >
-                <UserPlus className="mr-1 h-3 w-3" /> Sign Up
-            </Button>
         </div>
       </header>
-
-      {/* Mobile Menu Content */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden fixed inset-x-0 top-[57px] z-40 bg-slate-900/95 backdrop-blur-md p-4 border-b border-purple-700/50 shadow-lg">
-          <nav className="flex flex-col space-y-2.5">
-            <Button variant="ghost" className="text-purple-200 justify-start hover:bg-purple-700/60 hover:text-white py-2.5 px-3" onClick={() => {setIsMobileMenuOpen(false); document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });}} >
-              Features
-            </Button>
-            <Button variant="ghost" className="text-purple-200 justify-start hover:bg-purple-700/60 hover:text-white py-2.5 px-3" onClick={() => {setIsMobileMenuOpen(false); document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });}} >
-              About
-            </Button>
-            <Button variant="ghost" className="text-purple-200 justify-start hover:bg-purple-700/60 hover:text-white py-2.5 px-3" onClick={() => {setIsMobileMenuOpen(false); document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });}} >
-              Contact
-            </Button>
-            <div className="border-t border-purple-700/30 my-2"></div>
-            <Button variant="ghost" className="text-purple-200 justify-start hover:bg-purple-700/60 hover:text-white py-2.5 px-3" onClick={() => { setIsMobileMenuOpen(false); setIsBunnyModalOpen(true);}}>
-              <LogIn className="mr-2 h-4 w-4" /> Sign In (Dev)
-            </Button>
-            {/* Optional: Add Sign Up to mobile menu as well if needed, though it's on header */}
-            {/* <Button variant="outline" className="text-ria-hunter-signup-text border-ria-hunter-signup-text/70 hover:bg-ria-hunter-signup-text/10 hover:text-yellow-300 justify-start w-full mt-1 py-2.5 px-3" onClick={() => { setIsMobileMenuOpen(false); setIsWaitlistModalOpen(true);}}>
-              <UserPlus className="mr-2 h-4 w-4" /> Sign Up for Waitlist
-            </Button> */}
-          </nav>
-        </div>
-      )}
 
       {/* Main Content */}
       <main className="flex-grow flex flex-col items-center justify-center p-6 text-center">
@@ -355,24 +269,27 @@ export default function RiaHunterPage() {
       </main>
       
       {/* "What We're Investigating" Section */}
-      <section id="features" className="py-16 md:py-24 bg-purple-800/30 rounded-xl shadow-2xl border border-purple-700/50 backdrop-blur-sm">
-        <h2 className="text-3xl font-bold mb-12 text-center text-purple-200">Special Features</h2>
-        <div className="grid md:grid-cols-3 gap-8 px-4 md:px-8">
-          <FeatureCard
-            icon={<Search className="h-10 w-10 text-ria-hunter-icon-accent group-hover:text-yellow-300 transition-colors" />}
-            title="Deep Dive Search"
-            description="Uncover hidden connections and patterns in SEC Form ADV data with our powerful semantic search."
-          />
-          <FeatureCard
-            icon={<Filter className="h-10 w-10 text-ria-hunter-icon-accent group-hover:text-yellow-300 transition-colors" />}
-            title="Advanced Filtering"
-            description="Narrow down your search with precision using advanced filters for AUM, location, and more."
-          />
-          <FeatureCard
-            icon={<BarChart3 className="h-10 w-10 text-ria-hunter-icon-accent group-hover:text-yellow-300 transition-colors" />}
-            title="Insightful Analytics"
-            description="Visualize trends and gain actionable insights with our integrated data analytics tools."
-          />
+      <section className="py-16 bg-slate-800/30 border-t border-slate-700/50">
+        <div className="container mx-auto px-6 text-center">
+          <h2 className="text-3xl font-bold mb-2 text-slate-100">Special Features</h2>
+          <p className="text-lg text-slate-400 mb-10">Here's the kind of intelligence you'll command:</p>
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="bg-slate-700/50 p-6 rounded-lg shadow-lg border border-slate-600/50">
+              <Search className="h-10 w-10 text-purple-400 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold mb-2 text-slate-100">Pinpoint Private Investors</h3>
+              <p className="text-slate-400 text-sm">Zero in on RIAs active in private markets within your target zone (St. Louis MSA, 2020-Present).</p>
+            </div>
+            <div className="bg-slate-700/50 p-6 rounded-lg shadow-lg border border-slate-600/50">
+              <User className="h-10 w-10 text-purple-400 mx-auto mb-4" /> {/* User as proxy for profile */}
+              <h3 className="text-xl font-semibold mb-2 text-slate-100">Build Your Case Files</h3>
+              <p className="text-slate-400 text-sm">Create "Living Profiles" with your own notes, tags, and links to enrich SEC data.</p>
+            </div>
+            <div className="bg-slate-700/50 p-6 rounded-lg shadow-lg border border-slate-600/50">
+              <Sparkles className="h-10 w-10 text-purple-400 mx-auto mb-4" /> {/* Sparkles for AI */}
+              <h3 className="text-xl font-semibold mb-2 text-slate-100">Unlock Strategic Matches</h3>
+              <p className="text-slate-400 text-sm">Our "Investment Thesis Matcher" will use AI to find RIAs that align with your unique strategies.</p>
+            </div>
+          </div>
         </div>
       </section>
 
