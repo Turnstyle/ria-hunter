@@ -29,6 +29,11 @@ const config = {
         'gradient-purple-end': '#8a5cf6',
         'header-hunter-text': '#0f172a',
         'signup-cta-gold': '#efc637',
+        'app-foundation-start': '#10b981',
+        'app-foundation-end': '#14b8a6',
+        'app-foundation-text-light': '#e0f2f7',
+        'app-foundation-accent-light': '#5eead4',
+        'app-foundation-accent-dark': '#047857',
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
