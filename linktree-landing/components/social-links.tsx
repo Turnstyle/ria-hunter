@@ -54,18 +54,28 @@ export function SocialLinks() {
 
       {/* Contact Form Modal */}
       {showContactForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+          onClick={(e) => {
+            // Close if clicking the backdrop
+            if (e.target === e.currentTarget) {
+              setShowContactForm(false);
+            }
+          }}
+        >
           <div className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white/90 p-6 shadow-2xl backdrop-blur-sm dark:bg-slate-800/90">
             <div className="absolute -left-20 -top-20 h-40 w-40 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 opacity-20 blur-3xl"></div>
             <div className="absolute -bottom-20 -right-20 h-40 w-40 rounded-full bg-gradient-to-br from-blue-400 to-teal-400 opacity-20 blur-3xl"></div>
 
-            <button
+            <Button
               onClick={() => setShowContactForm(false)}
-              className="absolute right-4 top-4 rounded-full bg-white/50 p-2 text-slate-500 backdrop-blur-sm transition-colors hover:bg-slate-100 hover:text-slate-700 dark:bg-slate-700/50 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-white"
+              variant="ghost"
+              size="icon"
+              className="absolute right-4 top-4 rounded-full hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-700 dark:hover:text-white"
               aria-label="Close"
             >
               <X className="h-5 w-5" />
-            </button>
+            </Button>
             <ContactForm onClose={() => setShowContactForm(false)} />
           </div>
         </div>
