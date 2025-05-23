@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
-import { Search, UserPlus, LogIn, Mail, Send, Rabbit, Sparkles, Building, Phone, User, Menu } from "lucide-react";
+import { Search, UserPlus, LogIn, Mail, Send, Rabbit, Sparkles, Building, Phone, User, Menu, Users, Filter, BarChart3, X } from "lucide-react";
 
 // TODO: Create these modal components in separate files
 // For now, basic placeholders or inline for simplicity in this step.
@@ -169,11 +169,30 @@ const WaitlistFormModal: React.FC<WaitlistFormModalProps> = ({ isOpen, onClose }
   );
 };
 
+// FeatureCard component (could be in its own file)
+interface FeatureCardProps {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+}
+
+const FeatureCard: React.FC<FeatureCardProps> = ({ icon, title, description }) => {
+  return (
+    <div className="group bg-slate-700/50 p-6 rounded-lg shadow-lg border border-slate-600/50 hover:border-purple-400/70 hover:shadow-purple-500/30 transition-all duration-300 transform hover:-translate-y-1 cursor-pointer">
+      <div className="mb-4 flex justify-center items-center h-16 w-16 rounded-full bg-purple-500/20 group-hover:bg-purple-500/40 transition-colors duration-300 mx-auto">
+        {icon}
+      </div>
+      <h3 className="text-xl font-semibold mb-2 text-center text-purple-100 group-hover:text-white transition-colors duration-300">{title}</h3>
+      <p className="text-purple-200/80 text-sm text-center group-hover:text-purple-100 transition-colors duration-300">{description}</p>
+    </div>
+  );
+};
 
 export default function RiaHunterPage() {
   const [isBunnyModalOpen, setIsBunnyModalOpen] = useState(false);
   const [isWaitlistModalOpen, setIsWaitlistModalOpen] = useState(false);
   const [chatInputValue, setChatInputValue] = useState("");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleChatAttempt = () => {
     if (chatInputValue.trim() !== "") {
@@ -190,116 +209,150 @@ export default function RiaHunterPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-primary-blue to-gradient-purple-end text-slate-100 font-sans">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-ria-hunter-gradient-start via-ria-hunter-gradient-mid to-ria-hunter-gradient-end text-white font-sans">
       {/* Header */}
-      <header className="py-4 px-6 md:px-10 flex justify-between items-center border-b border-slate-700/50">
+      <header className="sticky top-0 z-50 py-4 px-6 md:px-10 flex justify-between items-center border-b border-purple-400/30 backdrop-blur-md bg-ria-hunter-gradient-start/80">
         <div className="flex items-center space-x-3">
-          <Button variant="ghost" size="icon" className="text-slate-300 hover:bg-slate-800 hover:text-white" onClick={() => setIsBunnyModalOpen(true)}>
-            <Menu className="h-6 w-6" />
-            <span className="sr-only">Open Menu</span>
-          </Button>
-          <div className="text-2xl font-bold tracking-tighter">
+          <a href="/" className="text-2xl font-bold tracking-tighter flex items-center">
             RIA <span className="text-header-hunter-text">Hunter</span>
-          </div>
+          </a>
         </div>
-        <div className="space-x-3">
-          <Button variant="outline" className="text-signup-cta-gold border-signup-cta-gold hover:bg-signup-cta-gold/10 hover:text-yellow-300 hover:scale-[1.03] hover:shadow-lg hover:shadow-yellow-500/30 transition-all duration-200" onClick={() => setIsBunnyModalOpen(true)}>
-            <UserPlus className="mr-2 h-4 w-4 text-signup-cta-gold" /> Sign Up
+        <nav className="hidden md:flex items-center space-x-3">
+          <Button variant="ghost" className="text-white hover:bg-purple-500/30 hover:text-white" asChild>
+            <a href="#features">Features</a>
           </Button>
-          <Button variant="ghost" className="text-slate-300 hover:bg-slate-800 hover:text-white" onClick={() => setIsBunnyModalOpen(true)}>
-            <LogIn className="mr-2 h-4 w-4" /> Sign In
+          <Button variant="ghost" className="text-white hover:bg-purple-500/30 hover:text-white" asChild>
+            <a href="#about">About</a>
+          </Button>
+          <Button variant="ghost" className="text-white hover:bg-purple-500/30 hover:text-white" asChild>
+            <a href="#contact">Contact</a>
+          </Button>
+        </nav>
+        <div className="md:hidden">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-white hover:bg-purple-500/30 hover:text-white"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            <span className="sr-only">Toggle Menu</span>
           </Button>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="flex-grow flex flex-col items-center justify-center p-6 text-center">
-        <div className="max-w-3xl w-full">
-          <Sparkles className="h-16 w-16 text-yellow-300 mx-auto mb-6 animate-pulse [animation:pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite,shimmer_3s_ease-in-out_infinite] [filter:drop-shadow(0_0_4px_theme(colors.yellow.300))_drop-shadow(0_0_8px_theme(colors.yellow.400))]\" />
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-6 leading-tight">
-            Uncover Who Invests Privately.
-            <br />
-            <span className="block whitespace-nowrap text-yellow-300 text-3xl sm:text-4xl md:text-5xl lg:text-6xl [text-shadow:0_0_1px_theme(colors.white),_0_0_2px_theme(colors.yellow.300),_0_0_4px_theme(colors.yellow.400),_0_0_7px_theme(colors.yellow.500)]">System Booting... Standby!</span>
-          </h1>
-          <p className="text-xl text-slate-400 mb-10 max-w-2xl mx-auto">
-            Ask your toughest questions of SEC Form ADV data,
-            <br />
-            get illuminating answers.
-          </p>
+      {isMobileMenuOpen && (
+        <div className="md:hidden absolute top-16 right-0 left-0 z-40 bg-ria-hunter-gradient-start/95 backdrop-blur-sm p-4 border-b border-purple-400/30">
+          <nav className="flex flex-col space-y-3">
+            <Button variant="ghost" className="text-white justify-start hover:bg-purple-500/30 hover:text-white" onClick={() => {setIsMobileMenuOpen(false); document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });}} >
+              Features
+            </Button>
+            <Button variant="ghost" className="text-white justify-start hover:bg-purple-500/30 hover:text-white" onClick={() => {setIsMobileMenuOpen(false); document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });}} >
+              About
+            </Button>
+            <Button variant="ghost" className="text-white justify-start hover:bg-purple-500/30 hover:text-white" onClick={() => {setIsMobileMenuOpen(false); document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });}} >
+              Contact
+            </Button>
+             <Button variant="outline" className="text-signup-cta-gold border-signup-cta-gold hover:bg-signup-cta-gold/10 hover:text-yellow-300 justify-start" onClick={() => { setIsMobileMenuOpen(false); setIsWaitlistModalOpen(true);}}>
+              <UserPlus className="mr-2 h-4 w-4 text-signup-cta-gold" /> Sign Up
+            </Button>
+            <Button variant="ghost" className="text-white justify-start hover:bg-purple-500/30 hover:text-white" onClick={() => { setIsMobileMenuOpen(false); setIsBunnyModalOpen(true);}}>
+              <LogIn className="mr-2 h-4 w-4" /> Sign In (Dev)
+            </Button>
+          </nav>
+        </div>
+      )}
 
-          {/* Faux Chat Interface */}
-          <div className="bg-slate-800/70 p-6 rounded-xl shadow-2xl border border-slate-700/50 max-w-2xl mx-auto mb-12">
-            <div className="flex items-center space-x-3 mb-4">
-              <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white">
-                <Search className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="font-semibold text-slate-200">Agent Hunter <span className="text-xs text-yellow-500">(Build Pending - Standby)</span></p>
-                <p className="text-xs text-slate-500">Ask me anything about RIAs... once the case files are open!</p>
-              </div>
+      {/* Hero Section */}
+      <main className="flex-grow flex flex-col items-center justify-center p-6 text-center">
+        <div className="max-w-4xl w-full">
+          <section className="py-16 md:py-24">
+            <div className="mb-8">
+              <Sparkles className="h-20 w-20 text-yellow-400 mx-auto [filter:drop-shadow(0_0_8px_theme(colors.yellow.400))_drop-shadow(0_0_16px_theme(colors.purple.500))] animate-shimmer" />
             </div>
-            <div className="space-y-2 text-sm text-left mb-4 h-16 overflow-y-auto p-3 bg-slate-900/50 rounded-md border border-slate-700">
-                {/* Removed first message */}
-                <p className="text-slate-400"><span className="font-medium text-blue-300">Wealth Hunter:</span> Compiling dossiers on the most elusive RIAs... get ready for deep insights!</p>
-            </div>
-            <div className="flex space-x-3">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-4 leading-tight">
+              Uncover Who Invests <span className="block text-purple-300">Privately</span>.
+            </h1>
+            <h2
+              className="text-3xl sm:text-4xl md:text-5xl font-bold text-yellow-400 mb-10"
+              style={{
+                textShadow:
+                  "0 0 3px theme(colors.yellow.700), 0 0 5px theme(colors.yellow.700), 0 0 7px theme(colors.purple.500), 0 0 10px theme(colors.purple.500)",
+              }}
+            >
+              System Booting... Standby!
+            </h2>
+            <p className="text-xl text-purple-200/90 mb-12 max-w-2xl mx-auto">
+              Ask your toughest questions of SEC Form ADV data,
+              <br />
+              get illuminating answers.
+            </p>
+            <div className="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4">
               <Input
                 type="text"
                 placeholder="Type your query here, detective... (coming soon!)"
-                className="flex-grow bg-slate-700 border-slate-600 text-slate-200 placeholder-slate-500 focus:ring-blue-500 focus:border-blue-500"
+                className="flex-grow bg-slate-700/80 border-purple-400/50 text-purple-100 placeholder-purple-300/70 focus:ring-purple-500 focus:border-purple-500 rounded-lg"
                 value={chatInputValue}
                 onChange={(e) => setChatInputValue(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleChatAttempt()}
               />
-              <Button
+              <Button 
                 type="button"
                 onClick={handleChatAttempt}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transform transition-all duration-150 ease-in-out active:scale-95 flex items-center justify-center"
+                variant="default" 
+                className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:shadow-pink-500/50 transition-all duration-300 transform hover:scale-105 glow-button"
+                // This button will glow similarly to the "System Booting" text due to the glow-button class (defined in globals.css or here if needed)
               >
                 <Send className="mr-2 h-5 w-5" /> Be an Investigator (Join Waitlist)
               </Button>
             </div>
-          </div>
+          </section>
 
-          <Button
-            size="lg"
-            className="bg-yellow-400 hover:bg-yellow-500 text-slate-900 font-bold text-lg py-4 px-8 rounded-lg shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-yellow-300 transition-all duration-300 transform hover:scale-105 [text-shadow:0_0_3px_rgba(255,255,255,0.3)] [box-shadow:0_0_8px_0_theme(colors.yellow.400),_0_0_15px_0_theme(colors.yellow.500),inset_0_0_5px_rgba(255,255,200,0.5)] hover:[box-shadow:0_0_12px_0_theme(colors.yellow.300),_0_0_25px_0_theme(colors.yellow.400),inset_0_0_8px_rgba(255,255,200,0.7)]"
-            onClick={() => setIsWaitlistModalOpen(true)}
-          >
-            <Sparkles className="mr-3 h-6 w-6 text-purple-600 [filter:drop-shadow(0_0_3px_theme(colors.purple.400))]" />
-            Be an Investigator (Join Waitlist)
-          </Button>
+          {/* Special Features Section */}
+          <section id="features" className="py-16 md:py-24 bg-gradient-to-b from-ria-hunter-features-bg-start to-ria-hunter-features-bg-end rounded-xl shadow-2xl border border-purple-400/30 backdrop-blur-sm">
+            <h2 className="text-3xl font-bold mb-12 text-center text-purple-200">Special Features</h2>
+            <div className="grid md:grid-cols-3 gap-8 px-4 md:px-8">
+              <FeatureCard
+                icon={<Search className="h-10 w-10 text-ria-hunter-icon-purple-contrast group-hover:text-yellow-300 transition-colors" />}
+                title="Deep Dive Search"
+                description="Uncover hidden connections and patterns in SEC Form ADV data with our powerful semantic search."
+              />
+              <FeatureCard
+                icon={<Filter className="h-10 w-10 text-ria-hunter-icon-purple-contrast group-hover:text-yellow-300 transition-colors" />}
+                title="Advanced Filtering"
+                description="Narrow down your search with precision using advanced filters for AUM, location, and more."
+              />
+              <FeatureCard
+                icon={<BarChart3 className="h-10 w-10 text-ria-hunter-icon-purple-contrast group-hover:text-yellow-300 transition-colors" />}
+                title="Insightful Analytics"
+                description="Visualize trends and gain actionable insights with our integrated data analytics tools."
+              />
+            </div>
+          </section>
+
+          {/* Call to Action Section */}
+          <section className="py-20 text-center">
+            <h2 className="text-4xl font-bold mb-6 text-purple-200">Ready to Start Investigating?</h2>
+            <p className="text-xl text-purple-300/80 mb-10 max-w-xl mx-auto">
+              Join the waitlist and be among the first to experience the power of RIA Hunter.
+            </p>
+            <Button
+              size="lg"
+              onClick={() => setIsWaitlistModalOpen(true)}
+              className="bg-signup-cta-gold text-header-hunter-text hover:bg-yellow-500 font-bold text-lg py-4 px-8 rounded-lg shadow-xl hover:shadow-yellow-400/60 transition-all duration-300 transform hover:scale-105 glow-button"
+              // Glow effect should be subtle here, or match the primary CTA glow
+            >
+              <Users className="mr-2 h-6 w-6" /> Be an Investigator (Join Waitlist)
+            </Button>
+          </section>
         </div>
       </main>
-      
-      {/* "What We're Investigating" Section */}
-      <section className="py-16 bg-slate-800/30 border-t border-slate-700/50">
-        <div className="container mx-auto px-6 text-center">
-          <h2 className="text-3xl font-bold mb-2 text-slate-100">Special Features</h2>
-          <p className="text-lg text-slate-400 mb-10">Here's the kind of intelligence you'll command:</p>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-slate-700/50 p-6 rounded-lg shadow-lg border border-slate-600/50">
-              <Search className="h-10 w-10 text-blue-700 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold mb-2 text-slate-100">Pinpoint Private Investors</h3>
-              <p className="text-slate-400 text-sm">Zero in on RIAs active in private markets within your target zone (St. Louis MSA, 2020-Present).</p>
-            </div>
-            <div className="bg-slate-700/50 p-6 rounded-lg shadow-lg border border-slate-600/50">
-              <User className="h-10 w-10 text-blue-700 mx-auto mb-4" /> {/* User as proxy for profile */}
-              <h3 className="text-xl font-semibold mb-2 text-slate-100">Build Your Case Files</h3>
-              <p className="text-slate-400 text-sm">Create "Living Profiles" with your own notes, tags, and links to enrich SEC data.</p>
-            </div>
-            <div className="bg-slate-700/50 p-6 rounded-lg shadow-lg border border-slate-600/50">
-              <Sparkles className="h-10 w-10 text-blue-700 mx-auto mb-4" /> {/* Sparkles for AI */}
-              <h3 className="text-xl font-semibold mb-2 text-slate-100">Unlock Strategic Matches</h3>
-              <p className="text-slate-400 text-sm">Our "Investment Thesis Matcher" will use AI to find RIAs that align with your unique strategies.</p>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Footer */}
-      <footer className="py-6 text-center text-sm text-slate-500 border-t border-slate-700/50">
-        &copy; {new Date().getFullYear()} jtpnexus.com. All rights reserved. The future of RIA investigation is loading...
+      <footer id="contact" className="py-8 px-6 md:px-10 text-center border-t border-purple-400/30 bg-ria-hunter-footer-bg">
+        <p className="text-ria-hunter-footer-text text-sm">
+          &copy; {new Date().getFullYear()} JTP Nexus. All rights reserved. RIA Hunter is a project by JT Peters.
+        </p>
       </footer>
 
       {/* Modals */}
@@ -307,4 +360,4 @@ export default function RiaHunterPage() {
       <WaitlistFormModal isOpen={isWaitlistModalOpen} onClose={() => setIsWaitlistModalOpen(false)} />
     </div>
   );
-} 
+}
