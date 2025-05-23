@@ -1,9 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import { Github, Linkedin, Twitter, Mail, X } from "lucide-react"
+import { Github, Linkedin, Mail, X } from "lucide-react"
 import { ContactForm } from "./contact-form"
 import { Button } from "@/components/ui/button"
+import { XLogo } from "./icons/x-logo"
 
 export function SocialLinks() {
   const [showContactForm, setShowContactForm] = useState(false)
@@ -25,10 +26,10 @@ export function SocialLinks() {
             href="https://x.com/JTPeters_"
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-blue-400 to-sky-500 p-2 text-white shadow-md transition-all duration-300 hover:shadow-lg md:h-12 md:w-12"
+            className="group flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-slate-700 to-slate-900 p-2 text-white shadow-md transition-all duration-300 hover:shadow-lg md:h-12 md:w-12"
             aria-label="X (formerly Twitter) Profile"
           >
-            <X className="h-5 w-5 transition-transform duration-300 group-hover:scale-110" />
+            <XLogo className="h-5 w-5 transition-transform duration-300 group-hover:scale-110" />
           </a>
           <a
             href="https://github.com/Turnstyle"
