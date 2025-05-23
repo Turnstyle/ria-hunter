@@ -203,8 +203,12 @@ export default function RiaHunterPage() {
           </div>
         </div>
         <div className="space-x-3">
-          <Button variant="outline" className="text-slate-100 border-slate-600 hover:bg-slate-800 hover:text-white hover:scale-[1.03] hover:shadow-lg hover:shadow-purple-500/30 transition-all duration-200" onClick={() => setIsBunnyModalOpen(true)}>
-            <UserPlus className="mr-2 h-4 w-4" /> Sign Up
+          <Button 
+            variant="outline" 
+            className="text-[#eab308] border-slate-600 hover:bg-slate-800 hover:text-[#eab308] hover:border-[#eab308]/50 hover:scale-[1.03] hover:shadow-lg hover:shadow-yellow-500/30 transition-all duration-200"
+            onClick={() => setIsBunnyModalOpen(true)}
+          >
+            <UserPlus className="mr-2 h-4 w-4 text-[#eab308]" /> Sign Up
           </Button>
           <Button variant="ghost" className="text-slate-300 hover:bg-slate-800 hover:text-white" onClick={() => setIsBunnyModalOpen(true)}>
             <LogIn className="mr-2 h-4 w-4" /> Sign In
@@ -219,7 +223,7 @@ export default function RiaHunterPage() {
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-6 leading-tight">
             Uncover Who Invests Privately.
             <br />
-            <span className="block whitespace-nowrap text-yellow-300 text-3xl sm:text-4xl md:text-5xl lg:text-6xl [text-shadow:0_0_1px_theme(colors.white),_0_0_4px_theme(colors.yellow.300),_0_0_7px_theme(colors.yellow.400),_0_0_12px_theme(colors.yellow.500)]">System Booting... Standby!</span>
+            <span className="block whitespace-nowrap text-yellow-300 text-3xl sm:text-4xl md:text-5xl lg:text-6xl [text-shadow:0_0_1px_theme(colors.white),_0_0_2px_theme(colors.yellow.300),_0_0_4px_theme(colors.yellow.400),_0_0_7px_theme(colors.yellow.500)]">System Booting... Standby!</span>
           </h1>
           <p className="text-xl text-slate-400 mb-10 max-w-2xl mx-auto">
             Ask your toughest questions of SEC Form ADV data,
