@@ -10,10 +10,10 @@ export function SocialLinks() {
 
   return (
     <>
-      <div className="fixed bottom-2 left-0 right-0 z-20 border-t border-white/50 bg-white/80 px-2 pt-2 pb-6 shadow-xl backdrop-blur-sm transition-all duration-300 dark:border-slate-700/50 dark:bg-slate-800/50 md:w-auto md:rounded-2xl md:border md:left-auto md:right-6 md:top-1/2 md:-translate-y-1/2 md:px-4 md:pt-4 md:pb-3 md:hover:shadow-2xl">
+      <div className="fixed bottom-2 left-0 right-0 z-20 border-t border-white/50 bg-white/80 px-2 pt-2 pb-2 shadow-xl backdrop-blur-sm transition-all duration-300 dark:border-slate-700/50 dark:bg-slate-800/50 md:w-auto md:rounded-2xl md:border md:left-auto md:right-6 md:top-1/2 md:-translate-y-1/2 md:px-4 md:pt-4 md:pb-3 md:hover:shadow-2xl">
         <div className="flex justify-around items-center space-x-1 md:flex-col md:space-x-0 md:space-y-4">
           <a
-            href="https://linkedin.com"
+            href="https://www.linkedin.com/in/j-t-peters/"
             target="_blank"
             rel="noopener noreferrer"
             className="group flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-blue-600 p-2 text-white shadow-md transition-all duration-300 hover:shadow-lg md:h-12 md:w-12"
@@ -22,16 +22,16 @@ export function SocialLinks() {
             <Linkedin className="h-5 w-5 transition-transform duration-300 group-hover:scale-110" />
           </a>
           <a
-            href="https://twitter.com"
+            href="https://x.com/JTPeters_"
             target="_blank"
             rel="noopener noreferrer"
             className="group flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-blue-400 to-sky-500 p-2 text-white shadow-md transition-all duration-300 hover:shadow-lg md:h-12 md:w-12"
-            aria-label="Twitter Profile"
+            aria-label="X (formerly Twitter) Profile"
           >
             <X className="h-5 w-5 transition-transform duration-300 group-hover:scale-110" />
           </a>
           <a
-            href="https://github.com"
+            href="https://github.com/Turnstyle"
             target="_blank"
             rel="noopener noreferrer"
             className="group flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-slate-700 to-slate-900 p-2 text-white shadow-md transition-all duration-300 hover:shadow-lg dark:from-slate-600 dark:to-slate-800 md:h-12 md:w-12"
