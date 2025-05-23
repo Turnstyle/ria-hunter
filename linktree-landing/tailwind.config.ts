@@ -34,6 +34,8 @@ const config = {
         'app-foundation-text-light': '#e0f2f7',
         'app-foundation-accent-light': '#5eead4',
         'app-foundation-accent-dark': '#047857',
+        'app-foundation-text-dark': '#004d40',
+        'app-foundation-github-button-text': '#00695c',
         'ria-hunter-gradient-start': '#4180f6',
         'ria-hunter-gradient-mid': '#6d6bf6',
         'ria-hunter-gradient-end': '#644ebe',
