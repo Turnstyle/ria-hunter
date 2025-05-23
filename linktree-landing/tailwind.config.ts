@@ -20,7 +20,7 @@ const config = {
     },
     extend: {
       colors: {
-        'custom-purple-start': '#320a59',
+        'custom-purple-start': '#815cb2',
         'custom-purple-end': '#211142',
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
