@@ -47,7 +47,7 @@ export function PageContent() {
               description="Find out who's who in private investments"
               href="/ria-hunter"
               ctaText="Give It A Try"
-              gradient="from-blue-500 to-violet-500"
+              gradient="from-custom-purple-start to-custom-purple-end"
               icon="search"
             />
             <LinkCard
