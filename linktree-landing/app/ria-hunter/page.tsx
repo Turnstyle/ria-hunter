@@ -210,64 +210,90 @@ export default function RiaHunterPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-slate-100 font-sans">
-      {/* Header */}
-      <header className="sticky top-0 z-50 py-4 px-6 md:px-10 flex justify-between items-center border-b border-purple-800/50 backdrop-blur-md bg-purple-900/70">
-        <div className="flex items-center space-x-3">
-          {/* Mobile Menu Button - kept for consistency, can be removed if not desired for RIA Hunter */}
-          <Button variant="ghost" size="icon" className="md:hidden text-purple-300 hover:bg-purple-700/50 hover:text-white" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
-            {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-ria-hunter-gradient-start via-ria-hunter-gradient-mid to-ria-hunter-gradient-end text-slate-100 font-sans">
+      {/* Header - Restored to a known good state with dark theme and mobile menu */}
+      <header className="sticky top-0 z-50 py-3 px-4 md:px-8 flex justify-between items-center border-b border-purple-700/40 bg-slate-900/80 backdrop-blur-lg">
+        <div className="flex items-center space-x-2 md:space-x-3">
+          {/* Mobile Menu Button */}
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="md:hidden text-purple-300 hover:bg-purple-700/50 hover:text-white focus-visible:ring-1 focus-visible:ring-purple-400"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             <span className="sr-only">Toggle Menu</span>
           </Button>
-          <a href="/" className="text-2xl font-bold tracking-tighter flex items-center text-purple-200 hover:text-white transition-colors">
-            RIA <span className="text-purple-400">Hunter</span>
+          <a href="/" className="text-xl md:text-2xl font-bold tracking-tighter flex items-center text-purple-200 hover:text-purple-100 transition-colors">
+            RIA <span className="text-purple-400 hover:text-purple-300">Hunter</span>
           </a>
         </div>
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-1">
-          <Button variant="ghost" className="text-purple-300 hover:bg-purple-700/50 hover:text-white" asChild>
+
+        {/* Desktop Navigation (centered) */}
+        <nav className="hidden md:flex flex-grow justify-center items-center space-x-1 lg:space-x-2">
+          <Button variant="ghost" className="text-purple-300 hover:bg-purple-700/50 hover:text-white px-3 py-2 text-sm lg:text-base" asChild>
             <a href="#features">Features</a>
           </Button>
-          <Button variant="ghost" className="text-purple-300 hover:bg-purple-700/50 hover:text-white" asChild>
+          <Button variant="ghost" className="text-purple-300 hover:bg-purple-700/50 hover:text-white px-3 py-2 text-sm lg:text-base" asChild>
             <a href="#about">About</a>
           </Button>
-          <Button variant="ghost" className="text-purple-300 hover:bg-purple-700/50 hover:text-white" asChild>
+          <Button variant="ghost" className="text-purple-300 hover:bg-purple-700/50 hover:text-white px-3 py-2 text-sm lg:text-base" asChild>
             <a href="#contact">Contact</a>
           </Button>
         </nav>
-        {/* Sign Up / Sign In Buttons */}
-        <div className="hidden md:flex items-center space-x-3">
-          <Button variant="outline" className="text-ria-hunter-signup-text border-ria-hunter-signup-text/70 hover:bg-ria-hunter-signup-text/10 hover:text-yellow-300 hover:scale-[1.03] hover:shadow-lg hover:shadow-yellow-500/30 transition-all duration-200" onClick={() => setIsWaitlistModalOpen(true)}>
-            <UserPlus className="mr-2 h-4 w-4 text-ria-hunter-signup-text" /> Sign Up
+
+        {/* Sign Up / Sign In Buttons (Desktop) */}
+        <div className="hidden md:flex items-center space-x-2 md:space-x-3">
+          <Button 
+            variant="outline" 
+            className="text-ria-hunter-signup-text border-ria-hunter-signup-text/70 hover:bg-ria-hunter-signup-text/10 hover:text-yellow-300 hover:border-yellow-400/80 hover:scale-[1.03] hover:shadow-md hover:shadow-yellow-500/20 transition-all duration-200 text-sm px-3 py-1.5 lg:px-4 lg:py-2"
+            onClick={() => setIsWaitlistModalOpen(true)}
+          >
+            <UserPlus className="mr-1.5 h-3.5 w-3.5 lg:mr-2 lg:h-4 lg:w-4" /> Sign Up
           </Button>
-          <Button variant="ghost" className="text-purple-300 hover:bg-purple-700/50 hover:text-white" onClick={() => setIsBunnyModalOpen(true)}>
-            <LogIn className="mr-2 h-4 w-4" /> Sign In
+          <Button 
+            variant="ghost" 
+            className="text-purple-300 hover:bg-purple-700/50 hover:text-white text-sm px-3 py-1.5 lg:px-4 lg:py-2" 
+            onClick={() => setIsBunnyModalOpen(true)}
+          >
+            <LogIn className="mr-1.5 h-3.5 w-3.5 lg:mr-2 lg:h-4 lg:w-4" /> Sign In
           </Button>
         </div>
-         {/* Mobile Sign In Button - if only one primary action desired for mobile header */} 
+
+        {/* Mobile Sign Up Button (Replaces Sign In on mobile header for primary CTA) */}
         <div className="md:hidden">
-            <Button variant="outline" size="sm" className="text-ria-hunter-signup-text border-ria-hunter-signup-text/70 hover:bg-ria-hunter-signup-text/10" onClick={() => setIsWaitlistModalOpen(true)}>
-                <UserPlus className="mr-1.5 h-3.5 w-3.5" /> Sign Up
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="text-ria-hunter-signup-text border-ria-hunter-signup-text/60 hover:bg-ria-hunter-signup-text/10 hover:text-yellow-300 hover:border-yellow-400/70 px-2.5 py-1 text-xs"
+              onClick={() => setIsWaitlistModalOpen(true)}
+            >
+                <UserPlus className="mr-1 h-3 w-3" /> Sign Up
             </Button>
         </div>
       </header>
 
       {/* Mobile Menu Content */}
       {isMobileMenuOpen && (
-        <div className="md:hidden absolute top-16 right-0 left-0 z-40 bg-purple-900/95 backdrop-blur-sm p-4 border-b border-purple-800/50">
-          <nav className="flex flex-col space-y-3">
-            <Button variant="ghost" className="text-purple-200 justify-start hover:bg-purple-700/50 hover:text-white" onClick={() => {setIsMobileMenuOpen(false); document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });}} >
+        <div className="md:hidden fixed inset-x-0 top-[57px] z-40 bg-slate-900/95 backdrop-blur-md p-4 border-b border-purple-700/50 shadow-lg">
+          <nav className="flex flex-col space-y-2.5">
+            <Button variant="ghost" className="text-purple-200 justify-start hover:bg-purple-700/60 hover:text-white py-2.5 px-3" onClick={() => {setIsMobileMenuOpen(false); document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });}} >
               Features
             </Button>
-            <Button variant="ghost" className="text-purple-200 justify-start hover:bg-purple-700/50 hover:text-white" onClick={() => {setIsMobileMenuOpen(false); document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });}} >
+            <Button variant="ghost" className="text-purple-200 justify-start hover:bg-purple-700/60 hover:text-white py-2.5 px-3" onClick={() => {setIsMobileMenuOpen(false); document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });}} >
               About
             </Button>
-            <Button variant="ghost" className="text-purple-200 justify-start hover:bg-purple-700/50 hover:text-white" onClick={() => {setIsMobileMenuOpen(false); document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });}} >
+            <Button variant="ghost" className="text-purple-200 justify-start hover:bg-purple-700/60 hover:text-white py-2.5 px-3" onClick={() => {setIsMobileMenuOpen(false); document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });}} >
               Contact
             </Button>
-            <Button variant="ghost" className="text-purple-200 justify-start hover:bg-purple-700/50 hover:text-white" onClick={() => { setIsMobileMenuOpen(false); setIsBunnyModalOpen(true);}}>
+            <div className="border-t border-purple-700/30 my-2"></div>
+            <Button variant="ghost" className="text-purple-200 justify-start hover:bg-purple-700/60 hover:text-white py-2.5 px-3" onClick={() => { setIsMobileMenuOpen(false); setIsBunnyModalOpen(true);}}>
               <LogIn className="mr-2 h-4 w-4" /> Sign In (Dev)
             </Button>
+            {/* Optional: Add Sign Up to mobile menu as well if needed, though it's on header */}
+            {/* <Button variant="outline" className="text-ria-hunter-signup-text border-ria-hunter-signup-text/70 hover:bg-ria-hunter-signup-text/10 hover:text-yellow-300 justify-start w-full mt-1 py-2.5 px-3" onClick={() => { setIsMobileMenuOpen(false); setIsWaitlistModalOpen(true);}}>
+              <UserPlus className="mr-2 h-4 w-4" /> Sign Up for Waitlist
+            </Button> */}
           </nav>
         </div>
       )}
