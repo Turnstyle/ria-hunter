@@ -46,7 +46,7 @@ export const ProduceSectionComingSoonModal: React.FC<ProduceSectionComingSoonMod
             })}
           </div>
           
-          <Sparkles className="relative mx-auto h-12 w-12 text-green-500 mb-3 animate-ping once" />
+          <Apple className="relative mx-auto h-12 w-12 text-green-500 mb-3 animate-ping once" />
           <DialogTitle className="relative text-3xl font-bold text-slate-800 dark:text-slate-100">
             The Produce Section: <span className="text-green-500">Coming Soon!</span>
           </DialogTitle>
@@ -70,7 +70,7 @@ export const ProduceSectionComingSoonModal: React.FC<ProduceSectionComingSoonMod
                 type="button" 
                 variant="default"
                 size="lg"
-                className="w-full sm:w-auto bg-green-500 hover:bg-green-600 text-white group transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-green-500/40"
+                className="w-full sm:w-auto bg-gradient-to-r from-green-500 to-lime-500 hover:from-green-600 hover:to-lime-600 text-white group transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-green-500/40"
             >
               <Carrot className="mr-2 h-5 w-5 animate-spin group-hover:animate-none [animation-duration:3s]" />
               Sounds Delicious!
