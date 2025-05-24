@@ -35,11 +35,9 @@ const BunnyComingSoonModal: React.FC<BunnyComingSoonModalProps> = ({ isOpen, onC
         <div className="flex flex-col items-center justify-center space-y-4 my-6">
           {/* Basic bunny animation placeholder - can be enhanced with SVG/CSS */}
           <div className="relative text-4xl">
-            <Rabbit className="absolute -left-1 top-0 h-10 w-10 text-slate-400 dark:text-slate-500 opacity-50 transform -rotate-[30deg]" />
             <span className="font-bold text-slate-700 dark:text-slate-200">Coming</span>
             <Sparkles className="inline-block h-6 w-6 text-amber-300 mx-1" />
             <span className="font-bold text-slate-700 dark:text-slate-200">Soon!</span>
-            <Rabbit className="absolute -right-2 top-0 h-10 w-10 text-purple-500 transform rotate-[30deg]" />
           </div>
         </div>
         <DialogFooter className="sm:justify-center flex-col sm:flex-col sm:space-x-0 space-y-2">
