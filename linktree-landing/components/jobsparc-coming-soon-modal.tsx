@@ -4,7 +4,7 @@ import { useState, FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
-import { Lock, Sparkles, Mail, Send, AlertTriangle, CheckCircle } from "lucide-react";
+import { Lock, Sparkles, Mail, Send, AlertTriangle, CheckCircle, Flame } from "lucide-react";
 
 interface JobSparcComingSoonModalProps {
   isOpen: boolean;
@@ -53,12 +53,12 @@ export const JobSparcComingSoonModal: React.FC<JobSparcComingSoonModalProps> = (
     <Dialog open={isOpen} onOpenChange={handleCloseDialog}>
       <DialogContent className="sm:max-w-md bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border-slate-200 dark:border-slate-700/50 shadow-2xl rounded-2xl overflow-hidden">
         <DialogHeader className="p-6 text-center">
-          <Sparkles className="mx-auto h-12 w-12 text-orange-500 animate-pulse mb-3" />
+          <Flame className="mx-auto h-12 w-12 text-orange-500 animate-pulse mb-3" />
           <DialogTitle className="text-2xl font-bold text-slate-800 dark:text-slate-100">
             JobSparc is Igniting Soon!
           </DialogTitle>
           <DialogDescription className="text-slate-600 dark:text-slate-400 mt-2">
-            This feature is currently in private beta and by <strong className="text-orange-500 dark:text-orange-400">invite only</strong>.
+            This feature is currently in private beta and by <strong className="text-[#f35e54] dark:text-[#f35e54]">invite only</strong>.
             Enter your code below to request access.
           </DialogDescription>
         </DialogHeader>
@@ -97,9 +97,9 @@ export const JobSparcComingSoonModal: React.FC<JobSparcComingSoonModalProps> = (
                 Cancel
               </Button>
             </DialogClose>
-            <Button 
-              type="submit" 
-              className="w-full sm:w-auto bg-orange-500 hover:bg-orange-600 text-white transition-all group relative overflow-hidden"
+            <Button
+              type="submit"
+              className="w-full sm:w-auto text-white transition-all group relative overflow-hidden bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600"
               disabled={isSubmitting}
             >
               {isSubmitting ? (
