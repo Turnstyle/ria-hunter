@@ -191,7 +191,7 @@ export default function RiaHunterPage() {
       {/* Header */}
       <header className="py-4 px-6 md:px-10 flex justify-between items-center border-b border-slate-700/50">
         <div className="flex items-center space-x-3">
-          <Button variant="ghost" size="icon" className="text-slate-300 hover:bg-slate-800 hover:text-white" onClick={() => setIsBunnyModalOpen(true)}>
+          <Button variant="ghost" size="icon" className="text-slate-300 hover:bg-slate-800 hover:text-white md:hidden" onClick={() => setIsBunnyModalOpen(true)}>
             <Menu className="h-6 w-6" />
             <span className="sr-only">Open Menu</span>
           </Button>
@@ -199,16 +199,24 @@ export default function RiaHunterPage() {
             RIA <span className="text-purple-400">Hunter</span>
           </div>
         </div>
-        <div className="space-x-3">
+        <div className="flex items-center space-x-2">
           <Button 
             variant="outline" 
-            className="text-[#eab308] bg-slate-700 border-slate-600 hover:bg-slate-800 hover:text-[#eab308] hover:border-[#eab308]/50 hover:scale-[1.03] hover:shadow-lg hover:shadow-yellow-500/30 transition-all duration-200"
+            className="text-[#eab308] bg-slate-700 border-slate-600 hover:bg-slate-800 hover:text-[#eab308] hover:border-[#eab308]/50 hover:scale-[1.03] hover:shadow-lg hover:shadow-yellow-500/30 transition-all duration-200 px-3 py-2 md:px-4 md:py-2"
             onClick={() => setIsBunnyModalOpen(true)}
+            aria-label="Sign Up"
           >
-            <UserPlus className="mr-2 h-4 w-4 text-[#eab308]" /> Sign Up
+            <UserPlus className="h-4 w-4 text-[#eab308] md:mr-2" />
+            <span className="hidden md:inline">Sign Up</span>
           </Button>
-          <Button variant="ghost" className="text-slate-300 hover:bg-slate-800 hover:text-white" onClick={() => setIsBunnyModalOpen(true)}>
-            <LogIn className="mr-2 h-4 w-4" /> Sign In
+          <Button 
+            variant="ghost" 
+            className="text-slate-300 hover:bg-slate-800 hover:text-white px-3 py-2 md:px-4 md:py-2" 
+            onClick={() => setIsBunnyModalOpen(true)}
+            aria-label="Sign In"
+          >
+            <LogIn className="h-4 w-4 md:mr-2" />
+            <span className="hidden md:inline">Sign In</span>
           </Button>
         </div>
       </header>
