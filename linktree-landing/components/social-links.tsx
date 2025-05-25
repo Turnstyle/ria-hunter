@@ -71,7 +71,7 @@ export function SocialLinks() {
               onClick={() => setShowContactForm(false)}
               variant="ghost"
               size="icon"
-              className="absolute right-4 top-4 rounded-full hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-700 dark:hover:text-white"
+              className="absolute right-4 top-4 rounded-full hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-700 dark:hover:text-white z-50"
               aria-label="Close"
             >
               <X className="h-5 w-5" />
