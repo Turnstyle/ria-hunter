@@ -69,7 +69,7 @@ interface WaitlistFormModalProps {
 }
 
 interface WaitlistFormData {
-  name: string;
+  fullName: string;
   email: string;
   phone: string;
   company?: string;
@@ -77,38 +77,83 @@ interface WaitlistFormData {
 }
 
 const WaitlistFormModal: React.FC<WaitlistFormModalProps> = ({ isOpen, onClose }) => {
-  const [formData, setFormData] = useState<WaitlistFormData & { formType: string }>({ name: "", email: "", phone: "", company: "", purpose: "", formType: "riaHunterWaitlist" });
+  const [formData, setFormData] = useState<WaitlistFormData & { formType: string }>({ fullName: "", email: "", phone: "", company: "", purpose: "", formType: "riaHunterWaitlist" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState<string | null>(null);
+  const [messageColor, setMessageColor] = useState<string>('black');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // Helper function to display messages
+  const showMessage = (message: string, color: string) => {
+    setSubmitMessage(message);
+    setMessageColor(color);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setSubmitMessage(null);
+    showMessage('Submitting...', 'black'); // Use showMessage for initial feedback
+
+    // --- IMPORTANT: Replace with YOUR Google Apps Script Web App URL ---
+    const appsScriptUrl = 'https://script.google.com/macros/s/AKfycbwgrrO7FAHFSWB9mCGl3mSRnwhUCZ4XZdgtEQnsSkKHEz5TGTcOdCiH_mW016WYvXfl/exec';
+
+    // --- Client-Side Validation ---
+    const { fullName, email, phone, company, purpose } = formData;
+
+    if (!fullName.trim() || !email.trim() || !phone.trim() || !purpose.trim()) {
+      showMessage('Please fill out all required fields.', 'red');
+      setIsSubmitting(false);
+      return;
+    }
+
+    const emailRegex = /^\S+@\S+\.\S+$/;
+    if (!emailRegex.test(email.trim())) {
+      showMessage('Please enter a valid email address.', 'red');
+      setIsSubmitting(false);
+      return;
+    }
+
+    const phoneDigits = phone.trim().replace(/\D/g, '');
+    const phoneRegex = /^\d{10}$/;
+    if (!phoneRegex.test(phoneDigits)) {
+      showMessage('Please enter a valid 10-digit phone number.', 'red');
+      setIsSubmitting(false);
+      return;
+    }
+    // --- End Validation ---
+
+    // Create a FormData object
+    const scriptFormData = new FormData();
+    scriptFormData.append('fullName', fullName.trim());
+    scriptFormData.append('email', email.trim());
+    scriptFormData.append('phone', phoneDigits); // Send only digits
+    scriptFormData.append('company', company ? company.trim() : '');
+    scriptFormData.append('purpose', purpose.trim());
 
     try {
-      // Changed API endpoint and ensure formType is part of formData
-      const response = await fetch('/api/save-form-data', {
+      const response = await fetch(appsScriptUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, formType: "riaHunterWaitlist" }), // Explicitly add/ensure formType
+        body: scriptFormData,
+        // mode: 'no-cors' // Per plan: try without 'no-cors' first.
       });
-      // We might not need to parse JSON if the new endpoint is simple
 
-      if (response.ok) {
-        setSubmitMessage("Thanks! You're on the list. We'll be in touch, detective!");
-        setFormData({ name: "", email: "", phone: "", company: "", purpose: "", formType: "riaHunterWaitlist" }); // Reset form
+      // Assuming Apps Script returns JSON as per the plan
+      const result = await response.json();
+      console.log('Apps Script Response:', result);
+
+      if (result.status === 'success') {
+        showMessage('Thank you! Your request has been received.', 'green');
+        setFormData({ fullName: "", email: "", phone: "", company: "", purpose: "", formType: "riaHunterWaitlist" }); // Reset form
         // Optionally close modal after a delay: setTimeout(onClose, 3000);
       } else {
-        const errorResult = await response.json(); // Get error details
-        setSubmitMessage(errorResult.message || "Something went wrong. Please try again.");
+        showMessage(`Error: ${result.message || 'Submission failed. Please try again.'}`, 'red');
       }
     } catch (error) {
-      setSubmitMessage("Network error. Please check your connection and try again.");
+      console.error('Fetch Error:', error);
+      showMessage('An error occurred. Please check your connection or try again later.', 'red');
     } finally {
       setIsSubmitting(false);
     }
@@ -132,7 +177,7 @@ const WaitlistFormModal: React.FC<WaitlistFormModalProps> = ({ isOpen, onClose }
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
           <div className="relative">
             <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-            <Input type="text" name="name" placeholder="Full Name" value={formData.name} onChange={handleChange} required className="pl-10" />
+            <Input type="text" name="fullName" placeholder="Full Name" value={formData.fullName} onChange={handleChange} required className="pl-10" />
           </div>
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
@@ -140,7 +185,7 @@ const WaitlistFormModal: React.FC<WaitlistFormModalProps> = ({ isOpen, onClose }
           </div>
           <div className="relative">
             <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-            <Input type="tel" name="phone" placeholder="Phone Number" value={formData.phone} onChange={handleChange} required className="pl-10" />
+            <Input type="tel" name="phone" placeholder="Phone Number (10 digits)" value={formData.phone} onChange={handleChange} required pattern="\d{10}" title="Please enter a 10-digit phone number" className="pl-10" />
           </div>
           <div className="relative">
             <Building className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
@@ -151,7 +196,7 @@ const WaitlistFormModal: React.FC<WaitlistFormModalProps> = ({ isOpen, onClose }
             <Search className="absolute left-3 top-3 h-5 w-5 text-slate-400" />
             <Textarea name="purpose" placeholder="Your purpose for wanting early access (e.g., business use case, specific research needs...)" value={formData.purpose} onChange={handleChange} required className="pl-10 min-h-[100px]" />
           </div>
-          {submitMessage && <p className={`text-sm ${submitMessage.startsWith("Thanks") ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>{submitMessage}</p>}
+          {submitMessage && <p className={`text-sm`} style={{ color: messageColor }}>{submitMessage}</p>}
           <DialogFooter className="pt-4">
             <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
               Cancel
