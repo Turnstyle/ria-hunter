@@ -20,9 +20,9 @@ export function PageContent() {
           {/* Description Box */}
           <div className="mb-10 p-6 text-center">
             <h1 className="relative mb-6 text-center text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400">
-              Welcome to My Digital Hub
+              Welcome to John Turner Peters' App Playground
             </h1>
-            <p className="relative text-lg text-slate-700 dark:text-slate-300 text-center">
+            <p className="relative text-base sm:text-lg text-slate-700 dark:text-slate-300 text-center">
               Hey there! 👋 Welcome to my little corner of the internet where you'll find a bunch of tools I've built.
               Feel free to explore for free! To keep things running smoothly (and the bots away!), you may need to
               create an account. Dive&nbsp;in&nbsp;and&nbsp;have&nbsp;fun!&nbsp;✨
