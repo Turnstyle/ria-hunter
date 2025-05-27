@@ -18,10 +18,7 @@ export function PageContent() {
       <main className="container relative z-10 mx-auto px-4 pt-8 sm:px-6 lg:px-8 pb-28">
         <div className="mx-auto max-w-4xl">
           {/* Description Box */}
-          <div className="mb-10 overflow-hidden rounded-2xl border-2 border-white bg-white/80 p-8 shadow-xl backdrop-blur-sm dark:border-slate-700/50 dark:bg-slate-800/50">
-            <div className="absolute -left-10 -top-10 h-40 w-40 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 opacity-20 blur-3xl"></div>
-            <div className="absolute -bottom-10 -right-10 h-40 w-40 rounded-full bg-gradient-to-br from-blue-400 to-teal-400 opacity-20 blur-3xl"></div>
-
+          <div className="mb-10 p-6 text-center">
             <h1 className="relative mb-6 text-center text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400">
               Welcome to My Digital Hub
             </h1>

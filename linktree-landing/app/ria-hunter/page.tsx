@@ -270,10 +270,12 @@ export default function RiaHunterPage() {
       <main className="flex-grow flex flex-col items-center justify-center p-6 text-center">
         <div className="max-w-3xl w-full">
           <Sparkles className="h-16 w-16 text-yellow-300 mx-auto mb-6 animate-pulse [animation:pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite,shimmer_3s_ease-in-out_infinite] [filter:drop-shadow(0_0_4px_theme(colors.yellow.300))_drop-shadow(0_0_8px_theme(colors.yellow.400))]" />
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-6 leading-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-6xl font-extrabold mb-6 leading-tight">
             Uncover Who Invests Privately.
             <br />
-            <span className="block whitespace-nowrap text-yellow-300 text-3xl sm:text-4xl md:text-5xl lg:text-6xl [text-shadow:0_0_1px_theme(colors.white),_0_0_2px_theme(colors.yellow.300),_0_0_4px_theme(colors.yellow.400),_0_0_7px_theme(colors.yellow.500)]">System Booting... Standby!</span>
+            <span className="block whitespace-nowrap text-yellow-300 text-2xl sm:text-3xl md:text-5xl lg:text-6xl [text-shadow:0_0_1px_theme(colors.white),_0_0_2px_theme(colors.yellow.300),_0_0_4px_theme(colors.yellow.400),_0_0_7px_theme(colors.yellow.500)]">
+              System Booting... Standby!
+            </span>
           </h1>
           <p className="text-xl text-slate-400 mb-10 max-w-2xl mx-auto">
             Ask your toughest questions of SEC Form ADV data,
@@ -347,9 +349,15 @@ export default function RiaHunterPage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-6 text-center text-sm text-slate-500 border-t border-slate-700/50">
-        &copy; {new Date().getFullYear()} jtpnexus.com. All rights reserved. The future of RIA investigation is loading...
+      {/* Sticky Footer for CTA */}
+      <footer className="sticky bottom-0 left-0 right-0 z-20 p-4 bg-slate-900/80 backdrop-blur-md border-t border-slate-700/50">
+        <Button 
+          className="w-full bg-yellow-400 hover:bg-yellow-500 text-slate-900 font-bold text-lg py-4 px-6 rounded-lg shadow-lg hover:shadow-yellow-500/40 transition-all duration-300 transform hover:scale-105 flex items-center justify-center group focus:outline-none focus:ring-2 focus:ring-yellow-300 focus:ring-offset-2 focus:ring-offset-slate-900"
+          onClick={() => setIsWaitlistModalOpen(true)}
+        >
+          <Sparkles className="mr-2 h-5 w-5 text-purple-600 group-hover:animate-pulse" />
+          <span className="truncate">Be an Investigator (Join Waitlist)</span>
+        </Button>
       </footer>
 
       {/* Modals */}
