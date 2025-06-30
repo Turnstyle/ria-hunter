@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
+    "lucide-react": "^0.252.0",
     "next": "13.4.8",
     "react": "18.2.0",
     "react-dom": "18.2.0"
