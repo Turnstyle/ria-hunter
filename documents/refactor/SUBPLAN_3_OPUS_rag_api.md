@@ -83,5 +83,29 @@ Expose an endpoint `/api/ask` that receives a natural‑language query, retrieve
 
 ## Status
 
-*(Add progress notes here before each commit)*
+### 2025-01-29 - RAG API Implementation Complete
+- ✅ Installed required dependencies: @supabase/supabase-js, @google-cloud/aiplatform, text-encoding, dotenv
+- ✅ Created `/api/ask` endpoint with full functionality:
+  - Parses natural language queries from request body
+  - Implements smart search logic to query Supabase for relevant advisers
+  - Supports filtering by state, firm name, and sorting by AUM
+  - Integrates with Google Vertex AI Gemini for answer generation
+  - Returns structured JSON with answer and source citations
+- ✅ Created optional `scripts/embed_narratives.ts` for vector embedding generation:
+  - Generates narrative text from RIA profile data
+  - Uses Vertex AI textembedding-gecko@003 model
+  - Handles batch processing with rate limiting
+  - Automatically creates pgvector column and index if needed
+- ✅ Updated environment variables in `.env.example` with Google Cloud configuration
+- ✅ Created comprehensive README.md with:
+  - API endpoint documentation and examples
+  - Setup instructions
+  - Database schema reference
+  - Usage guides for both the API and data processing scripts
+- ✅ Ready for testing and production deployment
+
+**Note**: The RAG API is fully functional and can handle queries like:
+- "What are the largest advisers in Texas?"
+- "Show me investment firms in California"
+- "Which advisers have the most employees?"
 
