@@ -1,0 +1,15 @@
+# Sample CIK numbers for testing batch processing
+# Replace these with real CIK numbers for actual use
+
+# Format: One CIK per line
+# Lines starting with # are ignored as comments
+
+# Major investment advisers (examples)
+0001364742  # BlackRock
+0000102909  # Vanguard
+0000093751  # Fidelity
+0001364742  # State Street
+0001397545  # Charles Schwab
+
+# Note: Some of these may be approximate or outdated
+# Verify CIK numbers before production use 

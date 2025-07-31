@@ -1,0 +1,64 @@
+SUBPLAN_1_docai_ingestion.md
+
+<!-- 01_docai_ingestion.md -->
+
+# SP‑1 – Document AI Ingestion Pipeline  
+*(Repo : Turnstyle/ria-hunter)*  
+*(Model label : **Opus Without Max** for multi‑file reliability)*
+
+## Goal
+Fetch SEC Form ADV files, run Google Vertex Document AI Form Parser, normalize fields, and upsert to Supabase.
+
+## AI Agent Instructions (repeat fully)
+
+### Environment
+- **IDE** : Cursor  
+- **Terminal** : Windows PowerShell  
+- **Assumption** : No tools installed. Always check (`python --version`, `node --version`, `git --version`) before use.
+
+### Execution Instructions
+1. **Autonomy** – Act independently; ask only if blocked or secrets missing.  
+2. **Commands** – Run each PowerShell command separately (no `&&` or `;`).  
+3. **File Edits** – Use Cursor file editor. For environment files use `echo "KEY=VALUE" >> .env`.  
+4. **Plan Updates** – Before every commit, append a brief status in this file under **Status**.
+
+### Tool Usage
+- **GitHub Multi‑Commit PR (MCP)** is preferred for commits.  
+  1. If MCP fails, analyse error.  
+  2. Try an adjusted MCP approach.  
+  3. If it fails again, craft equivalent raw `git` commands and run via terminal.  
+  4. If a terminal command hangs, pause and notify the user.  
+- **Browser MCP** – Only for docs research if required.
+
+## Detailed Task Breakdown
+1. **Create folder** `src/docai`.  
+2. **Install deps**  
+   ```powershell
+   npm init -y
+   npm install @google-cloud/documentai supabase @supabase/supabase-js dotenv
+   ```
+
+## Status
+
+### 2025-07-29
+- Created `src/docai` directory structure
+- Installed required dependencies: `@google-cloud/documentai`, `supabase`, `@supabase/supabase-js`, `dotenv`
+- Implemented the core Document AI ingestion pipeline modules:
+  - `index.ts`: Main pipeline orchestration
+  - `fetcher.ts`: SEC Form ADV document retrieval
+  - `processor.ts`: Google Document AI processing
+  - `normalizer.ts`: Field standardization and data normalization
+  - `storage.ts`: Supabase database operations
+  - `batch.ts`: Batch processing utilities
+  - `example.ts`: Example usage demonstration
+  - `cli.ts`: Command-line interface
+  - `README.md`: Documentation
+- The pipeline is ready for testing with actual credentials
+
+### 2025-07-29 (Update)
+- Added Jest testing framework and created initial tests for the normalizer module
+- Updated package.json with scripts for running the pipeline and tests
+- Created a sample CIK list file for batch processing
+- Added comprehensive environment variable templates in .env.example
+- Added ts-node for running TypeScript files directly
+- All tests are passing successfully

@@ -1,0 +1,23 @@
+MASTER_PLAN_RIA_HUNTER.md
+
+<!-- MASTER_PLAN.md -->
+
+# RIA Hunter – Backend Refactor Master Plan
+
+## Goal
+Turn this repo into the single data + AI backend, replacing the old Python ETL, adding Google Vertex Document AI ingestion, retrieval‑augmented AI endpoints, and Continuous Integration (CI) / Continuous Deployment & Delivery (CD) workflows.  
+
+Sibling repo **`ria-hunter-app`** will consume the new APIs; legacy **`ria-hunter-etl`** is being archived.
+
+## Sub‑Plans
+| ID | File | Purpose | Model Label |
+|----|------|---------|-------------|
+| SP‑1 | `01_docai_ingestion.md` | Create Document AI ingestion pipeline & DB upsert. | *Opus Without Max* |
+| SP‑2 | `02_mapping_integration.md` | Import mappings/validators from ETL export. | *(default model)* |
+| SP‑3 | `03_rag_api.md` | Build retrieval‑augmented Gemini `/api/ask` endpoint. | *Opus Without Max* |
+
+> **Repo context**  
+> – GitHub repo: **Turnstyle/ria-hunter**  
+> – Username: **Turnstyle**  
+> – Agents in this repo should not touch `ria-hunter-app`; trust that app agents will call these APIs.
+
