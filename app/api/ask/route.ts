@@ -5,10 +5,8 @@ import { VertexAI } from '@google-cloud/vertexai';
 // Using Node.js runtime for Google Cloud compatibility
 // export const runtime = 'edge'; // Removed - not compatible with @google-cloud/aiplatform
 
-const ALLOW_ORIGIN =
-  process.env.CORS_ORIGIN ?? '*'; // fallback for local dev
 const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': ALLOW_ORIGIN,
+  'Access-Control-Allow-Origin': process.env.CORS_ORIGIN ?? '*',
   'Access-Control-Allow-Headers': 'Content-Type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
