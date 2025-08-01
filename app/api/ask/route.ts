@@ -1,16 +1,14 @@
 import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { supabase, RIAProfile } from '@/lib/supabaseClient';
 import { VertexAI } from '@google-cloud/vertexai';
 
-// Using Node.js runtime for Google Cloud compatibility
-// export const runtime = 'edge'; // Removed - not compatible with @google-cloud/aiplatform
-
-/* ---- CORS helpers ----------------------------------------------- */
 const ALLOW_ORIGIN = process.env.CORS_ORIGIN ?? '*';
+
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': ALLOW_ORIGIN,
-  'Access-Control-Allow-Headers': 'Content-Type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
 };
 
 // Initialize Vertex AI client
@@ -159,24 +157,21 @@ async function generateAnswer(prompt: string): Promise<string> {
   }
 }
 
-/* ➜ OPTIONS pre-flight */
+/** Pre-flight handler */
 export function OPTIONS() {
   return new Response(null, { status: 204, headers: CORS_HEADERS });
 }
 
-/* ➜ POST handler (keep your existing logic, just wrap response) */
+/** Main handler */
 export async function POST(req: NextRequest) {
   try {
     const body: AskRequest = await req.json();
     const { query, limit = 5 } = body;
 
     if (!query || typeof query !== 'string') {
-      return new Response(
-        JSON.stringify({ error: 'Query parameter is required and must be a string' }),
-        { 
-          status: 400, 
-          headers: { 'Content-Type': 'application/json', ...CORS_HEADERS } 
-        }
+      return NextResponse.json(
+        { error: 'Query parameter is required and must be a string' },
+        { status: 400, headers: CORS_HEADERS }
       );
     }
 
@@ -187,10 +182,7 @@ export async function POST(req: NextRequest) {
       const answer = "I couldn't find any advisers matching your query. Please try rephrasing your question or being more specific.";
       const sources: any[] = [];
       
-      return new Response(
-        JSON.stringify({ answer, sources }),
-        { status: 200, headers: { 'Content-Type': 'application/json', ...CORS_HEADERS } }
-      );
+      return NextResponse.json({ answer, sources }, { headers: CORS_HEADERS });
     }
 
     // Build prompt and generate answer
@@ -206,18 +198,12 @@ export async function POST(req: NextRequest) {
       aum: adviser.aum,
     }));
 
-    return new Response(
-      JSON.stringify({ answer, sources }),
-      { status: 200, headers: { 'Content-Type': 'application/json', ...CORS_HEADERS } }
-    );
+    return NextResponse.json({ answer, sources }, { headers: CORS_HEADERS });
   } catch (error) {
     console.error('API error:', error);
-    return new Response(
-      JSON.stringify({ error: 'An error occurred processing your request' }),
-      { 
-        status: 500, 
-        headers: { 'Content-Type': 'application/json', ...CORS_HEADERS } 
-      }
+    return NextResponse.json(
+      { error: 'An error occurred processing your request' },
+      { status: 500, headers: CORS_HEADERS }
     );
   }
 } 
