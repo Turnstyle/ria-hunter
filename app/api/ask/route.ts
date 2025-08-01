@@ -1,12 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 import { supabase, RIAProfile } from '@/lib/supabaseClient';
 import { VertexAI } from '@google-cloud/vertexai';
 
 // Using Node.js runtime for Google Cloud compatibility
 // export const runtime = 'edge'; // Removed - not compatible with @google-cloud/aiplatform
 
+/* ---- CORS helpers ----------------------------------------------- */
+const ALLOW_ORIGIN = process.env.CORS_ORIGIN ?? '*';
 const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': process.env.CORS_ORIGIN ?? '*',
+  'Access-Control-Allow-Origin': ALLOW_ORIGIN,
   'Access-Control-Allow-Headers': 'Content-Type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
@@ -157,36 +159,38 @@ async function generateAnswer(prompt: string): Promise<string> {
   }
 }
 
-/** Handle pre-flight */
+/* ➜ OPTIONS pre-flight */
 export function OPTIONS() {
   return new Response(null, { status: 204, headers: CORS_HEADERS });
 }
 
-export async function POST(request: NextRequest) {
+/* ➜ POST handler (keep your existing logic, just wrap response) */
+export async function POST(req: NextRequest) {
   try {
-    const body: AskRequest = await request.json();
+    const body: AskRequest = await req.json();
     const { query, limit = 5 } = body;
 
     if (!query || typeof query !== 'string') {
-          return NextResponse.json(
-      { error: 'Query parameter is required and must be a string' },
-      { 
-        status: 400,
-        headers: CORS_HEADERS 
-      }
-    );
+      return new Response(
+        JSON.stringify({ error: 'Query parameter is required and must be a string' }),
+        { 
+          status: 400, 
+          headers: { 'Content-Type': 'application/json', ...CORS_HEADERS } 
+        }
+      );
     }
 
     // Search for relevant advisers
     const advisers = await searchAdvisers(query, limit);
 
     if (advisers.length === 0) {
-          return NextResponse.json({
-      answer: "I couldn't find any advisers matching your query. Please try rephrasing your question or being more specific.",
-      sources: [],
-    }, {
-      headers: CORS_HEADERS
-    });
+      const answer = "I couldn't find any advisers matching your query. Please try rephrasing your question or being more specific.";
+      const sources: any[] = [];
+      
+      return new Response(
+        JSON.stringify({ answer, sources }),
+        { status: 200, headers: { 'Content-Type': 'application/json', ...CORS_HEADERS } }
+      );
     }
 
     // Build prompt and generate answer
@@ -202,21 +206,17 @@ export async function POST(request: NextRequest) {
       aum: adviser.aum,
     }));
 
-    const response: AskResponse = {
-      answer,
-      sources,
-    };
-
-    return NextResponse.json(response, { 
-      headers: CORS_HEADERS 
-    });
+    return new Response(
+      JSON.stringify({ answer, sources }),
+      { status: 200, headers: { 'Content-Type': 'application/json', ...CORS_HEADERS } }
+    );
   } catch (error) {
     console.error('API error:', error);
-    return NextResponse.json(
-      { error: 'An error occurred processing your request' },
+    return new Response(
+      JSON.stringify({ error: 'An error occurred processing your request' }),
       { 
-        status: 500,
-        headers: CORS_HEADERS
+        status: 500, 
+        headers: { 'Content-Type': 'application/json', ...CORS_HEADERS } 
       }
     );
   }
