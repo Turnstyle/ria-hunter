@@ -5,12 +5,18 @@ import { VertexAI } from '@google-cloud/vertexai';
 
 const ALLOW_ORIGIN = process.env.CORS_ORIGIN ?? '*';
 
-// CORS configuration for cross-origin requests
-// Supports production domain via CORS_ORIGIN env variable
-const CORS_HEADERS = {
+const CORS_HEADERS: HeadersInit = {
   'Access-Control-Allow-Origin': ALLOW_ORIGIN,
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+};
+
+/** Attach CORS headers to any Response */
+const withCors = (res: Response) => {
+  res.headers.set('Access-Control-Allow-Origin', ALLOW_ORIGIN);
+  res.headers.set('Access-Control-Allow-Headers', 'Content-Type');
+  res.headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  return res;
 };
 
 // Initialize Vertex AI client
@@ -159,9 +165,8 @@ async function generateAnswer(prompt: string): Promise<string> {
   }
 }
 
-/** Pre-flight handler */
 export function OPTIONS() {
-  return new Response(null, { status: 204, headers: CORS_HEADERS });
+  return withCors(new Response(null, { status: 204 }));
 }
 
 /** Main handler */
@@ -171,9 +176,11 @@ export async function POST(req: NextRequest) {
     const { query, limit = 5 } = body;
 
     if (!query || typeof query !== 'string') {
-      return NextResponse.json(
-        { error: 'Query parameter is required and must be a string' },
-        { status: 400, headers: CORS_HEADERS }
+      return withCors(
+        NextResponse.json(
+          { error: 'Query parameter is required and must be a string' },
+          { status: 400 }
+        )
       );
     }
 
@@ -184,7 +191,9 @@ export async function POST(req: NextRequest) {
       const answer = "I couldn't find any advisers matching your query. Please try rephrasing your question or being more specific.";
       const sources: any[] = [];
       
-      return NextResponse.json({ answer, sources }, { headers: CORS_HEADERS });
+      return withCors(
+        NextResponse.json({ answer, sources }, { status: 200 })
+      );
     }
 
     // Build prompt and generate answer
@@ -200,12 +209,16 @@ export async function POST(req: NextRequest) {
       aum: adviser.aum,
     }));
 
-    return NextResponse.json({ answer, sources }, { headers: CORS_HEADERS });
+    return withCors(
+      NextResponse.json({ answer, sources }, { status: 200 })
+    );
   } catch (error) {
     console.error('API error:', error);
-    return NextResponse.json(
-      { error: 'An error occurred processing your request' },
-      { status: 500, headers: CORS_HEADERS }
+    return withCors(
+      NextResponse.json(
+        { error: 'An error occurred processing your request' },
+        { status: 500 }
+      )
     );
   }
 } 
