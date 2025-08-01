@@ -5,6 +5,8 @@ import { VertexAI } from '@google-cloud/vertexai';
 
 const ALLOW_ORIGIN = process.env.CORS_ORIGIN ?? '*';
 
+// CORS configuration for cross-origin requests
+// Supports production domain via CORS_ORIGIN env variable
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': ALLOW_ORIGIN,
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
