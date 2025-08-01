@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase, RIAProfile } from '@/lib/supabaseClient';
-import { VertexAI } from '@google-cloud/aiplatform';
+import { VertexAI } from '@google-cloud/vertexai';
+
+// Using Node.js runtime for Google Cloud compatibility
+// export const runtime = 'edge'; // Removed - not compatible with @google-cloud/aiplatform
+
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': process.env.CORS_ORIGIN ?? '*',
+  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+};
 
 // Initialize Vertex AI client
 const projectId = process.env.GOOGLE_CLOUD_PROJECT || '';
@@ -148,26 +157,36 @@ async function generateAnswer(prompt: string): Promise<string> {
   }
 }
 
+/** Handle pre-flight */
+export function OPTIONS() {
+  return new Response(null, { status: 204, headers: CORS_HEADERS });
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body: AskRequest = await request.json();
     const { query, limit = 5 } = body;
 
     if (!query || typeof query !== 'string') {
-      return NextResponse.json(
-        { error: 'Query parameter is required and must be a string' },
-        { status: 400 }
-      );
+          return NextResponse.json(
+      { error: 'Query parameter is required and must be a string' },
+      { 
+        status: 400,
+        headers: CORS_HEADERS 
+      }
+    );
     }
 
     // Search for relevant advisers
     const advisers = await searchAdvisers(query, limit);
 
     if (advisers.length === 0) {
-      return NextResponse.json({
-        answer: "I couldn't find any advisers matching your query. Please try rephrasing your question or being more specific.",
-        sources: [],
-      });
+          return NextResponse.json({
+      answer: "I couldn't find any advisers matching your query. Please try rephrasing your question or being more specific.",
+      sources: [],
+    }, {
+      headers: CORS_HEADERS
+    });
     }
 
     // Build prompt and generate answer
@@ -188,12 +207,17 @@ export async function POST(request: NextRequest) {
       sources,
     };
 
-    return NextResponse.json(response);
+    return NextResponse.json(response, { 
+      headers: CORS_HEADERS 
+    });
   } catch (error) {
     console.error('API error:', error);
     return NextResponse.json(
       { error: 'An error occurred processing your request' },
-      { status: 500 }
+      { 
+        status: 500,
+        headers: CORS_HEADERS
+      }
     );
   }
 } 
