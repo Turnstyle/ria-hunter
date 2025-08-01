@@ -2,6 +2,9 @@
   "name": "ria-hunter",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -10,8 +13,8 @@
     "test": "jest"
   },
   "dependencies": {
-    "@google-cloud/aiplatform": "^3.11.0",
-    "@google-cloud/documentai": "^8.6.0",
+    "@google-cloud/documentai": "^9.3.0",
+    "@google-cloud/vertexai": "^1.10.0",
     "@google-cloud/storage": "^7.7.0",
     "@radix-ui/react-accordion": "^1.1.2",
     "@radix-ui/react-alert-dialog": "^1.0.5",
@@ -70,8 +73,10 @@
     "eslint-config-next": "14.1.0",
     "jest": "^29.7.0",
     "postcss": "^8",
-    "tailwindcss": "^3.3.0",
-    "ts-jest": "^29.1.1",
+    "supertest": "^7.1.4",
+    "tailwindcss": "^3.4.17",
+    "ts-jest": "^29.4.0",
+    "ts-node": "^10.9.2",
     "typescript": "^5"
   }
 }
