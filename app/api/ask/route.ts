@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase, RIAProfile } from '@/lib/supabaseClient';
-import { VertexAI } from '@google-cloud/aiplatform';
+import { VertexAI } from '@google-cloud/vertexai';
 
-// Edge runtime
-export const runtime = 'edge';
+// Using Node.js runtime for Google Cloud compatibility
+// export const runtime = 'edge'; // Removed - not compatible with @google-cloud/aiplatform
 
 const ALLOW_ORIGIN =
   process.env.CORS_ORIGIN ?? '*'; // fallback for local dev
