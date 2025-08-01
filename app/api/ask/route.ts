@@ -5,18 +5,21 @@ import { VertexAI } from '@google-cloud/vertexai';
 
 const ALLOW_ORIGIN = process.env.CORS_ORIGIN ?? '*';
 
-const CORS_HEADERS: HeadersInit = {
-  'Access-Control-Allow-Origin': ALLOW_ORIGIN,
-  'Access-Control-Allow-Headers': 'Content-Type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
-
-/** Attach CORS headers to any Response */
-const withCors = (res: Response) => {
-  res.headers.set('Access-Control-Allow-Origin', ALLOW_ORIGIN);
-  res.headers.set('Access-Control-Allow-Headers', 'Content-Type');
-  res.headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  return res;
+/**
+ * Creates a new Response with CORS headers from an existing response
+ * This ensures headers are always present in production
+ */
+const corsify = (res: Response): Response => {
+  const headers = new Headers(res.headers);
+  headers.set('Access-Control-Allow-Origin', ALLOW_ORIGIN);
+  headers.set('Access-Control-Allow-Headers', 'Content-Type');
+  headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  
+  return new Response(res.body, {
+    status: res.status,
+    statusText: res.statusText,
+    headers
+  });
 };
 
 // Initialize Vertex AI client
@@ -166,7 +169,7 @@ async function generateAnswer(prompt: string): Promise<string> {
 }
 
 export function OPTIONS() {
-  return withCors(new Response(null, { status: 204 }));
+  return corsify(new Response(null, { status: 204 }));
 }
 
 /** Main handler */
@@ -176,7 +179,7 @@ export async function POST(req: NextRequest) {
     const { query, limit = 5 } = body;
 
     if (!query || typeof query !== 'string') {
-      return withCors(
+      return corsify(
         NextResponse.json(
           { error: 'Query parameter is required and must be a string' },
           { status: 400 }
@@ -191,7 +194,7 @@ export async function POST(req: NextRequest) {
       const answer = "I couldn't find any advisers matching your query. Please try rephrasing your question or being more specific.";
       const sources: any[] = [];
       
-      return withCors(
+      return corsify(
         NextResponse.json({ answer, sources }, { status: 200 })
       );
     }
@@ -209,12 +212,12 @@ export async function POST(req: NextRequest) {
       aum: adviser.aum,
     }));
 
-    return withCors(
+    return corsify(
       NextResponse.json({ answer, sources }, { status: 200 })
     );
   } catch (error) {
     console.error('API error:', error);
-    return withCors(
+    return corsify(
       NextResponse.json(
         { error: 'An error occurred processing your request' },
         { status: 500 }
