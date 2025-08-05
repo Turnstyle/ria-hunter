@@ -150,9 +150,9 @@ async function searchAdvisers(query: string, limit?: number): Promise<RIAProfile
   // For general searches, use text search on firm names if we have search terms
   // BUT only if we don't have state/city filters (location queries should not do text search)
   if (parsed.queryType === 'search' && parsed.searchTerms.length > 0 && !parsed.filters.state && !parsed.filters.city) {
-    // Create an OR condition for all search terms
+    // Create an OR condition for all search terms - proper Supabase syntax
     const orConditions = parsed.searchTerms.map(term => 
-      `legal_name.ilike.%${term}%`
+      `legal_name.ilike.*${term}*`
     ).join(',');
     
     if (orConditions) {

@@ -52,4 +52,4 @@ cypress/videos/
 cypress/screenshots/
 
 # Ignore a custom file for form submissions
-form_submissions.txt
+form_submissions.txtenv.local
