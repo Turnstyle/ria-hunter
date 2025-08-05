@@ -126,6 +126,29 @@ export function createAIService(config: AIConfig): AIService | null {
         console.warn('Vertex AI: Missing Google Cloud project ID');
         return null;
       }
+
+      // Check for JSON credentials in environment variable (for Vercel deployment)
+      const credentialsJson = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
+      if (credentialsJson) {
+        try {
+          // Parse and validate JSON credentials
+          const credentials = JSON.parse(credentialsJson);
+          if (credentials.type === 'service_account' && credentials.private_key && credentials.client_email) {
+            // Set credentials for Google Auth Library
+            process.env.GOOGLE_APPLICATION_CREDENTIALS = JSON.stringify(credentials);
+            console.log('Vertex AI: Using JSON credentials from environment variable');
+          } else {
+            console.error('Vertex AI: Invalid service account JSON format');
+            return null;
+          }
+        } catch (error) {
+          console.error('Vertex AI: Failed to parse JSON credentials:', error);
+          return null;
+        }
+      } else if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+        console.warn('Vertex AI: Missing credentials (GOOGLE_APPLICATION_CREDENTIALS or GOOGLE_APPLICATION_CREDENTIALS_JSON)');
+        return null;
+      }
       
       try {
         return new VertexAIService(projectId, location);
@@ -135,7 +158,7 @@ export function createAIService(config: AIConfig): AIService | null {
       }
       
     case 'openai':
-      const apiKey = process.env.OPENAI_API_KEY || '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';
+      const apiKey = process.env.OPENAI_API_KEY;
       console.log(`OpenAI API key present: ${!!apiKey}, length: ${apiKey?.length || 0}`);
       
       if (!apiKey) {
