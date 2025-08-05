@@ -57,6 +57,33 @@ interface AskResponse {
 }
 
 /**
+ * Deduplicate RIA profiles by legal_name, keeping the one with highest AUM
+ */
+function deduplicateByFirmName(profiles: RIAProfile[]): RIAProfile[] {
+  const firmMap = new Map<string, RIAProfile>();
+  
+  for (const profile of profiles) {
+    const firmName = profile.legal_name?.trim().toLowerCase();
+    if (!firmName) continue;
+    
+    const existing = firmMap.get(firmName);
+    if (!existing) {
+      firmMap.set(firmName, profile);
+    } else {
+      // Keep the one with higher AUM
+      const currentAUM = Number(profile.aum) || 0;
+      const existingAUM = Number(existing.aum) || 0;
+      
+      if (currentAUM > existingAUM) {
+        firmMap.set(firmName, profile);
+      }
+    }
+  }
+  
+  return Array.from(firmMap.values());
+}
+
+/**
  * Search for advisers based on the user's query with enhanced parsing
  */
 async function searchAdvisers(query: string, limit?: number): Promise<RIAProfile[]> {
@@ -119,7 +146,12 @@ async function searchAdvisers(query: string, limit?: number): Promise<RIAProfile
     return [];
   }
   
-  return data || [];
+  if (!data) return [];
+  
+  // Deduplicate by legal_name, keeping the one with highest AUM
+  const deduplicatedData = deduplicateByFirmName(data);
+  
+  return deduplicatedData;
 }
 
 /**
