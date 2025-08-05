@@ -1,6 +1,7 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { supabase, RIAProfile } from '@/lib/supabaseClient';
+import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { VertexAI } from '@google-cloud/vertexai';
 import { parseQuery, buildSupabaseFilters, getQueryLimit } from '@/lib/queryParser';
 import { createAIService, getAIProvider, AIProvider } from '@/lib/ai-providers';
@@ -54,6 +55,73 @@ interface AskResponse {
     state: string;
     aum?: number;
   }>;
+}
+
+/**
+ * Check if user has exceeded their query limit for the current month
+ */
+async function checkQueryLimit(userId: string): Promise<{ allowed: boolean; remaining: number; isSubscriber: boolean }> {
+  const startOfMonth = new Date();
+  startOfMonth.setDate(1);
+  startOfMonth.setHours(0, 0, 0, 0);
+
+  try {
+    // Check subscription status first
+    const { data: subscription } = await supabaseAdmin
+      .from('subscriptions')
+      .select('status')
+      .eq('user_id', userId)
+      .single();
+
+    const isSubscriber = subscription && ['trialing', 'active'].includes(subscription.status);
+    
+    if (isSubscriber) {
+      return { allowed: true, remaining: -1, isSubscriber: true }; // Unlimited for subscribers
+    }
+
+    // Count queries this month
+    const { count: queryCount } = await supabaseAdmin
+      .from('user_queries')
+      .select('*', { head: true, count: 'exact' })
+      .eq('user_id', userId)
+      .gte('created_at', startOfMonth.toISOString());
+
+    // Count share bonuses this month
+    const { count: shareCount } = await supabaseAdmin
+      .from('user_shares')
+      .select('*', { head: true, count: 'exact' })
+      .eq('user_id', userId)
+      .gte('shared_at', startOfMonth.toISOString());
+
+    // Calculate allowed queries: 2 base + max 1 share bonus
+    const allowedQueries = 2 + Math.min(shareCount || 0, 1);
+    const currentQueries = queryCount || 0;
+    const remaining = Math.max(0, allowedQueries - currentQueries);
+    
+    return {
+      allowed: currentQueries < allowedQueries,
+      remaining,
+      isSubscriber: false
+    };
+  } catch (error) {
+    console.error('Error checking query limit:', error);
+    // In case of error, allow the query but log it
+    return { allowed: true, remaining: 0, isSubscriber: false };
+  }
+}
+
+/**
+ * Log a query usage for tracking purposes
+ */
+async function logQueryUsage(userId: string): Promise<void> {
+  try {
+    await supabaseAdmin
+      .from('user_queries')
+      .insert({ user_id: userId });
+  } catch (error) {
+    console.error('Error logging query usage:', error);
+    // Don't fail the request if logging fails
+  }
 }
 
 /**
@@ -188,30 +256,79 @@ async function searchAdvisers(query: string, limit?: number): Promise<RIAProfile
 }
 
 /**
- * Perform vector similarity search on narratives
+ * Perform semantic search on narratives using keyword analysis as fallback
  */
 async function searchNarratives(query: string, limit: number = 5): Promise<any[]> {
   try {
-    // First, generate embedding for the query
-    const embedding = await generateQueryEmbedding(query, aiProvider);
+    // Investment specialization keywords for semantic-like search
+    const specializations = {
+      'alternative': ['alternative', 'hedge fund', 'private equity', 'family office', 'institutional'],
+      'real_estate': ['real estate', 'property', 'REIT', 'commercial', 'development'],
+      'infrastructure': ['infrastructure', 'energy', 'utilities', 'renewable', 'project'],
+      'venture': ['venture', 'startup', 'technology', 'growth capital', 'emerging'],
+      'distressed': ['distressed', 'restructuring', 'turnaround', 'special situations'],
+      'private_placement': ['private placement', 'private fund', 'alternative investment', 'accredited investor']
+    };
+
+    // Determine query intent and relevant keywords
+    const queryLower = query.toLowerCase();
+    let searchKeywords: string[] = [];
     
-    if (!embedding) {
-      return [];
-    }
-    
-    // Perform vector similarity search
-    const { data, error } = await supabase.rpc('match_narratives', {
-      query_embedding: embedding,
-      match_threshold: 0.7,
-      match_count: limit
+    Object.entries(specializations).forEach(([category, keywords]) => {
+      keywords.forEach(keyword => {
+        if (queryLower.includes(keyword)) {
+          searchKeywords.push(...keywords);
+        }
+      });
     });
     
+    // If no specific keywords found, use general private placement terms
+    if (searchKeywords.length === 0) {
+      searchKeywords = specializations.private_placement;
+    }
+    
+    // Search narratives using keyword matching
+    let narrativeQuery = supabase
+      .from('narratives')
+      .select('crd_number, narrative')
+      .not('narrative', 'is', null);
+    
+    // Build OR condition for keywords
+    if (searchKeywords.length > 0) {
+      const orConditions = searchKeywords.map(keyword => 
+        `narrative.ilike.%${keyword}%`
+      ).join(',');
+      
+      narrativeQuery = narrativeQuery.or(orConditions);
+    }
+    
+    const { data, error } = await narrativeQuery.limit(limit * 3); // Get more to filter
+    
     if (error) {
-      console.error('Vector search error:', error);
+      console.error('Narrative search error:', error);
       return [];
     }
     
-    return data || [];
+    // Score and rank results
+    const scoredResults = (data || []).map(item => {
+      const narrative = item.narrative.toLowerCase();
+      let score = 0;
+      
+      searchKeywords.forEach(keyword => {
+        const matches = (narrative.match(new RegExp(keyword, 'g')) || []).length;
+        score += matches;
+      });
+      
+      return {
+        ...item,
+        similarity: score / searchKeywords.length // Normalize score
+      };
+    })
+    .filter(item => item.similarity > 0)
+    .sort((a, b) => b.similarity - a.similarity)
+    .slice(0, limit);
+    
+    return scoredResults;
   } catch (error) {
     console.error('Error in searchNarratives:', error);
     return [];
@@ -401,6 +518,48 @@ export function OPTIONS() {
 /** Main handler */
 export async function POST(req: NextRequest) {
   try {
+    // Extract user info from middleware headers
+    const userId = req.headers.get('x-user-id');
+    const userEmail = req.headers.get('x-user-email');
+
+    if (!userId) {
+      return corsify(
+        NextResponse.json(
+          { error: 'User authentication required' },
+          { status: 401 }
+        )
+      );
+    }
+
+    // Check query limits before processing
+    const limitCheck = await checkQueryLimit(userId);
+    
+    console.log(`Query limit check for user ${userId}:`, {
+      allowed: limitCheck.allowed,
+      remaining: limitCheck.remaining,
+      isSubscriber: limitCheck.isSubscriber
+    });
+    
+    if (!limitCheck.allowed) {
+      const errorMessage = limitCheck.isSubscriber 
+        ? 'Subscription expired. Please renew your subscription to continue.'
+        : 'Free query limit reached for this month. Share on LinkedIn for +1 query or upgrade to Pro for unlimited queries.';
+      
+      console.log(`Query blocked for user ${userId}: ${errorMessage}`);
+      
+      return corsify(
+        NextResponse.json(
+          { 
+            error: errorMessage,
+            remaining: limitCheck.remaining,
+            isSubscriber: limitCheck.isSubscriber,
+            upgradeRequired: true
+          },
+          { status: 403 }
+        )
+      );
+    }
+
     const body: AskRequest = await req.json();
     const { query, limit = 5, aiProvider } = body;
 
@@ -419,12 +578,14 @@ export async function POST(req: NextRequest) {
     // Search for relevant advisers
     const advisers = await searchAdvisers(query, limit);
 
-    // For investment focus queries, also search narratives if we have few results
+    // For investment focus queries, also search narratives for enhanced context
     let narratives: any[] = [];
-    if (parsed.intent === 'investment_focus' || parsed.searchTerms.length > 0) {
-      // Only search narratives if we have embeddings available
-      // For now, we'll skip this until embeddings are generated
-      // narratives = await searchNarratives(query, 5);
+    if (parsed.intent === 'investment_focus' || parsed.intent === 'private_placement' || parsed.searchTerms.some(term => 
+      ['alternative', 'private', 'fund', 'investment', 'equity', 'real estate', 'infrastructure'].includes(term.toLowerCase())
+    )) {
+      console.log('🔍 Performing semantic narrative search...');
+      narratives = await searchNarratives(query, 5);
+      console.log(`Found ${narratives.length} relevant narratives`);
     }
 
     if (advisers.length === 0) {
@@ -449,8 +610,16 @@ export async function POST(req: NextRequest) {
       aum: adviser.aum,
     }));
 
+    // Log the query usage after successful processing
+    await logQueryUsage(userId);
+
     return corsify(
-      NextResponse.json({ answer, sources }, { status: 200 })
+      NextResponse.json({ 
+        answer, 
+        sources,
+        remaining: limitCheck.isSubscriber ? -1 : Math.max(0, limitCheck.remaining - 1),
+        isSubscriber: limitCheck.isSubscriber
+      }, { status: 200 })
     );
   } catch (error) {
     console.error('API error:', error);

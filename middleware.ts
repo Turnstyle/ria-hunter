@@ -1,0 +1,62 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { supabaseAdmin } from '@/lib/supabaseAdmin'
+
+/**
+ * Middleware to authenticate API routes using Supabase JWT tokens
+ * Replaces Auth0 authentication with Supabase Auth
+ */
+export async function middleware(request: NextRequest) {
+  // Only apply to API routes (except webhook endpoints which need raw body)
+  if (!request.nextUrl.pathname.startsWith('/api/')) {
+    return NextResponse.next()
+  }
+
+  // Skip auth for webhook endpoints and test endpoints
+  const skipAuthPaths = [
+    '/api/stripe-webhook',
+    '/api/test-env',
+    '/api/ria-hunter-waitlist',
+    '/api/save-form-data'
+  ]
+  
+  if (skipAuthPaths.some(path => request.nextUrl.pathname.startsWith(path))) {
+    return NextResponse.next()
+  }
+
+  // Extract Authorization header
+  const authHeader = request.headers.get('Authorization')
+  if (!authHeader?.startsWith('Bearer ')) {
+    return NextResponse.json({ error: 'Unauthorized - Missing or invalid Authorization header' }, { status: 401 })
+  }
+
+  const token = authHeader.split(' ')[1]
+  
+  try {
+    // Validate JWT with Supabase
+    const { data: user, error } = await supabaseAdmin.auth.getUser(token)
+    
+    if (error || !user.user) {
+      console.error('Supabase auth error:', error)
+      return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 })
+    }
+
+    // Add user info to request headers for use in API routes
+    const requestHeaders = new Headers(request.headers)
+    requestHeaders.set('x-user-id', user.user.id)
+    requestHeaders.set('x-user-email', user.user.email || '')
+
+    // Continue with the request
+    return NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    })
+  } catch (error) {
+    console.error('Middleware error:', error)
+    return NextResponse.json({ error: 'Authentication failed' }, { status: 401 })
+  }
+}
+
+export const config = {
+  matcher: ['/api/:path*']
+}
