@@ -9,6 +9,10 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  env: {
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+    AI_PROVIDER: process.env.AI_PROVIDER,
+  },
 }
 
 export default nextConfig
