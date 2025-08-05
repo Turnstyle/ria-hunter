@@ -110,12 +110,24 @@ async function searchAdvisers(query: string, limit?: number): Promise<RIAProfile
   
   // Handle superlative queries
   if (parsed.queryType === 'superlative') {
-    if (parsed.filters.superlativeType === 'largest') {
-      supabaseQuery = supabaseQuery.order('aum', { ascending: false });
-    } else if (parsed.filters.superlativeType === 'smallest') {
-      supabaseQuery = supabaseQuery.order('aum', { ascending: true });
-    } else if (parsed.filters.superlativeType === 'top') {
-      supabaseQuery = supabaseQuery.order('aum', { ascending: false });
+    // For private placement queries, sort by private fund metrics
+    if (parsed.intent === 'private_placement') {
+      if (parsed.filters.superlativeType === 'largest') {
+        supabaseQuery = supabaseQuery.order('private_fund_aum', { ascending: false });
+      } else if (parsed.filters.superlativeType === 'smallest') {
+        supabaseQuery = supabaseQuery.order('private_fund_count', { ascending: true });
+      } else if (parsed.filters.superlativeType === 'top') {
+        supabaseQuery = supabaseQuery.order('private_fund_count', { ascending: false });
+      }
+    } else {
+      // Default to general AUM sorting
+      if (parsed.filters.superlativeType === 'largest') {
+        supabaseQuery = supabaseQuery.order('aum', { ascending: false });
+      } else if (parsed.filters.superlativeType === 'smallest') {
+        supabaseQuery = supabaseQuery.order('aum', { ascending: true });
+      } else if (parsed.filters.superlativeType === 'top') {
+        supabaseQuery = supabaseQuery.order('aum', { ascending: false });
+      }
     }
   }
   
@@ -131,9 +143,13 @@ async function searchAdvisers(query: string, limit?: number): Promise<RIAProfile
     }
   }
   
-  // Always order by AUM descending as a secondary sort for relevance
+  // Always order by appropriate metric as a secondary sort for relevance
   if (!parsed.filters.hasSuperlative) {
-    supabaseQuery = supabaseQuery.order('aum', { ascending: false });
+    if (parsed.intent === 'private_placement') {
+      supabaseQuery = supabaseQuery.order('private_fund_count', { ascending: false });
+    } else {
+      supabaseQuery = supabaseQuery.order('aum', { ascending: false });
+    }
   }
   
   // Apply limit
@@ -225,7 +241,16 @@ Available RIA Data:
 ${index + 1}. ${adviser.legal_name}
    - CRD Number: ${adviser.crd_number}
    - Location: ${adviser.city}, ${adviser.state}
-   - Assets Under Management: ${adviser.aum ? `$${adviser.aum.toLocaleString()}` : 'Not disclosed'}
+   - Assets Under Management: ${adviser.aum ? `$${adviser.aum.toLocaleString()}` : 'Not disclosed'}`;
+   
+    // Add private placement info if available and relevant
+    if (parsed.intent === 'private_placement' && (adviser.private_fund_count || adviser.private_fund_aum)) {
+      prompt += `
+   - Private Funds Managed: ${adviser.private_fund_count || 0}
+   - Private Fund Assets: ${adviser.private_fund_aum ? `$${adviser.private_fund_aum.toLocaleString()}` : 'Not disclosed'}`;
+    }
+    
+    prompt += `
    - Form ADV Date: ${adviser.form_adv_date || 'Not available'}
 `;
   });
@@ -244,6 +269,16 @@ ${index + 1}. ${adviser.legal_name}
   }
 
   // Add specific instructions based on query type
+  if (parsed.intent === 'private_placement') {
+    prompt += `
+
+IMPORTANT: This query is about private placement activity. Focus on:
+- Number of private funds managed
+- Private fund assets under management  
+- Ranking should be based on private placement activity, not general AUM
+- If private placement data is not available for a firm, mention this limitation
+`;
+  }
   if (parsed.queryType === 'superlative') {
     if (parsed.filters.superlativeType === 'largest') {
       prompt += `\n\nIMPORTANT INSTRUCTION: The user is asking for THE LARGEST RIA. You must:

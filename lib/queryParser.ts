@@ -95,18 +95,35 @@ export function parseQuery(query: string): ParsedQuery {
     return word.length > 2 && !stopWords.has(word) && !/^\d+$/.test(word);
   });
 
-  // Add specific investment-related terms if mentioned
-  const investmentTerms = [
-    'sustainable', 'esg', 'retirement', 'wealth', 'hedge', 'private equity',
-    'mutual fund', 'etf', 'fixed income', 'equity', 'alternative', 'crypto',
-    'real estate', 'commodities', 'derivatives', 'options', 'futures'
+  // Check for private placement specific queries
+  const privatePlacementTerms = [
+    'private placement', 'private fund', 'private equity', 'hedge fund',
+    'alternative investment', 'private investment', 'fund management',
+    'private capital', 'alternative fund'
   ];
 
-  for (const term of investmentTerms) {
+  for (const term of privatePlacementTerms) {
     if (query.toLowerCase().includes(term)) {
       result.searchTerms.push(term);
-      if (result.intent === 'general') {
-        result.intent = 'investment_focus';
+      result.intent = 'private_placement';
+      break;
+    }
+  }
+
+  // Add specific investment-related terms if mentioned (and not private placement)
+  if (result.intent !== 'private_placement') {
+    const investmentTerms = [
+      'sustainable', 'esg', 'retirement', 'wealth', 'hedge', 'private equity',
+      'mutual fund', 'etf', 'fixed income', 'equity', 'alternative', 'crypto',
+      'real estate', 'commodities', 'derivatives', 'options', 'futures'
+    ];
+
+    for (const term of investmentTerms) {
+      if (query.toLowerCase().includes(term)) {
+        result.searchTerms.push(term);
+        if (result.intent === 'general') {
+          result.intent = 'investment_focus';
+        }
       }
     }
   }
