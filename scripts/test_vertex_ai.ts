@@ -15,7 +15,7 @@ try {
     location: location 
   });
 
-  const model = 'gemini-1.5-flash';
+  const model = 'gemini-2.0-flash-exp';
   
   console.log('\nInitializing model:', model);
   

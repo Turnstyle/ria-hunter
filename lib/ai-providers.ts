@@ -40,7 +40,7 @@ export class VertexAIService implements AIService {
     });
     
     this.generativeModel = this.vertexAI.preview.getGenerativeModel({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.0-flash-exp',
     });
   }
 
