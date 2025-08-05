@@ -28,6 +28,7 @@ export interface ContactSubmission {
 export interface RIAProfile {
   id: string
   firm_name: string
+  legal_name: string
   crd_number: string
   sec_number?: string
   address: string
@@ -38,6 +39,10 @@ export interface RIAProfile {
   website?: string
   aum?: number
   employee_count?: number
+  private_fund_count?: number
+  private_fund_aum?: number
+  last_private_fund_analysis?: string
+  form_adv_date?: string
   created_at: string
   updated_at: string
 }

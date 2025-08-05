@@ -99,13 +99,29 @@ async function searchAdvisers(query: string, limit?: number): Promise<RIAProfile
   
   // Apply state filter if present
   if (parsed.filters.state) {
-    console.log(`Applying state filter: ${parsed.filters.state}`);
     supabaseQuery = supabaseQuery.eq('state', parsed.filters.state);
+  }
+
+  // Apply city filter if present
+  if (parsed.filters.city) {
+    console.log(`Applying city filter: ${parsed.filters.city}`);
+    // Handle various St. Louis formats
+    if (parsed.filters.city === 'ST. LOUIS') {
+      supabaseQuery = supabaseQuery.or('city.ilike.%ST. LOUIS%,city.ilike.%ST LOUIS%,city.ilike.%SAINT LOUIS%');
+    } else {
+      supabaseQuery = supabaseQuery.ilike('city', `%${parsed.filters.city}%`);
+    }
   }
   
   // Handle specific firm name searches
   if (parsed.filters.firmName) {
     supabaseQuery = supabaseQuery.ilike('legal_name', `%${parsed.filters.firmName}%`);
+  }
+
+  // For private placement queries, filter for firms with actual private placement activity
+  if (parsed.intent === 'private_placement') {
+    console.log('Filtering for firms with private placement activity (private_fund_count > 0)');
+    supabaseQuery = supabaseQuery.gt('private_fund_count', 0);
   }
   
   // Handle superlative queries
@@ -132,7 +148,8 @@ async function searchAdvisers(query: string, limit?: number): Promise<RIAProfile
   }
   
   // For general searches, use text search on firm names if we have search terms
-  if (parsed.queryType === 'search' && parsed.searchTerms.length > 0) {
+  // BUT only if we don't have state/city filters (location queries should not do text search)
+  if (parsed.queryType === 'search' && parsed.searchTerms.length > 0 && !parsed.filters.state && !parsed.filters.city) {
     // Create an OR condition for all search terms
     const orConditions = parsed.searchTerms.map(term => 
       `legal_name.ilike.%${term}%`

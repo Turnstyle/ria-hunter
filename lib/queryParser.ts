@@ -4,11 +4,69 @@
 
 import { extractStateFromQuery, hasSuperlative, isCountQuery, extractFirmName } from './states';
 
+/**
+ * Extract city from a query string
+ * @param query The user's query
+ * @returns The city name if found, null otherwise
+ */
+export function extractCityFromQuery(query: string): string | null {
+  const queryLower = query.toLowerCase();
+  
+  // Common US cities that might be mentioned in RIA queries
+  const cities = [
+    'st. louis', 'saint louis', 'st louis',
+    'new york', 'chicago', 'los angeles', 'houston', 'philadelphia', 
+    'phoenix', 'san antonio', 'san diego', 'dallas', 'san jose', 'austin',
+    'jacksonville', 'fort worth', 'columbus', 'charlotte', 'san francisco',
+    'indianapolis', 'seattle', 'denver', 'washington', 'boston', 'el paso',
+    'detroit', 'nashville', 'memphis', 'portland', 'oklahoma city', 'las vegas',
+    'louisville', 'baltimore', 'milwaukee', 'albuquerque', 'tucson', 'fresno',
+    'mesa', 'sacramento', 'atlanta', 'kansas city', 'colorado springs',
+    'raleigh', 'omaha', 'miami', 'oakland', 'tulsa', 'minneapolis', 'cleveland',
+    'wichita', 'arlington', 'bakersfield', 'new orleans', 'honolulu', 'anaheim',
+    'tampa', 'aurora', 'santa ana', 'saint paul', 'cincinnati', 'pittsburgh',
+    'henderson', 'stockton', 'corpus christi', 'lexington', 'anchorage',
+    'riverside', 'spokane', 'toledo', 'st. petersburg', 'newark', 'greensboro'
+  ];
+  
+  // Look for city names in the query
+  for (const city of cities) {
+    if (queryLower.includes(city)) {
+      // Return the properly formatted city name
+      if (city.includes('st.') || city.includes('saint')) {
+        return 'ST. LOUIS'; // Standardize St. Louis variants
+      }
+      return city.toUpperCase();
+    }
+  }
+  
+  // Check for patterns like "in [City]" or "from [City]"
+  const locationPatterns = [
+    /\b(?:in|from|near|at|based in|located in|headquartered in)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)/g
+  ];
+  
+  for (const pattern of locationPatterns) {
+    const matches = query.matchAll(pattern);
+    for (const match of matches) {
+      const potentialCity = match[1].toLowerCase();
+      if (cities.includes(potentialCity)) {
+        if (potentialCity.includes('st.') || potentialCity.includes('saint')) {
+          return 'ST. LOUIS';
+        }
+        return potentialCity.toUpperCase();
+      }
+    }
+  }
+  
+  return null;
+}
+
 export interface ParsedQuery {
   originalQuery: string;
   queryType: 'search' | 'count' | 'specific' | 'superlative';
   filters: {
     state?: string;
+    city?: string;
     firmName?: string;
     hasSuperlative?: boolean;
     superlativeType?: 'largest' | 'smallest' | 'top';
@@ -34,6 +92,12 @@ export function parseQuery(query: string): ParsedQuery {
   const state = extractStateFromQuery(query);
   if (state) {
     result.filters.state = state;
+  }
+
+  // Extract city
+  const city = extractCityFromQuery(query);
+  if (city) {
+    result.filters.city = city;
   }
 
   // Check for count queries
@@ -144,6 +208,10 @@ export function buildSupabaseFilters(parsed: ParsedQuery): any {
 
   if (parsed.filters.state) {
     filters.state = parsed.filters.state;
+  }
+
+  if (parsed.filters.city) {
+    filters.city = parsed.filters.city;
   }
 
   if (parsed.filters.firmName) {
