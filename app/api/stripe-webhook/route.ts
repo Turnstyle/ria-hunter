@@ -2,18 +2,27 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
-// Initialize Stripe with secret key
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+// Initialize Stripe with secret key - handle missing key gracefully for build
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+const stripe = stripeSecretKey ? new Stripe(stripeSecretKey, {
   apiVersion: '2024-06-20',
-});
+}) : null;
 
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 /**
  * Stripe webhook handler for subscription events
  * This endpoint is NOT protected by auth middleware (raw body needed for signature verification)
  */
 export async function POST(request: NextRequest) {
+  // Check if Stripe is properly configured
+  if (!stripe || !stripeSecretKey || !webhookSecret) {
+    return NextResponse.json(
+      { error: 'Stripe webhook not configured' },
+      { status: 503 }
+    );
+  }
+
   const sig = request.headers.get('stripe-signature');
   const body = await request.text(); // Raw body as string for signature verification
 

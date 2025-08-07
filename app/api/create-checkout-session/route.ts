@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-// Initialize Stripe with secret key
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+// Initialize Stripe with secret key - handle missing key gracefully for build
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+const stripe = stripeSecretKey ? new Stripe(stripeSecretKey, {
   apiVersion: '2024-06-20',
-});
+}) : null;
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
@@ -18,6 +19,14 @@ interface CheckoutRequest {
  */
 export async function POST(req: NextRequest) {
   try {
+    // Check if Stripe is properly configured
+    if (!stripe || !stripeSecretKey) {
+      return NextResponse.json(
+        { error: 'Payment processing not configured' },
+        { status: 503 }
+      );
+    }
+
     // Extract user info from middleware headers
     const userId = req.headers.get('x-user-id');
     const userEmail = req.headers.get('x-user-email');

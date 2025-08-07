@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 
 // Mock environment variables
 const mockEnv = {
-  CORS_ORIGIN: 'https://ria-hunter-app.vercel.app',
+  CORS_ORIGIN: 'https://ria-hunter.app',
 };
 
 describe('/api/ask CORS Headers', () => {
@@ -20,7 +20,7 @@ describe('/api/ask CORS Headers', () => {
   /**
    * Helper function to check CORS headers on a response
    */
-  const expectCorsHeaders = (response: Response, expectedOrigin: string = 'https://ria-hunter-app.vercel.app') => {
+  const expectCorsHeaders = (response: Response, expectedOrigin: string = 'https://ria-hunter.app') => {
     const headers = Object.fromEntries(response.headers.entries());
     expect(headers['access-control-allow-origin']).toBe(expectedOrigin);
     expect(headers['access-control-allow-headers']).toBe('Content-Type');

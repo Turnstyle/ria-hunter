@@ -3,7 +3,7 @@ const testStifel = async () => {
   const query = "Tell me about Stifel Nicolaus"
   
   try {
-    const response = await fetch('https://ria-hunter-app.vercel.app/api/ask', {
+    const response = await fetch('https://ria-hunter.app/api/ask', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

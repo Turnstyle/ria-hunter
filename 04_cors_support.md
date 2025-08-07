@@ -38,10 +38,10 @@ Add proper CORS handling so the front-end (**ria-hunter-app**) can call the back
 |---|------|----------------|
 | 1 | **Create branch** | `git checkout -b chore/cors-support` |
 
-| 1.5 | Update .env.example in ria-hunter to include CORS_ORIGIN=https://ria-hunter-app.vercel.app  so future devs see the new var.
+| 1.5 | Update .env.example in ria-hunter to include CORS_ORIGIN=https://ria-hunter.app  so future devs see the new var.
 
 | 1.8 | Do not check in .env.local; keep it in .gitignore
-| 2 | **Add env placeholder** | `echo "CORS_ORIGIN=https://ria-hunter-app.vercel.app" >> .env.example` |
+| 2 | **Add env placeholder** | `echo "CORS_ORIGIN=https://ria-hunter.app" >> .env.example` |
 | 3 | **Implement CORS wrapper** | `app/api/ask/route.ts` (patch in place – see snippet) |
 | 4 | **Local test** | `npm run dev` then `curl -X OPTIONS -H "Origin: http://localhost:3000" -i http://localhost:3000/api/ask` – expect `204` with 3 CORS headers. |
 | 5 | **Unit test** (optional but recommended) | `npm i -D supertest jest` then create `src/__tests__/cors.test.ts` to hit OPTIONS route. |
@@ -96,7 +96,7 @@ async function handleAsk(q: string) {
 
 | Symptom                 | Cause                                     | Fix                                                                                                           |
 | ----------------------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| **CORS error persists** | Wrong `CORS_ORIGIN` on Vercel             | In Vercel → Settings → Env Vars add `CORS_ORIGIN=https://ria-hunter-app.vercel.app` then redeploy.            |
+| **CORS error persists** | Wrong `CORS_ORIGIN` on Vercel             | In Vercel → Settings → Env Vars add `CORS_ORIGIN=https://ria-hunter.app` then redeploy.            |
 | **Vercel build fails**  | `process.env` undefined during Edge build | Ensure `.env` vars are present in Vercel and *not* referenced at module top-level other than constants above. |
 | **404 /api/ask**        | Route path changed                        | Confirm file still lives at `app/api/ask/route.ts`.                                                           |
 

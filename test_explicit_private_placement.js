@@ -3,7 +3,7 @@ const testExplicit = async () => {
   const query = "Show me RIAs with the most private funds in St. Louis"
   
   try {
-    const response = await fetch('https://ria-hunter-app.vercel.app/api/ask', {
+    const response = await fetch('https://ria-hunter.app/api/ask', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
