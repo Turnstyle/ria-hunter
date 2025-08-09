@@ -1,56 +1,24 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
 # Dependencies
-/node_modules
+node_modules
+.venv
 
-# Next.js build output
-/.next/
-/out/
+# Build outputs
+.next
+.vercel
+dist
 
-# Production build
-/build
-
-# Debug logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-
-# Environment variables - IMPORTANT
+# Local env and keys
 .env*
-.env*.local
-
-# Google Cloud Platform key file - IMPORTANT
+.env
+.env.local
 gcp-key.json
 
-# Vercel
-.vercel
+# Data and generated artifacts
+public/raw_data/
+raw/
+output/
+seed/narratives.json
+output/narratives.json
 
-# TypeScript
-*.tsbuildinfo
-next-env.d.ts
-
-# Blitz auto-generated files
-blitz.config.js
-blitz-env.d.ts
-
-# IDE / Editor specific
-.vscode/
-.idea/
-*.sublime-workspace
-
-# macOS specific
+# OS/Editor
 .DS_Store
-
-# Optional Sentry files
-.sentryclirc
-
-# Optional Cypress files
-cypress.json
-cypress.env.json
-cypress/videos/
-cypress/screenshots/
-
-# Ignore a custom file for form submissions
-form_submissions.txtenv.local
-env.local
