@@ -2,7 +2,8 @@ import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { supabase, RIAProfile } from '@/lib/supabaseClient';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
-import { VertexAI } from '@google-cloud/vertexai';
+// Defer VertexAI import to runtime to prevent Next from bundling optional deps
+let VertexAI: any;
 import { parseQuery, buildSupabaseFilters, getQueryLimit } from '@/lib/queryParser';
 import { createAIService, getAIProvider, AIProvider } from '@/lib/ai-providers';
 
@@ -30,14 +31,22 @@ const projectId = process.env.GOOGLE_PROJECT_ID || process.env.GOOGLE_CLOUD_PROJ
 const location = process.env.DOCUMENT_AI_PROCESSOR_LOCATION || process.env.GOOGLE_CLOUD_LOCATION || 'us-central1';
 const model = 'gemini-1.5-flash';
 
-// Initialize the Vertex AI client
-let vertexAI: VertexAI | null = null;
+// Initialize the Vertex AI client lazily in Node runtime only
+let vertexAI: any | null = null;
 
-if (projectId) {
-  vertexAI = new VertexAI({
-    project: projectId,
-    location: location,
-  });
+if (projectId && typeof process !== 'undefined') {
+  try {
+    // Import inside try/catch so build doesn't fail if package is not installed
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { VertexAI: VertexAICtor } = require('@google-cloud/vertexai');
+    VertexAI = VertexAICtor;
+    vertexAI = new VertexAI({
+      project: projectId,
+      location: location,
+    });
+  } catch (err) {
+    console.warn('Vertex AI not initialized; proceeding without it:', err?.message || err);
+  }
 }
 
 interface AskRequest {

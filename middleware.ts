@@ -1,5 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabaseAdmin'
+// Avoid using Node-only clients in Edge runtime
+let supabaseAdmin: any
+try {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  supabaseAdmin = require('@/lib/supabaseAdmin').supabaseAdmin
+} catch {
+  supabaseAdmin = null
+}
 
 /**
  * Middleware to authenticate API routes using Supabase JWT tokens
@@ -33,6 +40,9 @@ export async function middleware(request: NextRequest) {
   
   try {
     // Validate JWT with Supabase
+    if (!supabaseAdmin) {
+      return NextResponse.json({ error: 'Authentication service unavailable' }, { status: 500 })
+    }
     const { data: user, error } = await supabaseAdmin.auth.getUser(token)
     
     if (error || !user.user) {
