@@ -125,6 +125,63 @@ function normalizeState(input: string | undefined): string | undefined {
   return map[s] || s
 }
 
+function titleCase(input: string): string {
+  return input
+    .toLowerCase()
+    .split(/\s+/)
+    .map((w) => (w.length ? w[0].toUpperCase() + w.slice(1) : w))
+    .join(' ')
+}
+
+function generateCityVariants(rawCity?: string): string[] {
+  if (!rawCity) return []
+  const base = rawCity
+    .replace(/\./g, '')
+    .replace(/-/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+  const t = base.toLowerCase()
+
+  const variants = new Set<string>()
+
+  // Base forms
+  variants.add(titleCase(base))
+  variants.add(base.toUpperCase())
+
+  // Saint variants (St, St., Saint)
+  if (/\bst\b|\bst\.|\bsaint\b/i.test(t)) {
+    const saint = t.replace(/\bst\.?\s+/i, 'saint ').replace(/\bsaint\s+/i, 'saint ')
+    const st = t.replace(/\bsaint\s+/i, 'st ').replace(/\bst\.?\s+/i, 'st ')
+    const saintTC = titleCase(saint)
+    const stTC = titleCase(st)
+    variants.add(saintTC)
+    variants.add(stTC)
+    variants.add(saintTC.toUpperCase())
+    variants.add(stTC.toUpperCase())
+  }
+
+  // Fort / Mount variants
+  if (/\bft\b|\bft\.|\bfort\b/i.test(t)) {
+    const fort = t.replace(/\bft\.?\s+/i, 'fort ')
+    variants.add(titleCase(fort))
+    variants.add(titleCase(fort).toUpperCase())
+  }
+  if (/\bmt\b|\bmt\.|\bmount\b/i.test(t)) {
+    const mount = t.replace(/\bmt\.?\s+/i, 'mount ')
+    variants.add(titleCase(mount))
+    variants.add(titleCase(mount).toUpperCase())
+  }
+
+  // "New" compounds: allow missing space or hyphen
+  if (/^new\s?[a-z]/i.test(t)) {
+    const withSpace = t.replace(/^new\s?([a-z]+)/i, (_m, p1) => `new ${p1}`)
+    variants.add(titleCase(withSpace))
+    variants.add(titleCase(withSpace).toUpperCase())
+  }
+
+  return Array.from(variants)
+}
+
 async function callLLMToDecomposeQuery(userQuery: string, provider?: AIProvider): Promise<QueryDecomposition> {
   let selectedProvider = getAIProvider(provider)
   let aiService = createAIService({ provider: selectedProvider })
@@ -381,7 +438,15 @@ export async function POST(req: NextRequest) {
     const { city, state } = parseLocation(filters.location)
     let q = supabaseAdmin.from('ria_profiles').select('*')
     if (state) q = q.ilike('state', state)
-    if (city) q = q.ilike('city', `%${city}%`)
+    if (city) {
+      const cityVariants = generateCityVariants(city)
+      if (cityVariants.length === 1) {
+        q = q.ilike('city', `%${cityVariants[0]}%`)
+      } else if (cityVariants.length > 1) {
+        const orConditions = cityVariants.map((cv) => `city.ilike.%${cv}%`).join(',')
+        q = q.or(orConditions)
+      }
+    }
     if (typeof filters.min_aum === 'number') q = q.gte('aum', filters.min_aum)
     if (typeof filters.max_aum === 'number' && filters.max_aum !== null) q = q.lte('aum', filters.max_aum)
     if (Array.isArray(filters.services) && filters.services.length > 0) {
@@ -420,12 +485,26 @@ export async function POST(req: NextRequest) {
     if (isSmallest) q = q.order('aum', { ascending: true })
 
     const topN = topMatch ? Math.max(1, Math.min(50, Number(topMatch[1]) || 5)) : 50
-    const { data: riaRows, error: riaError } = await q.limit(topN)
+    let { data: riaRows, error: riaError } = await q.limit(topN)
     if (riaError) {
       console.error('Structured query error:', riaError)
       return corsify(req, NextResponse.json({ error: 'Query failed', code: 'INTERNAL_ERROR' }, { status: 500 }))
     }
 
+    // Relaxation: if no rows but vector matches exist, retry using only matched CRDs (ignoring city variants)
+    if ((!riaRows || riaRows.length === 0) && matchedCrds.length > 0) {
+      let relaxed = supabaseAdmin.from('ria_profiles').select('*').in('crd_number', matchedCrds)
+      if (typeof filters.min_aum === 'number') relaxed = relaxed.gte('aum', filters.min_aum)
+      if (typeof filters.max_aum === 'number' && filters.max_aum !== null) relaxed = relaxed.lte('aum', filters.max_aum)
+      if (isLargest) relaxed = relaxed.order('aum', { ascending: false })
+      if (isSmallest) relaxed = relaxed.order('aum', { ascending: true })
+      const relaxedRes = await relaxed.limit(topN)
+      if (!relaxedRes.error && relaxedRes.data) {
+        riaRows = relaxedRes.data
+      }
+    }
+
+    const usedVector = matchedCrds.length > 0
     const results = (riaRows || []).map((r: any) => ({
       // Canonical preferred
       legal_name: r.legal_name,
@@ -434,6 +513,7 @@ export async function POST(req: NextRequest) {
       main_addr_state: r.state,
       total_aum: r.aum,
       filing_date: r.form_adv_date,
+      source: usedVector ? 'vector+filters' : 'filters-only',
       // Aliases for compatibility
       crd_number: r.crd_number,
       city: r.city,
