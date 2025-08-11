@@ -94,19 +94,19 @@ export class OpenAIService implements AIService {
 
   async generateText(prompt: string): Promise<GenerationResult> {
     const response = await this.openai.chat.completions.create({
-      model: 'gpt-4-turbo-preview',
+      model: 'gpt-4o',
       messages: [
         {
           role: 'system',
-          content: 'You are a helpful assistant that answers questions about Registered Investment Advisers (RIAs) based on provided data. Be concise and factual.'
+          content: 'You are a helpful assistant that answers questions about Registered Investment Advisers (RIAs) based on provided data. Return only what is asked. For JSON tasks, output only valid JSON.'
         },
         {
           role: 'user',
           content: prompt
         }
       ],
-      temperature: 0.7,
-      max_tokens: 500,
+      temperature: 0.2,
+      max_tokens: 800,
     });
     
     const text = response.choices[0]?.message?.content || '';
