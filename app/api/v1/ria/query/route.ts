@@ -280,15 +280,23 @@ function fallbackDecompose(userQuery: string): QueryDecomposition {
   const q = userQuery.trim()
   // Extract top N
   const topMatch = q.toLowerCase().match(/top\s+(\d+)/)
-  // Extract state abbreviation or name
-  const stateMatch = q.match(/\b(AL|AK|AZ|AR|CA|CO|CT|DE|FL|GA|HI|ID|IL|IN|IA|KS|KY|LA|ME|MD|MA|MI|MN|MS|MO|MT|NE|NV|NH|NJ|NM|NY|NC|ND|OH|OK|OR|PA|RI|SC|SD|TN|TX|UT|VT|VA|WA|WV|WI|WY)\b/i)
+  // Extract state name or safe abbreviation (avoid matching the preposition "in")
   const fullStateMatch = q.match(/\b(Alabama|Alaska|Arizona|Arkansas|California|Colorado|Connecticut|Delaware|Florida|Georgia|Hawaii|Idaho|Illinois|Indiana|Iowa|Kansas|Kentucky|Louisiana|Maine|Maryland|Massachusetts|Michigan|Minnesota|Mississippi|Missouri|Montana|Nebraska|Nevada|New Hampshire|New Jersey|New Mexico|New York|North Carolina|North Dakota|Ohio|Oklahoma|Oregon|Pennsylvania|Rhode Island|South Carolina|South Dakota|Tennessee|Texas|Utah|Vermont|Virginia|Washington|West Virginia|Wisconsin|Wyoming)\b/i)
+  const STATE_CODES = new Set(['AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY'])
+  let abbrev: string | undefined
+  const abbrevMatches = Array.from(q.matchAll(/\b([A-Z]{2})\b/g))
+  for (const m of abbrevMatches) {
+    const token = m[1]
+    if (STATE_CODES.has(token)) { abbrev = token; break }
+  }
   // Heuristic city extraction: look for "in <City>" or common St Louis variants
   let city: string | undefined
   const inCity = q.match(/\bin\s+([A-Za-z.\s]+?)(?:,\s*[A-Za-z]{2}|$)/i)
   if (inCity) city = inCity[1].trim()
   if (/\b(st\.?|saint)\s+louis\b/i.test(q)) city = 'Saint Louis'
-  const state = normalizeState((fullStateMatch?.[0] as string) || (stateMatch?.[0] as string))
+  let state = normalizeState((fullStateMatch?.[0] as string) || (abbrev as string | undefined))
+  // Prefer MO for Saint Louis when state is absent
+  if (!state && city && /saint\s+louis/i.test(city)) state = 'MO'
   const location = city && state ? `${city}, ${state}` : city ? city : state ? state : null
   // AUM extraction like $500m / $1 billion
   let min_aum: number | null = null
@@ -437,7 +445,7 @@ export async function POST(req: NextRequest) {
     const filters = decomposition.structured_filters || {}
     const { city, state } = parseLocation(filters.location)
     let q = supabaseAdmin.from('ria_profiles').select('*')
-    if (state) q = q.ilike('state', state)
+    if (state) q = q.or(`state.ilike.${state},state.ilike.% ${state}`) // tolerate missing/extra space
     let appliedCityFilter = false
     if (city) {
       const cityVariants = generateCityVariants(city)
