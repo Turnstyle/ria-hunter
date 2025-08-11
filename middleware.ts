@@ -18,12 +18,19 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
+  // Always allow CORS preflight to pass through to route handlers
+  if (request.method === 'OPTIONS') {
+    return NextResponse.next()
+  }
+
   // Skip auth for webhook endpoints and test endpoints
   const skipAuthPaths = [
     '/api/stripe-webhook',
     '/api/test-env',
     '/api/ria-hunter-waitlist',
-    '/api/save-form-data'
+    '/api/save-form-data',
+    // v1 centralized endpoints handle anonymous + auth internally
+    '/api/v1/ria/'
   ]
   
   if (skipAuthPaths.some(path => request.nextUrl.pathname.startsWith(path))) {
