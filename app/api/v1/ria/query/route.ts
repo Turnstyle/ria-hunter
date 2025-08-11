@@ -219,6 +219,46 @@ async function generateVertex384Embedding(text: string): Promise<number[] | null
   }
 }
 
+function fallbackDecompose(userQuery: string): QueryDecomposition {
+  const q = userQuery.trim()
+  // Extract top N
+  const topMatch = q.toLowerCase().match(/top\s+(\d+)/)
+  // Extract state abbreviation or name
+  const stateMatch = q.match(/\b(AL|AK|AZ|AR|CA|CO|CT|DE|FL|GA|HI|ID|IL|IN|IA|KS|KY|LA|ME|MD|MA|MI|MN|MS|MO|MT|NE|NV|NH|NJ|NM|NY|NC|ND|OH|OK|OR|PA|RI|SC|SD|TN|TX|UT|VT|VA|WA|WV|WI|WY)\b/i)
+  const fullStateMatch = q.match(/\b(Alabama|Alaska|Arizona|Arkansas|California|Colorado|Connecticut|Delaware|Florida|Georgia|Hawaii|Idaho|Illinois|Indiana|Iowa|Kansas|Kentucky|Louisiana|Maine|Maryland|Massachusetts|Michigan|Minnesota|Mississippi|Missouri|Montana|Nebraska|Nevada|New Hampshire|New Jersey|New Mexico|New York|North Carolina|North Dakota|Ohio|Oklahoma|Oregon|Pennsylvania|Rhode Island|South Carolina|South Dakota|Tennessee|Texas|Utah|Vermont|Virginia|Washington|West Virginia|Wisconsin|Wyoming)\b/i)
+  // Heuristic city extraction: look for "in <City>" or common St Louis variants
+  let city: string | undefined
+  const inCity = q.match(/\bin\s+([A-Za-z.\s]+?)(?:,\s*[A-Za-z]{2}|$)/i)
+  if (inCity) city = inCity[1].trim()
+  if (/\b(st\.?|saint)\s+louis\b/i.test(q)) city = 'Saint Louis'
+  const state = normalizeState((fullStateMatch?.[0] as string) || (stateMatch?.[0] as string))
+  const location = city && state ? `${city}, ${state}` : city ? city : state ? state : null
+  // AUM extraction like $500m / $1 billion
+  let min_aum: number | null = null
+  const aumMatch = q.toLowerCase().match(/(over|greater than|at least|>=?)\s*\$?\s*([0-9.,]+)\s*(b|bn|billion|m|mm|million)?/)
+  if (aumMatch) {
+    const num = parseFloat(aumMatch[2].replace(/[,]/g, ''))
+    const unit = aumMatch[3]
+    const factor = !unit ? 1 : /b|bn|billion/i.test(unit) ? 1_000_000_000 : /m|mm|million/i.test(unit) ? 1_000_000 : 1
+    min_aum = Math.round(num * factor)
+  }
+  // Services intent
+  const services: string[] = []
+  if (/private\s+(placement|fund|equity)|hedge\s+fund|alternative/i.test(q)) {
+    services.push('private placements')
+  }
+  const semantic_query = `Registered Investment Advisors ${location ? 'in ' + location : ''}${min_aum ? ` with over $${min_aum.toLocaleString()} AUM` : ''}${services.length ? ' that offer private placement or alternative investment services' : ''}`.trim()
+  return {
+    semantic_query: semantic_query.length > 0 ? semantic_query : q,
+    structured_filters: {
+      location,
+      min_aum: min_aum ?? null,
+      max_aum: null,
+      services: services.length ? services : null,
+    },
+  }
+}
+
 function decodeJwtSub(authorizationHeader: string | null): string | null {
   if (!authorizationHeader) return null
   const parts = authorizationHeader.split(' ')
@@ -308,7 +348,13 @@ export async function POST(req: NextRequest) {
     }
 
     // Decompose query with LLM
-    const decomposition = await callLLMToDecomposeQuery(query)
+    let decomposition: QueryDecomposition
+    try {
+      decomposition = await callLLMToDecomposeQuery(query)
+    } catch (e) {
+      // Fallback to deterministic parser when LLM fails
+      decomposition = fallbackDecompose(query)
+    }
 
     // Generate embedding for semantic query (Vertex 384). If unavailable, skip vector step
     const embedding = await generateVertex384Embedding(decomposition.semantic_query)
