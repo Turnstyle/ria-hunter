@@ -3,7 +3,15 @@ import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { createAIService, getAIProvider, type AIProvider } from '@/lib/ai-providers'
 
-const ALLOW_ORIGIN = process.env.CORS_ORIGIN ?? '*'
+const DEFAULT_ALLOWED_ORIGINS = [
+  'https://www.ria-hunter.app',
+  'https://ria-hunter.app',
+]
+const ALLOWED_ORIGINS = (process.env.CORS_ORIGINS || '')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean)
+const EFFECTIVE_ALLOWED_ORIGINS = ALLOWED_ORIGINS.length > 0 ? ALLOWED_ORIGINS : DEFAULT_ALLOWED_ORIGINS
 
 type StructuredFilters = {
   location?: string | null
@@ -17,21 +25,26 @@ type QueryDecomposition = {
   structured_filters: StructuredFilters
 }
 
-function corsify(res: Response): Response {
-  const headers = new Headers(res.headers)
-  headers.set('Access-Control-Allow-Origin', ALLOW_ORIGIN)
-  headers.set('Access-Control-Allow-Headers', 'Content-Type, X-User-Id, X-User-Email')
-  headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS')
-
-  return new Response(res.body, {
-    status: res.status,
-    statusText: res.statusText,
-    headers,
-  })
+function getAllowedOriginFromRequest(req: NextRequest): string | undefined {
+  const origin = req.headers.get('origin') || undefined
+  if (origin && EFFECTIVE_ALLOWED_ORIGINS.includes(origin)) return origin
+  return undefined
 }
 
-export function OPTIONS() {
-  return corsify(new Response(null, { status: 204 }))
+function corsify(req: NextRequest, res: Response, preflight = false): Response {
+  const headers = new Headers(res.headers)
+  const origin = getAllowedOriginFromRequest(req) || EFFECTIVE_ALLOWED_ORIGINS[0]
+  headers.set('Access-Control-Allow-Origin', origin)
+  headers.set('Vary', 'Origin')
+  headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+  headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+  if (preflight) headers.set('Access-Control-Max-Age', '86400')
+
+  return new Response(res.body, { status: res.status, statusText: res.statusText, headers })
+}
+
+export function OPTIONS(req: NextRequest) {
+  return corsify(req, new Response(null, { status: 204 }), true)
 }
 
 async function checkQueryLimit(userId: string): Promise<{ allowed: boolean; remaining: number; isSubscriber: boolean }>
@@ -206,6 +219,21 @@ async function generateVertex384Embedding(text: string): Promise<number[] | null
   }
 }
 
+function decodeJwtSub(authorizationHeader: string | null): string | null {
+  if (!authorizationHeader) return null
+  const parts = authorizationHeader.split(' ')
+  if (parts.length !== 2 || parts[0] !== 'Bearer') return null
+  const token = parts[1]
+  const segments = token.split('.')
+  if (segments.length < 2) return null
+  try {
+    const payload = JSON.parse(Buffer.from(segments[1].replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8'))
+    return payload?.sub || null
+  } catch {
+    return null
+  }
+}
+
 function parseAnonCookie(req: NextRequest): { count: number } {
   const cookie = req.cookies.get('rh_qc')?.value
   const count = cookie ? Number(cookie) || 0 : 0
@@ -220,10 +248,11 @@ function withAnonCookie(res: Response, newCount: number): Response {
 
 export async function POST(req: NextRequest) {
   try {
-    const userId = req.headers.get('x-user-id')
+    const authHeader = req.headers.get('authorization')
+    const userId = decodeJwtSub(authHeader)
     const body = await req.json().catch(() => null)
     if (!body || typeof body.query !== 'string') {
-      return corsify(NextResponse.json({ error: 'Invalid body. Expected { "query": string }' }, { status: 400 }))
+      return corsify(req, NextResponse.json({ error: 'Invalid body. Expected { "query": string }', code: 'BAD_REQUEST' }, { status: 400 }))
     }
 
     const { query } = body as { query: string; aiProvider?: AIProvider }
@@ -242,16 +271,18 @@ export async function POST(req: NextRequest) {
       isSubscriber = limit.isSubscriber
       if (!allowed) {
         return corsify(
+          req,
           NextResponse.json(
             {
               error: limit.isSubscriber
                 ? 'Subscription expired. Please renew your subscription to continue.'
-                : 'Free query limit reached for this month. Share on LinkedIn for +1 query or upgrade to Pro for unlimited queries.',
+                : 'Free query limit reached. Upgrade to continue.',
+              code: 'PAYMENT_REQUIRED',
               remaining: limit.remaining,
               isSubscriber: limit.isSubscriber,
               upgradeRequired: true,
             },
-            { status: 403 },
+            { status: 402 },
           ),
         )
       }
@@ -260,14 +291,16 @@ export async function POST(req: NextRequest) {
       anonCount = anon.count
       if (anonCount >= 2) {
         return corsify(
+          req,
           NextResponse.json(
             {
               error: 'Free query limit reached. Create an account for more searches.',
+              code: 'PAYMENT_REQUIRED',
               remaining: 0,
               isSubscriber: false,
               upgradeRequired: true,
             },
-            { status: 403 },
+            { status: 402 },
           ),
         )
       }
@@ -305,19 +338,58 @@ export async function POST(req: NextRequest) {
     if (city) q = q.ilike('city', `%${city}%`)
     if (typeof filters.min_aum === 'number') q = q.gte('aum', filters.min_aum)
     if (typeof filters.max_aum === 'number' && filters.max_aum !== null) q = q.lte('aum', filters.max_aum)
-    if (Array.isArray(filters.services) && filters.services.some((s) => s.toLowerCase().includes('private placement')))
-      q = q.gt('private_fund_count', 0)
+    if (Array.isArray(filters.services) && filters.services.length > 0) {
+      const servicesLower = filters.services.map((s) => s.toLowerCase())
+      const privatePlacementSynonyms = new Set<string>([
+        'private placement',
+        'private placements',
+        'private fund',
+        'private funds',
+        'private equity',
+        'hedge fund',
+        'hedge funds',
+        'alternative investment',
+        'alternative investments',
+        'alternatives',
+        'alts',
+        'accredited investor',
+        'venture capital',
+        'vc fund',
+      ])
+      const hasPrivatePlacementIntent = servicesLower.some((svc) =>
+        Array.from(privatePlacementSynonyms).some((syn) => svc.includes(syn)),
+      )
+      if (hasPrivatePlacementIntent) {
+        q = q.gt('private_fund_count', 0)
+      }
+    }
     if (matchedCrds.length > 0) q = q.in('crd_number', matchedCrds)
 
-    const { data: riaRows, error: riaError } = await q.limit(50)
+    // Superlatives and top-N
+    const sq = (decomposition.semantic_query || '').toLowerCase()
+    const topMatch = sq.match(/top\s+(\d+)/)
+    const isLargest = sq.includes('largest') || topMatch !== null
+    const isSmallest = sq.includes('smallest')
+    if (isLargest) q = q.order('aum', { ascending: false })
+    if (isSmallest) q = q.order('aum', { ascending: true })
+
+    const topN = topMatch ? Math.max(1, Math.min(50, Number(topMatch[1]) || 5)) : 50
+    const { data: riaRows, error: riaError } = await q.limit(topN)
     if (riaError) {
       console.error('Structured query error:', riaError)
-      return corsify(NextResponse.json({ error: 'Query failed' }, { status: 500 }))
+      return corsify(req, NextResponse.json({ error: 'Query failed', code: 'INTERNAL_ERROR' }, { status: 500 }))
     }
 
     const results = (riaRows || []).map((r: any) => ({
-      crd_number: r.crd_number,
+      // Canonical preferred
       legal_name: r.legal_name,
+      cik: String(r.crd_number),
+      main_addr_city: r.city,
+      main_addr_state: r.state,
+      total_aum: r.aum,
+      filing_date: r.form_adv_date,
+      // Aliases for compatibility
+      crd_number: r.crd_number,
       city: r.city,
       state: r.state,
       aum: r.aum,
@@ -332,6 +404,7 @@ export async function POST(req: NextRequest) {
     }
 
     let response = corsify(
+      req,
       NextResponse.json({
         results,
         remaining: userId ? (isSubscriber ? -1 : Math.max(0, (remaining || 0) - 1)) : Math.max(0, 2 - (anonCount + 1)),
@@ -344,7 +417,7 @@ export async function POST(req: NextRequest) {
     return response
   } catch (error) {
     console.error('v1 query endpoint error:', error)
-    return corsify(NextResponse.json({ error: 'Internal server error' }, { status: 500 }))
+    return corsify(req, NextResponse.json({ error: 'Internal server error', code: 'INTERNAL_ERROR' }, { status: 500 }))
   }
 }
 
