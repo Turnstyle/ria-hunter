@@ -438,13 +438,16 @@ export async function POST(req: NextRequest) {
     const { city, state } = parseLocation(filters.location)
     let q = supabaseAdmin.from('ria_profiles').select('*')
     if (state) q = q.ilike('state', state)
+    let appliedCityFilter = false
     if (city) {
       const cityVariants = generateCityVariants(city)
       if (cityVariants.length === 1) {
         q = q.ilike('city', `%${cityVariants[0]}%`)
+        appliedCityFilter = true
       } else if (cityVariants.length > 1) {
         const orConditions = cityVariants.map((cv) => `city.ilike.%${cv}%`).join(',')
         q = q.or(orConditions)
+        appliedCityFilter = true
       }
     }
     if (typeof filters.min_aum === 'number') q = q.gte('aum', filters.min_aum)
@@ -491,16 +494,32 @@ export async function POST(req: NextRequest) {
       return corsify(req, NextResponse.json({ error: 'Query failed', code: 'INTERNAL_ERROR' }, { status: 500 }))
     }
 
-    // Relaxation: if no rows but vector matches exist, retry using only matched CRDs (ignoring city variants)
-    if ((!riaRows || riaRows.length === 0) && matchedCrds.length > 0) {
+    // Relaxation ladder
+    let relaxationLevel: 'state' | 'vector-only' | null = null
+    if ((!riaRows || riaRows.length === 0) && state && appliedCityFilter) {
+      // Step 1: relax to state only
+      let relaxedState = supabaseAdmin.from('ria_profiles').select('*').ilike('state', state)
+      if (typeof filters.min_aum === 'number') relaxedState = relaxedState.gte('aum', filters.min_aum)
+      if (typeof filters.max_aum === 'number' && filters.max_aum !== null) relaxedState = relaxedState.lte('aum', filters.max_aum)
+      if (isLargest) relaxedState = relaxedState.order('aum', { ascending: false })
+      if (isSmallest) relaxedState = relaxedState.order('aum', { ascending: true })
+      const rs = await relaxedState.limit(topN)
+      if (!rs.error && rs.data && rs.data.length > 0) {
+        riaRows = rs.data
+        relaxationLevel = 'state'
+      }
+    }
+    if ((!riaRows || riaRows.length === 0) && matchedCrds.length > 0 && relaxationLevel === null) {
+      // Step 2: vector-only
       let relaxed = supabaseAdmin.from('ria_profiles').select('*').in('crd_number', matchedCrds)
       if (typeof filters.min_aum === 'number') relaxed = relaxed.gte('aum', filters.min_aum)
       if (typeof filters.max_aum === 'number' && filters.max_aum !== null) relaxed = relaxed.lte('aum', filters.max_aum)
       if (isLargest) relaxed = relaxed.order('aum', { ascending: false })
       if (isSmallest) relaxed = relaxed.order('aum', { ascending: true })
-      const relaxedRes = await relaxed.limit(topN)
-      if (!relaxedRes.error && relaxedRes.data) {
-        riaRows = relaxedRes.data
+      const rr = await relaxed.limit(topN)
+      if (!rr.error && rr.data) {
+        riaRows = rr.data
+        relaxationLevel = 'vector-only'
       }
     }
 
@@ -514,6 +533,8 @@ export async function POST(req: NextRequest) {
       total_aum: r.aum,
       filing_date: r.form_adv_date,
       source: usedVector ? 'vector+filters' : 'filters-only',
+      sourceCategory: usedVector ? 'hybrid' : 'database',
+      matchReason: relaxationLevel === 'vector-only' ? 'vector-only' : 'geo+filters',
       // Aliases for compatibility
       crd_number: r.crd_number,
       city: r.city,
@@ -535,6 +556,12 @@ export async function POST(req: NextRequest) {
         results,
         remaining: userId ? (isSubscriber ? -1 : Math.max(0, (remaining || 0) - 1)) : Math.max(0, 2 - (anonCount + 1)),
         isSubscriber: !!isSubscriber,
+        meta: {
+          relaxed: relaxationLevel !== null,
+          relaxationLevel,
+          resolvedRegion: { city: city || null, state: state || null },
+          n: topMatch ? Math.max(1, Math.min(50, Number(topMatch[1]) || 5)) : null,
+        },
       }),
     )
     if (!userId && needsCookieUpdate) {
