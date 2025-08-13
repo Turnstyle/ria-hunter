@@ -195,16 +195,17 @@ export function getAIProvider(requestProvider?: AIProvider): AIProvider {
     return envProvider;
   }
   
-  // Default logic: try Vertex first, fall back to OpenAI
-  const hasVertexConfig = !!(process.env.GOOGLE_PROJECT_ID || process.env.GOOGLE_CLOUD_PROJECT);
+  // Default logic: prefer OpenAI for production stability, fall back to Vertex
   const hasOpenAIConfig = !!process.env.OPENAI_API_KEY;
-  
-  if (hasVertexConfig) {
-    return 'vertex';
-  } else if (hasOpenAIConfig) {
+  const hasVertexConfig = !!(process.env.GOOGLE_PROJECT_ID || process.env.GOOGLE_CLOUD_PROJECT);
+
+  if (hasOpenAIConfig) {
     return 'openai';
   }
-  
+  if (hasVertexConfig) {
+    return 'vertex';
+  }
+
   // Default to OpenAI if nothing is configured
   return 'openai';
 }
