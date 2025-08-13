@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { callLLMToDecomposeQuery } from '@/app/api/ask/planner'
 import { executeEnhancedQuery } from '@/app/api/ask/retriever'
 import { buildAnswerContext } from '@/app/api/ask/context-builder'
-import { generateNaturalLanguageAnswerStream } from '@/app/api/ask/generator'
+import { streamAnswerTokens } from '@/app/api/ask/generator'
 
 const DEFAULT_ALLOWED_ORIGINS = [
 	'https://www.ria-hunter.app',
@@ -53,13 +53,27 @@ export async function POST(request: NextRequest) {
 		const plan = await callLLMToDecomposeQuery(query)
 		const rows = await executeEnhancedQuery({ filters: { location: plan.structured_filters?.location }, limit: 10 })
 		const context = buildAnswerContext(rows as any, query)
-		const stream = generateNaturalLanguageAnswerStream(query, context)
-		return new Response(stream, {
+		const encoder = new TextEncoder()
+		const body = new ReadableStream<Uint8Array>({
+			async start(controller) {
+				try {
+					for await (const token of streamAnswerTokens(query, context)) {
+						controller.enqueue(encoder.encode(`data: ${token}\n\n`))
+					}
+					controller.enqueue(encoder.encode('event: end\n\n'))
+					controller.close()
+				} catch (err) {
+					controller.error(err)
+				}
+			},
+		})
+		return new Response(body, {
 			headers: {
 				...corsHeaders(request),
-				'Content-Type': 'text/plain; charset=utf-8',
-				'Cache-Control': 'no-cache',
+				'Content-Type': 'text/event-stream; charset=utf-8',
+				'Cache-Control': 'no-cache, no-transform',
 				'Connection': 'keep-alive',
+				'X-Accel-Buffering': 'no',
 			},
 		})
 	} catch (error) {
