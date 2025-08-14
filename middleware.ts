@@ -30,7 +30,11 @@ export async function middleware(request: NextRequest) {
     '/api/ria-hunter-waitlist',
     '/api/save-form-data',
     // v1 centralized endpoints handle anonymous + auth internally
-    '/api/v1/ria/'
+    '/api/v1/ria/',
+    // Alias to v1 query; allow anonymous to reach handler for free-tier logic
+    '/api/ask',
+    // Streaming version of ask; allow anonymous
+    '/api/ask-stream'
   ]
   
   if (skipAuthPaths.some(path => request.nextUrl.pathname.startsWith(path))) {
