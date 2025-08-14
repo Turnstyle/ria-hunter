@@ -6,7 +6,7 @@ type ActivityRow = {
 	vc_fund_count: number
 	vc_total_aum: number
 	activity_score: number
-	executives: Array<{ name: string; title: string }>
+	executives: Array<{ name?: string; title?: string }>
 }
 
 export function buildAnswerContext(rows: ActivityRow[], originalQuery: string): string {
@@ -16,9 +16,9 @@ export function buildAnswerContext(rows: ActivityRow[], originalQuery: string): 
 		const r = rows[i]
 		const execs = Array.isArray(r.executives)
 			? r.executives
-				.filter((e) => e && (e.name || e.title))
+				.filter((e) => e && ((e as any).name || e.title))
 				.slice(0, 5)
-				.map((e) => `${e.name || 'N/A'}${e.title ? ` (${e.title})` : ''}`)
+				.map((e: any) => `${e.name || 'N/A'}${e.title ? ` (${e.title})` : ''}`)
 				.join('; ')
 			: ''
 		lines.push(

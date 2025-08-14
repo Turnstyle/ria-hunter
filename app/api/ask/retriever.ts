@@ -28,8 +28,8 @@ export async function executeEnhancedQuery(plan: any) {
 		const results = await Promise.all((rows || []).map(async (r: any) => {
 			const { data: execs } = await supabaseAdmin
 				.from('control_persons')
-				.select('name, title, adviser_id')
-				.eq('adviser_id', Number(r.crd_number))
+				.select('person_name, title, crd_number')
+				.eq('crd_number', Number(r.crd_number))
 			const activity_score = (Number(r.private_fund_count || 0) * 0.6) + (Number(r.private_fund_aum || 0) / 1_000_000 * 0.4)
 			return {
 				crd_number: r.crd_number,
@@ -39,7 +39,7 @@ export async function executeEnhancedQuery(plan: any) {
 				vc_fund_count: r.private_fund_count || 0,
 				vc_total_aum: r.private_fund_aum || 0,
 				activity_score,
-				executives: (execs || []).map((e: any) => ({ name: e.name, title: e.title })),
+				executives: (execs || []).map((e: any) => ({ name: e.person_name, title: e.title })),
 			}
 		}))
 		// Order by computed score and slice to limit
