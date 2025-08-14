@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
 		const rows = await executeEnhancedQuery({ filters: { location: plan.structured_filters?.location }, limit: 10 })
 		const context = buildAnswerContext(rows as any, query)
 		const encoder = new TextEncoder()
-		const body = new ReadableStream<Uint8Array>({
+		const sse = new ReadableStream<Uint8Array>({
 			async start(controller) {
 				try {
 					for await (const token of streamAnswerTokens(query, context)) {
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
 				}
 			},
 		})
-		return new Response(body, {
+		return new Response(sse, {
 			headers: {
 				...corsHeaders(request),
 				'Content-Type': 'text/event-stream; charset=utf-8',
