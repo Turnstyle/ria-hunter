@@ -1,0 +1,76 @@
+import { NextResponse, type NextRequest } from 'next/server'
+import { supabaseAdmin } from '@/lib/supabaseAdmin'
+import OpenAI from 'openai'
+
+type CheckResult = { ok: boolean; error?: string; meta?: Record<string, unknown> }
+
+function bool(b: any): boolean { return !!b }
+
+function guard(request: NextRequest): string | null {
+  const expected = process.env.DEBUG_HEALTH_KEY
+  if (!expected) return null
+  const provided = request.headers.get('x-debug-key') || request.nextUrl.searchParams.get('key')
+  if (provided !== expected) return 'Forbidden'
+  return null
+}
+
+export async function GET(request: NextRequest) {
+  const guardError = guard(request)
+  if (guardError) return NextResponse.json({ error: guardError }, { status: 403 })
+
+  const results: Record<string, CheckResult> = {}
+
+  // Environment presence
+  results.env = {
+    ok: true,
+    meta: {
+      aiProvider: process.env.AI_PROVIDER || 'unset',
+      openaiKeyPresent: bool(process.env.OPENAI_API_KEY),
+      supabaseUrlPresent: bool(process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL),
+      serviceRolePresent: bool(process.env.SUPABASE_SERVICE_ROLE_KEY),
+      nodeEnv: process.env.NODE_ENV,
+    },
+  }
+
+  // Supabase connectivity + table checks
+  try {
+    const ping = await supabaseAdmin.from('ria_profiles').select('crd_number', { count: 'exact', head: true })
+    results.supabase_ping = { ok: !ping.error, error: ping.error?.message }
+  } catch (e: any) {
+    results.supabase_ping = { ok: false, error: e?.message || String(e) }
+  }
+
+  // RPC existence/behavior
+  try {
+    const { data, error } = await supabaseAdmin.rpc('compute_vc_activity', { state_filter: 'MO', result_limit: 1 })
+    results.compute_vc_activity = {
+      ok: !error,
+      error: error?.message,
+      meta: { returnedRows: Array.isArray(data) ? data.length : null },
+    }
+  } catch (e: any) {
+    results.compute_vc_activity = { ok: false, error: e?.message || String(e) }
+  }
+
+  // OpenAI reachability
+  try {
+    if (!process.env.OPENAI_API_KEY) {
+      results.openai = { ok: false, error: 'OPENAI_API_KEY missing' }
+    } else {
+      const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+      const r = await client.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [{ role: 'user', content: 'ping' }],
+        max_tokens: 5,
+        temperature: 0,
+      })
+      results.openai = { ok: !!r?.id, meta: { model: r?.model } }
+    }
+  } catch (e: any) {
+    results.openai = { ok: false, error: e?.message || String(e) }
+  }
+
+  return NextResponse.json({ ok: Object.values(results).every((r) => r.ok), results })
+}
+
+
