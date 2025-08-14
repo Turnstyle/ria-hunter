@@ -52,7 +52,21 @@ export async function POST(request: NextRequest) {
 			return NextResponse.json({ error: 'Query is required' }, { status: 400, headers: corsHeaders(request) })
 		}
 		const plan = await callLLMToDecomposeQuery(query)
-		const rows = await executeEnhancedQuery({ filters: { location: plan.structured_filters?.location }, limit: 10 })
+		let city: string | undefined
+		let state: string | undefined
+		const loc = plan.structured_filters?.location || ''
+		if (typeof loc === 'string' && loc.length > 0) {
+			const parts = loc.split(',').map((p) => p.trim())
+			if (parts.length === 2) {
+				city = parts[0]
+				state = parts[1].toUpperCase()
+			} else if (parts.length === 1 && parts[0].length === 2) {
+				state = parts[0].toUpperCase()
+			} else {
+				city = parts[0]
+			}
+		}
+		const rows = await executeEnhancedQuery({ filters: { state, city }, limit: 10 })
 		const context = buildAnswerContext(rows as any, query)
 		const encoder = new TextEncoder()
 		const sse = new ReadableStream<Uint8Array>({

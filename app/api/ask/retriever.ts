@@ -15,11 +15,13 @@ export async function executeEnhancedQuery(plan: any) {
 
 	// Fallback query mirrors compute_vc_activity logic using ria_profiles and control_persons
 	try {
-		const state = filters?.state || filters?.location || null
+		const state = filters?.state || null
+		const city = filters?.city || null
 		let q = supabaseAdmin.from('ria_profiles')
 			.select('crd_number, legal_name, city, state, private_fund_count, private_fund_aum')
 			.gt('private_fund_count', 0)
 		if (state) q = q.eq('state', state)
+		if (city) q = q.ilike('city', `%${city}%`)
 		const { data: rows, error } = await q.limit(limit || 10)
 		if (error) throw error
 		// Enrich with executives via a second query per firm (limit to small N)

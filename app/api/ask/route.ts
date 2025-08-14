@@ -54,7 +54,22 @@ export async function POST(request: NextRequest) {
 			return corsify(request, NextResponse.json({ error: 'Query is required' }, { status: 400 }))
 		}
 		const decomposedPlan = await callLLMToDecomposeQuery(query)
-		const structuredData = await executeEnhancedQuery({ filters: { location: decomposedPlan.structured_filters?.location, state: decomposedPlan.structured_filters?.location }, limit: 10 })
+		// Parse location like "City, ST" into discrete parts
+		let city: string | undefined
+		let state: string | undefined
+		const loc = decomposedPlan.structured_filters?.location || ''
+		if (typeof loc === 'string' && loc.length > 0) {
+			const parts = loc.split(',').map((p) => p.trim())
+			if (parts.length === 2) {
+				city = parts[0]
+				state = parts[1].toUpperCase()
+			} else if (parts.length === 1 && parts[0].length === 2) {
+				state = parts[0].toUpperCase()
+			} else {
+				city = parts[0]
+			}
+		}
+		const structuredData = await executeEnhancedQuery({ filters: { state, city }, limit: 10 })
 		const context = buildAnswerContext(structuredData as any, query)
 		const answer = await generateNaturalLanguageAnswer(query, context)
 
