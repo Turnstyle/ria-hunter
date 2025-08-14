@@ -46,7 +46,8 @@ export function OPTIONS(req: NextRequest) {
 
 export async function POST(request: NextRequest) {
 	try {
-		const { query } = await request.json()
+		const body = await request.json().catch(() => ({} as any))
+		const query = typeof body?.query === 'string' ? body.query : ''
 		if (!query) {
 			return NextResponse.json({ error: 'Query is required' }, { status: 400, headers: corsHeaders(request) })
 		}

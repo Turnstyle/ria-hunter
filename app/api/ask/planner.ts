@@ -38,7 +38,8 @@ export async function callLLMToDecomposeQuery(userQuery: string, provider?: AIPr
 		selectedProvider = 'openai'
 		aiService = createAIService({ provider: selectedProvider })
 	}
-	if (!aiService) throw new Error('AI provider not configured')
+	// If no AI configured, fall back to deterministic parser instead of failing
+	if (!aiService) return fallbackDecompose(userQuery)
 
 	const prompt = `You are a sophisticated financial data analyst API. Your purpose is to deconstruct a user's natural language query about Registered Investment Advisors (RIAs) and transform it into a structured JSON object for a multi-faceted database search. Analyze the user's query: "${userQuery}".
 
