@@ -64,7 +64,8 @@ export async function POST(request: NextRequest) {
 					controller.enqueue(encoder.encode('event: end\n\n'))
 					controller.close()
 				} catch (err) {
-					controller.error(err)
+					controller.enqueue(encoder.encode(`event: error\n` + `data: ${(err as any)?.message || String(err)}\n\n`))
+					controller.close()
 				}
 			},
 		})

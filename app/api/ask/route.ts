@@ -63,12 +63,12 @@ export async function POST(request: NextRequest) {
 			NextResponse.json({
 				answer,
 				sources: structuredData,
-				metadata: { plan: decomposedPlan },
+				metadata: { plan: decomposedPlan, debug: { provider: process.env.AI_PROVIDER || 'openai', openaiKeyPresent: !!process.env.OPENAI_API_KEY } },
 			}),
 		)
 	} catch (error) {
 		console.error('Error in /api/ask:', error)
-		return corsify(request, NextResponse.json({ error: 'An internal error occurred.' }, { status: 500 }))
+		return corsify(request, NextResponse.json({ error: 'An internal error occurred.', debug: { message: (error as any)?.message || String(error) } }, { status: 500 }))
 	}
 }
 
