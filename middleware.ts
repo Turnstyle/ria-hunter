@@ -34,7 +34,9 @@ export async function middleware(request: NextRequest) {
     // Alias to v1 query; allow anonymous to reach handler for free-tier logic
     '/api/ask',
     // Streaming version of ask; allow anonymous
-    '/api/ask-stream'
+    '/api/ask-stream',
+    // Debug endpoints (guarded with DEBUG_HEALTH_KEY inside the handler)
+    '/api/debug/'
   ]
   
   if (skipAuthPaths.some(path => request.nextUrl.pathname.startsWith(path))) {
