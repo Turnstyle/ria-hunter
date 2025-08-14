@@ -1,7 +1,7 @@
 -- Create compute_vc_activity function if not exists
 create or replace function compute_vc_activity(
-  state_filter text default null,
-  result_limit integer default 10
+  result_limit integer default 10,
+  state_filter text default null
 )
 returns table (
   crd_number bigint,
