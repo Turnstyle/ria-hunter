@@ -48,12 +48,13 @@ export function OPTIONS(req: NextRequest) {
 
 export async function POST(request: NextRequest) {
 	try {
-		const { query } = await request.json()
+		const body = await request.json().catch(() => ({} as any))
+		const query = typeof body?.query === 'string' ? body.query : ''
 		if (!query) {
 			return corsify(request, NextResponse.json({ error: 'Query is required' }, { status: 400 }))
 		}
 		const decomposedPlan = await callLLMToDecomposeQuery(query)
-		const structuredData = await executeEnhancedQuery({ filters: { location: decomposedPlan.structured_filters?.location }, limit: 10 })
+		const structuredData = await executeEnhancedQuery({ filters: { location: decomposedPlan.structured_filters?.location, state: decomposedPlan.structured_filters?.location }, limit: 10 })
 		const context = buildAnswerContext(structuredData as any, query)
 		const answer = await generateNaturalLanguageAnswer(query, context)
 
