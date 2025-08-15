@@ -25,9 +25,19 @@ type QueryDecomposition = {
   structured_filters: StructuredFilters
 }
 
+function isAllowedPreviewOrigin(origin: string): boolean {
+  try {
+    const url = new URL(origin)
+    const host = url.hostname
+    return host.endsWith('.vercel.app') && (host.startsWith('ria-hunter-') || host.startsWith('ria-hunter-app-'))
+  } catch {
+    return false
+  }
+}
+
 function getAllowedOriginFromRequest(req: NextRequest): string | undefined {
   const origin = req.headers.get('origin') || undefined
-  if (origin && EFFECTIVE_ALLOWED_ORIGINS.includes(origin)) return origin
+  if (origin && (EFFECTIVE_ALLOWED_ORIGINS.includes(origin) || isAllowedPreviewOrigin(origin))) return origin
   return undefined
 }
 
@@ -180,6 +190,153 @@ function generateCityVariants(rawCity?: string): string[] {
   }
 
   return Array.from(variants)
+}
+
+// Normalize a firm name to a canonical form for grouping
+function normalizeFirmName(input?: string | null): string {
+  if (!input) return ''
+  let s = input
+    .toUpperCase()
+    .replace(/&/g, ' AND ')
+    .replace(/[.,']/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+
+  // Remove common entity suffixes and boilerplate words at end of names
+  // Do conservative removals to avoid over-grouping unrelated firms
+  const suffixes = [
+    ' INCORPORATED',
+    ' INC',
+    ' LLC',
+    ' L L C',
+    ' LLP',
+    ' L L P',
+    ' LP',
+    ' L P',
+    ' CO',
+    ' COMPANY',
+    ' CORPORATION',
+    ' CORP',
+  ]
+  for (const suf of suffixes) {
+    s = s.replace(new RegExp(`${suf}$`), '')
+  }
+  s = s.replace(/\s+/g, ' ').trim()
+  return s
+}
+
+type FirmResult = {
+  legal_name: string
+  cik: string
+  main_addr_city: string
+  main_addr_state: string
+  total_aum: number
+  filing_date: any
+  source: string
+  sourceCategory: string
+  matchReason: string
+  crd_number: string
+  city: string
+  state: string
+  aum: number
+  private_fund_count?: number
+  private_fund_aum?: number
+  form_adv_date?: any
+}
+
+function aggregateFirmResults(
+  rows: FirmResult[],
+  options: { sortByAum?: 'asc' | 'desc'; topN?: number } = {},
+) {
+  const groups = new Map<
+    string,
+    {
+      key: string
+      displayName: string
+      totalAum: number
+      privateFundCount: number
+      privateFundAum: number
+      cities: Record<string, number>
+      states: Record<string, number>
+      crds: Set<string>
+      members: FirmResult[]
+    }
+  >()
+
+  for (const r of rows) {
+    const key = normalizeFirmName(r.legal_name)
+    if (!groups.has(key)) {
+      groups.set(key, {
+        key,
+        displayName: r.legal_name,
+        totalAum: Number(r.aum) || 0,
+        privateFundCount: Number(r.private_fund_count || 0),
+        privateFundAum: Number(r.private_fund_aum || 0),
+        cities: { [r.city || r.main_addr_city || '']: 1 },
+        states: { [r.state || r.main_addr_state || '']: 1 },
+        crds: new Set([String(r.crd_number || r.cik)]),
+        members: [r],
+      })
+    } else {
+      const g = groups.get(key)!
+      g.totalAum += Number(r.aum) || 0
+      g.privateFundCount += Number(r.private_fund_count || 0)
+      g.privateFundAum += Number(r.private_fund_aum || 0)
+      const c = r.city || r.main_addr_city || ''
+      const st = r.state || r.main_addr_state || ''
+      g.cities[c] = (g.cities[c] || 0) + 1
+      g.states[st] = (g.states[st] || 0) + 1
+      g.crds.add(String(r.crd_number || r.cik))
+      // Prefer the longest legal name as display
+      if ((r.legal_name || '').length > (g.displayName || '').length) {
+        g.displayName = r.legal_name
+      }
+      g.members.push(r)
+    }
+  }
+
+  // Convert to response items
+  let items = Array.from(groups.values()).map((g) => {
+    const pickMode = (rec: Record<string, number>) =>
+      Object.entries(rec)
+        .sort((a, b) => b[1] - a[1])[0]?.[0] || ''
+
+    const city = pickMode(g.cities)
+    const state = pickMode(g.states)
+    return {
+      legal_name: g.displayName,
+      cik: Array.from(g.crds)[0],
+      main_addr_city: city,
+      main_addr_state: state,
+      total_aum: g.totalAum,
+      filing_date: g.members[0]?.filing_date ?? null,
+      source: rows[0]?.source || 'database',
+      sourceCategory: rows[0]?.sourceCategory || 'database',
+      matchReason: rows[0]?.matchReason || 'geo+filters',
+      // Compatibility fields
+      crd_number: Array.from(g.crds)[0],
+      city,
+      state,
+      aum: g.totalAum,
+      private_fund_count: g.privateFundCount,
+      private_fund_aum: g.privateFundAum,
+      form_adv_date: g.members[0]?.form_adv_date ?? null,
+      // Enriched metadata
+      aggregated: true,
+      group_size: g.members.length,
+      crd_numbers: Array.from(g.crds),
+    }
+  })
+
+  if (options.sortByAum) {
+    items.sort((a, b) =>
+      options.sortByAum === 'asc' ? (a.total_aum || 0) - (b.total_aum || 0) : (b.total_aum || 0) - (a.total_aum || 0),
+    )
+  }
+  if (options.topN && options.topN > 0) {
+    items = items.slice(0, options.topN)
+  }
+  return items
 }
 
 async function callLLMToDecomposeQuery(userQuery: string, provider?: AIProvider): Promise<QueryDecomposition> {
@@ -495,8 +652,10 @@ export async function POST(req: NextRequest) {
     if (isLargest) q = q.order('aum', { ascending: false })
     if (isSmallest) q = q.order('aum', { ascending: true })
 
+    // Fetch more rows than needed so aggregation can combine affiliates
     const topN = topMatch ? Math.max(1, Math.min(50, Number(topMatch[1]) || 5)) : 50
-    let { data: riaRows, error: riaError } = await q.limit(topN)
+    const fetchLimit = Math.min(200, topN * 5)
+    let { data: riaRows, error: riaError } = await q.limit(fetchLimit)
     if (riaError) {
       console.error('Structured query error:', riaError)
       return corsify(req, NextResponse.json({ error: 'Query failed', code: 'INTERNAL_ERROR' }, { status: 500 }))
@@ -511,7 +670,7 @@ export async function POST(req: NextRequest) {
       if (typeof filters.max_aum === 'number' && filters.max_aum !== null) relaxedState = relaxedState.lte('aum', filters.max_aum)
       if (isLargest) relaxedState = relaxedState.order('aum', { ascending: false })
       if (isSmallest) relaxedState = relaxedState.order('aum', { ascending: true })
-      const rs = await relaxedState.limit(topN)
+      const rs = await relaxedState.limit(fetchLimit)
       if (!rs.error && rs.data && rs.data.length > 0) {
         riaRows = rs.data
         relaxationLevel = 'state'
@@ -524,7 +683,7 @@ export async function POST(req: NextRequest) {
       if (typeof filters.max_aum === 'number' && filters.max_aum !== null) relaxed = relaxed.lte('aum', filters.max_aum)
       if (isLargest) relaxed = relaxed.order('aum', { ascending: false })
       if (isSmallest) relaxed = relaxed.order('aum', { ascending: true })
-      const rr = await relaxed.limit(topN)
+      const rr = await relaxed.limit(fetchLimit)
       if (!rr.error && rr.data) {
         riaRows = rr.data
         relaxationLevel = 'vector-only'
@@ -532,7 +691,7 @@ export async function POST(req: NextRequest) {
     }
 
     const usedVector = matchedCrds.length > 0
-    const results = (riaRows || []).map((r: any) => ({
+    const rawResults: FirmResult[] = (riaRows || []).map((r: any) => ({
       // Canonical preferred
       legal_name: r.legal_name,
       cik: String(r.crd_number),
@@ -553,6 +712,12 @@ export async function POST(req: NextRequest) {
       form_adv_date: r.form_adv_date,
     }))
 
+    // Aggregate affiliated records by normalized firm name
+    const results = aggregateFirmResults(rawResults, {
+      sortByAum: isLargest ? 'desc' : isSmallest ? 'asc' : undefined,
+      topN,
+    })
+
     // Log usage
     if (userId) {
       await logQueryUsage(userId)
@@ -561,14 +726,16 @@ export async function POST(req: NextRequest) {
     let response = corsify(
       req,
       NextResponse.json({
-        results,
+         results,
         remaining: userId ? (isSubscriber ? -1 : Math.max(0, (remaining || 0) - 1)) : Math.max(0, 2 - (anonCount + 1)),
         isSubscriber: !!isSubscriber,
         meta: {
           relaxed: relaxationLevel !== null,
           relaxationLevel,
           resolvedRegion: { city: city || null, state: state || null },
-          n: topMatch ? Math.max(1, Math.min(50, Number(topMatch[1]) || 5)) : null,
+           n: topMatch ? Math.max(1, Math.min(50, Number(topMatch[1]) || 5)) : null,
+           aggregated: true,
+           fetched: (riaRows || []).length,
         },
       }),
     )

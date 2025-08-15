@@ -36,6 +36,9 @@ const fieldMappings: Record<string, string> = {
   'Telephone Number': 'phone',
   'Business Phone': 'phone',
   'Contact Phone': 'phone',
+  'Fax': 'fax',
+  'Facsimile': 'fax',
+  'Business Fax': 'fax',
   'Website': 'website',
   'Web Address': 'website',
   'URL': 'website',
@@ -139,6 +142,14 @@ function normalizeFieldValue(fieldName: string, rawValue: string): any {
       const phoneDigits = cleanValue.replace(/\D/g, '');
       if (phoneDigits.length === 10) {
         return `(${phoneDigits.slice(0, 3)}) ${phoneDigits.slice(3, 6)}-${phoneDigits.slice(6)}`;
+      }
+      return cleanValue;
+    
+    case 'fax':
+      // Normalize fax to standard format (same as phone)
+      const faxDigits = cleanValue.replace(/\D/g, '');
+      if (faxDigits.length === 10) {
+        return `(${faxDigits.slice(0, 3)}) ${faxDigits.slice(3, 6)}-${faxDigits.slice(6)}`;
       }
       return cleanValue;
       

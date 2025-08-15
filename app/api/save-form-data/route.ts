@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabaseClient'
+import { supabaseAdmin } from '@/lib/supabaseAdmin'
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Insert into contact_submissions table
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('contact_submissions')
       .insert([
         {

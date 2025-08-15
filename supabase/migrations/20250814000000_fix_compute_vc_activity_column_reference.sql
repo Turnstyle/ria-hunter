@@ -1,4 +1,4 @@
--- Align function to production schema (no ria_private_funds table; use aggregated columns on ria_profiles)
+-- Fix the compute_vc_activity function to use correct column name
 create or replace function public.compute_vc_activity(
   result_limit integer default 10,
   state_filter text default null
@@ -28,7 +28,7 @@ begin
     (
       select jsonb_agg(json_build_object('name', cp.person_name, 'title', cp.title))
       from public.control_persons cp
-      where (cp.adviser_id::bigint) = rp.crd_number
+      where cp.crd_number = rp.crd_number  -- FIXED: was cp.adviser_id
     ) as executives
   from public.ria_profiles rp
   where (state_filter is null or rp.state = state_filter)
@@ -37,3 +37,5 @@ begin
   limit result_limit;
 end;
 $$;
+
+

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
+import Stripe from 'stripe';
 
 /**
  * Get current subscription status for the authenticated user
@@ -33,6 +34,43 @@ export async function GET(req: NextRequest) {
     }
 
     const isSubscriber = subscription && ['trialing', 'active'].includes(subscription.status);
+
+    // Optional enrichment from Stripe (plan nickname, latest invoice status)
+    let planName: string | null = null;
+    let latestInvoiceStatus: string | null = null;
+    let trialEnd: string | null = null;
+    if (subscription) {
+      // trialEnd is an alias of currentPeriodEnd during trial
+      if (subscription.status === 'trialing' && subscription.current_period_end) {
+        trialEnd = subscription.current_period_end;
+      }
+
+      const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+      const stripeSubscriptionId = subscription.stripe_subscription_id;
+      if (stripeSecretKey && stripeSubscriptionId) {
+        try {
+          const stripe = new Stripe(stripeSecretKey, { apiVersion: '2024-06-20' });
+          const stripeSub = await stripe.subscriptions.retrieve(stripeSubscriptionId, {
+            expand: ['items.data.price', 'latest_invoice'],
+          });
+          const firstItem = stripeSub.items.data[0];
+          const price: any = firstItem?.price as any;
+          planName = price?.nickname || null;
+
+          const li = stripeSub.latest_invoice as any;
+          if (li && typeof li === 'object') {
+            latestInvoiceStatus = li.status || null;
+          } else if (typeof li === 'string') {
+            const inv = await stripe.invoices.retrieve(li);
+            latestInvoiceStatus = inv.status || null;
+          }
+        } catch (e) {
+          // Best-effort enrichment; ignore failures
+          planName = planName ?? null;
+          latestInvoiceStatus = latestInvoiceStatus ?? null;
+        }
+      }
+    }
 
     // Calculate current month usage if not a subscriber
     let usage = null;
@@ -74,6 +112,9 @@ export async function GET(req: NextRequest) {
       subscription: subscription ? {
         status: subscription.status,
         currentPeriodEnd: subscription.current_period_end,
+        trialEnd,
+        planName,
+        latestInvoiceStatus,
         stripeCustomerId: subscription.stripe_customer_id,
         stripeSubscriptionId: subscription.stripe_subscription_id
       } : null,

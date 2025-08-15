@@ -12,9 +12,20 @@ const ALLOWED_ORIGINS = (process.env.CORS_ORIGINS || '')
   .filter(Boolean)
 const EFFECTIVE_ALLOWED_ORIGINS = ALLOWED_ORIGINS.length > 0 ? ALLOWED_ORIGINS : DEFAULT_ALLOWED_ORIGINS
 
+function isAllowedPreviewOrigin(origin: string): boolean {
+  try {
+    const url = new URL(origin)
+    const host = url.hostname
+    // Allow Vercel preview deployments for this project
+    return host.endsWith('.vercel.app') && (host.startsWith('ria-hunter-') || host.startsWith('ria-hunter-app-'))
+  } catch {
+    return false
+  }
+}
+
 function getAllowedOriginFromRequest(req: NextRequest): string | undefined {
   const origin = req.headers.get('origin') || undefined
-  if (origin && EFFECTIVE_ALLOWED_ORIGINS.includes(origin)) return origin
+  if (origin && (EFFECTIVE_ALLOWED_ORIGINS.includes(origin) || isAllowedPreviewOrigin(origin))) return origin
   return undefined
 }
 
@@ -50,10 +61,10 @@ export async function GET(req: NextRequest, ctx: { params: { cik: string } }) {
       return corsify(req, NextResponse.json({ error: 'Profile not found', code: 'NOT_FOUND' }, { status: 404 }))
     }
 
-    // Filings and private funds are optional – join tables if available (placeholder queries)
-    // These will no-op if tables are absent
+    // Optional related data
     let filings: any[] = []
     let private_funds: any[] = []
+    let executives: any[] = []
 
     try {
       const filingsRes = await supabaseAdmin
@@ -74,6 +85,16 @@ export async function GET(req: NextRequest, ctx: { params: { cik: string } }) {
       private_funds = fundsRes.data || []
     } catch {}
 
+    // Control persons / executives (if table exists)
+    try {
+      const execRes = await supabaseAdmin
+        .from('control_persons')
+        .select('*')
+        .eq('crd_number', cik)
+        .order('person_name', { ascending: true })
+      executives = execRes.data || []
+    } catch {}
+
     const result = {
       // canonical core
       cik: String(profile.crd_number),
@@ -90,9 +111,15 @@ export async function GET(req: NextRequest, ctx: { params: { cik: string } }) {
       main_addr_state: profile.state,
       total_aum: profile.aum,
       phone_number: profile.phone || undefined,
+      fax_number: profile.fax || undefined,
       website: profile.website || undefined,
+      executives: executives.map((p: any) => ({
+        name: p.person_name,
+        title: p.title || undefined,
+      })),
       filings: filings.map((f: any) => ({
         id: f.id || undefined,
+        filing_id: f.id || undefined,
         filing_date: f.filing_date,
         total_aum: f.total_aum,
         manages_private_funds_flag: f.manages_private_funds_flag,
@@ -100,6 +127,7 @@ export async function GET(req: NextRequest, ctx: { params: { cik: string } }) {
       })),
       private_funds: private_funds.map((pf: any) => ({
         id: pf.id || undefined,
+        fund_id: pf.id || undefined,
         fund_name: pf.fund_name,
         fund_type: pf.fund_type,
         gross_asset_value: pf.gross_asset_value,
