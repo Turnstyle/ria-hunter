@@ -22,3 +22,6 @@ output/narratives.json
 
 # OS/Editor
 .DS_Store
+
+# Local env
+env.local

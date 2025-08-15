@@ -26,10 +26,15 @@ export async function executeEnhancedQuery(plan: any) {
 		if (error) throw error
 		// Enrich with executives via a second query per firm (limit to small N)
 		const results = await Promise.all((rows || []).map(async (r: any) => {
-			const { data: execs } = await supabaseAdmin
-				.from('control_persons')
-				.select('person_name, title, crd_number')
-				.eq('crd_number', Number(r.crd_number))
+			let execs: any[] | null = null
+			// Try by crd_number first
+			try {
+				const res = await supabaseAdmin
+					.from('control_persons')
+					.select('person_name, title')
+					.eq('crd_number', Number(r.crd_number))
+				execs = res.data || []
+			} catch {}
 			const activity_score = (Number(r.private_fund_count || 0) * 0.6) + (Number(r.private_fund_aum || 0) / 1_000_000 * 0.4)
 			return {
 				crd_number: r.crd_number,

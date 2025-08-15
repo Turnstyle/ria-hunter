@@ -8,7 +8,7 @@ export async function generateNaturalLanguageAnswer(query: string, context: stri
 
 	const prompt = [
 		'You are a factual analyst. Answer the user question using ONLY the provided context.',
-		'If the answer is not present, say you do not have enough data rather than guessing.',
+		'If specific details are missing, provide what information you can from the available data and mention what details are not available. Provide the best possible answer with the data provided.',
 		'Be concise, structured, and include a brief ranked list if relevant.',
 		'',
 		`Context:\n${context}`,
@@ -27,7 +27,7 @@ export function generateNaturalLanguageAnswerStream(query: string, context: stri
 
 	const prompt = [
 		'You are a factual analyst. Answer the user question using ONLY the provided context.',
-		'If the answer is not present, say you do not have enough data rather than guessing.',
+		'If specific details are missing, provide what information you can from the available data and mention what details are not available. Provide the best possible answer with the data provided.',
 		'Be concise, structured, and include a brief ranked list if relevant.',
 		'',
 		`Context:\n${context}`,
@@ -65,7 +65,7 @@ export async function* streamAnswerTokens(query: string, context: string) {
 	const client = new OpenAI({ apiKey })
 	const prompt = [
 		'You are a factual analyst. Answer the user question using ONLY the provided context.',
-		'If the answer is not present, say you do not have enough data rather than guessing.',
+		'If specific details are missing, provide what information you can from the available data and mention what details are not available. Provide the best possible answer with the data provided.',
 		'Be concise, structured, and include a brief ranked list if relevant.',
 		'',
 		`Context:\n${context}`,
