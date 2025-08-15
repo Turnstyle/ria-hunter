@@ -101,19 +101,38 @@ export async function POST(request: NextRequest) {
 		}
 
 		const decomposedPlan = await callLLMToDecomposeQuery(query)
-		// Parse location like "City, ST" into discrete parts
+		// Parse location robustly: accept "City, ST", "ST", full state names like "Missouri"
+		function normalizeStateNameToCode(input?: string): string | undefined {
+			if (!input) return undefined
+			const s = input.trim()
+			if (s.length === 2) return s.toUpperCase()
+			const map: Record<string, string> = {
+				Alabama: 'AL', Alaska: 'AK', Arizona: 'AZ', Arkansas: 'AR', California: 'CA', Colorado: 'CO',
+				Connecticut: 'CT', Delaware: 'DE', Florida: 'FL', Georgia: 'GA', Hawaii: 'HI', Idaho: 'ID',
+				Illinois: 'IL', Indiana: 'IN', Iowa: 'IA', Kansas: 'KS', Kentucky: 'KY', Louisiana: 'LA',
+				Maine: 'ME', Maryland: 'MD', Massachusetts: 'MA', Michigan: 'MI', Minnesota: 'MN',
+				Mississippi: 'MS', Missouri: 'MO', Montana: 'MT', Nebraska: 'NE', Nevada: 'NV',
+				'New Hampshire': 'NH', 'New Jersey': 'NJ', 'New Mexico': 'NM', 'New York': 'NY',
+				'North Carolina': 'NC', 'North Dakota': 'ND', Ohio: 'OH', Oklahoma: 'OK', Oregon: 'OR',
+				Pennsylvania: 'PA', 'Rhode Island': 'RI', 'South Carolina': 'SC', 'South Dakota': 'SD',
+				Tennessee: 'TN', Texas: 'TX', Utah: 'UT', Vermont: 'VT', Virginia: 'VA', Washington: 'WA',
+				'West Virginia': 'WV', Wisconsin: 'WI', Wyoming: 'WY',
+			}
+			return map[s] || undefined
+		}
+
 		let city: string | undefined
 		let state: string | undefined
 		const loc = decomposedPlan.structured_filters?.location || ''
 		if (typeof loc === 'string' && loc.length > 0) {
-			const parts = loc.split(',').map((p) => p.trim())
+			const parts = loc.split(',').map((p) => p.trim()).filter(Boolean)
 			if (parts.length === 2) {
 				city = parts[0]
-				state = parts[1].toUpperCase()
-			} else if (parts.length === 1 && parts[0].length === 2) {
-				state = parts[0].toUpperCase()
-			} else {
-				city = parts[0]
+				state = normalizeStateNameToCode(parts[1]) || parts[1].toUpperCase()
+			} else if (parts.length === 1) {
+				const maybeState = normalizeStateNameToCode(parts[0])
+				if (maybeState) state = maybeState
+				else city = parts[0]
 			}
 		}
 		let relaxationLevel: 'state' | null = null
