@@ -132,7 +132,35 @@ function normalizeState(input: string | undefined): string | undefined {
     Tennessee: 'TN', Texas: 'TX', Utah: 'UT', Vermont: 'VT', Virginia: 'VA', Washington: 'WA',
     'West Virginia': 'WV', Wisconsin: 'WI', Wyoming: 'WY'
   }
-  return map[s] || s
+  const titled = titleCase(s)
+  const lowerKey = Object.keys(map).find((k) => k.toLowerCase() === s.toLowerCase())
+  return map[titled] || (lowerKey ? map[lowerKey] : s.toUpperCase())
+}
+
+// Generate robust variants for a state input (code and full name forms)
+function generateStateVariants(input?: string): string[] {
+  if (!input) return []
+  const code = normalizeState(input) || input.toUpperCase()
+  const fullByCode: Record<string, string> = {
+    AL: 'Alabama', AK: 'Alaska', AZ: 'Arizona', AR: 'Arkansas', CA: 'California', CO: 'Colorado',
+    CT: 'Connecticut', DE: 'Delaware', FL: 'Florida', GA: 'Georgia', HI: 'Hawaii', ID: 'Idaho',
+    IL: 'Illinois', IN: 'Indiana', IA: 'Iowa', KS: 'Kansas', KY: 'Kentucky', LA: 'Louisiana',
+    ME: 'Maine', MD: 'Maryland', MA: 'Massachusetts', MI: 'Michigan', MN: 'Minnesota',
+    MS: 'Mississippi', MO: 'Missouri', MT: 'Montana', NE: 'Nebraska', NV: 'Nevada',
+    NH: 'New Hampshire', NJ: 'New Jersey', NM: 'New Mexico', NY: 'New York',
+    NC: 'North Carolina', ND: 'North Dakota', OH: 'Ohio', OK: 'Oklahoma', OR: 'Oregon',
+    PA: 'Pennsylvania', RI: 'Rhode Island', SC: 'South Carolina', SD: 'South Dakota',
+    TN: 'Tennessee', TX: 'Texas', UT: 'Utah', VT: 'Vermont', VA: 'Virginia', WA: 'Washington',
+    WV: 'West Virginia', WI: 'Wisconsin', WY: 'Wyoming'
+  }
+  const name = fullByCode[code]
+  const variants = new Set<string>()
+  variants.add(code)
+  if (name) {
+    variants.add(titleCase(name))
+    variants.add(name.toUpperCase())
+  }
+  return Array.from(variants)
 }
 
 function titleCase(input: string): string {
@@ -158,16 +186,22 @@ function generateCityVariants(rawCity?: string): string[] {
   variants.add(titleCase(base))
   variants.add(base.toUpperCase())
 
-  // Saint variants (St, St., Saint)
+  // Saint variants (St, St., Saint) with dotted and undotted forms
   if (/\bst\b|\bst\.|\bsaint\b/i.test(t)) {
     const saint = t.replace(/\bst\.?\s+/i, 'saint ').replace(/\bsaint\s+/i, 'saint ')
     const st = t.replace(/\bsaint\s+/i, 'st ').replace(/\bst\.?\s+/i, 'st ')
+    // Explicit dotted shorthand (e.g., "St. Louis") to match DB entries that retain the period
+    const stDot = t.replace(/\bsaint\s+/i, 'st. ').replace(/\bst\.?\s+/i, 'st. ')
+
     const saintTC = titleCase(saint)
     const stTC = titleCase(st)
+    const stDotTC = titleCase(stDot)
     variants.add(saintTC)
     variants.add(stTC)
+    variants.add(stDotTC)
     variants.add(saintTC.toUpperCase())
     variants.add(stTC.toUpperCase())
+    variants.add(stDotTC.toUpperCase())
   }
 
   // Fort / Mount variants
@@ -187,6 +221,31 @@ function generateCityVariants(rawCity?: string): string[] {
     const withSpace = t.replace(/^new\s?([a-z]+)/i, (_m, p1) => `new ${p1}`)
     variants.add(titleCase(withSpace))
     variants.add(titleCase(withSpace).toUpperCase())
+  }
+
+  // Super-loose: add punctuation-stripped and wildcard variants
+  const tokenized = t.replace(/[.\-]/g, ' ').replace(/\s+/g, ' ').trim()
+  if (tokenized) {
+    const compact = tokenized.replace(/\s+/g, '') // saintlouis
+    const loose = tokenized.replace(/\s+/g, '%')   // saint%louis
+    variants.add(titleCase(compact))
+    variants.add(compact.toUpperCase())
+    variants.add(loose.toUpperCase())
+  }
+
+  // Synonym expansions for common metros
+  const synonyms: Record<string, string[]> = {
+    'saint louis': ['st louis', 'st. louis', 'st-louis', 'stl', 'saintlouis'],
+    'new york': ['new york city', 'nyc', 'newyork', 'new-york'],
+  }
+  const key = tokenized
+  const matchKey = Object.keys(synonyms).find((k) => key.includes(k))
+  if (matchKey) {
+    for (const syn of synonyms[matchKey]) {
+      const tc = titleCase(syn)
+      variants.add(tc)
+      variants.add(tc.toUpperCase())
+    }
   }
 
   return Array.from(variants)
@@ -441,9 +500,9 @@ function fallbackDecompose(userQuery: string): QueryDecomposition {
   const fullStateMatch = q.match(/\b(Alabama|Alaska|Arizona|Arkansas|California|Colorado|Connecticut|Delaware|Florida|Georgia|Hawaii|Idaho|Illinois|Indiana|Iowa|Kansas|Kentucky|Louisiana|Maine|Maryland|Massachusetts|Michigan|Minnesota|Mississippi|Missouri|Montana|Nebraska|Nevada|New Hampshire|New Jersey|New Mexico|New York|North Carolina|North Dakota|Ohio|Oklahoma|Oregon|Pennsylvania|Rhode Island|South Carolina|South Dakota|Tennessee|Texas|Utah|Vermont|Virginia|Washington|West Virginia|Wisconsin|Wyoming)\b/i)
   const STATE_CODES = new Set(['AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY'])
   let abbrev: string | undefined
-  const abbrevMatches = Array.from(q.matchAll(/\b([A-Z]{2})\b/g))
+  const abbrevMatches = Array.from(q.matchAll(/\b([A-Za-z]{2})\b/g))
   for (const m of abbrevMatches) {
-    const token = m[1]
+    const token = m[1].toUpperCase()
     if (STATE_CODES.has(token)) { abbrev = token; break }
   }
   // Heuristic city extraction: look for "in <City>" or common St Louis variants
@@ -451,6 +510,8 @@ function fallbackDecompose(userQuery: string): QueryDecomposition {
   const inCity = q.match(/\bin\s+([A-Za-z.\s]+?)(?:,\s*[A-Za-z]{2}|$)/i)
   if (inCity) city = inCity[1].trim()
   if (/\b(st\.?|saint)\s+louis\b/i.test(q)) city = 'Saint Louis'
+  if (/\bstl\b/i.test(q)) city = 'Saint Louis'
+  if (/\bnyc\b|\bnew\s+york\s+city\b/i.test(q)) { city = 'New York'; if (!abbrev && !fullStateMatch) { abbrev = 'NY' } }
   let state = normalizeState((fullStateMatch?.[0] as string) || (abbrev as string | undefined))
   // Prefer MO for Saint Louis when state is absent
   if (!state && city && /saint\s+louis/i.test(city)) state = 'MO'
@@ -602,7 +663,15 @@ export async function POST(req: NextRequest) {
     const filters = decomposition.structured_filters || {}
     const { city, state } = parseLocation(filters.location)
     let q = supabaseAdmin.from('ria_profiles').select('*')
-    if (state) q = q.or(`state.ilike.${state},state.ilike.% ${state}`) // tolerate missing/extra space
+    if (state) {
+      const stateVars = generateStateVariants(state)
+      if (stateVars.length === 1) {
+        q = q.ilike('state', `%${stateVars[0]}%`)
+      } else {
+        const stateOr = stateVars.map((sv) => `state.ilike.%${sv}%`).join(',')
+        q = q.or(stateOr)
+      }
+    }
     let appliedCityFilter = false
     if (city) {
       const cityVariants = generateCityVariants(city)
@@ -642,7 +711,9 @@ export async function POST(req: NextRequest) {
         q = q.gt('private_fund_count', 0)
       }
     }
-    if (matchedCrds.length > 0) q = q.in('crd_number', matchedCrds)
+    // Only intersect with vector results when no structured filters are applied
+    const structuredApplied = !!(city || state || (Array.isArray(filters.services) && filters.services.length) || typeof filters.min_aum === 'number' || (typeof filters.max_aum === 'number' && filters.max_aum !== null))
+    if (matchedCrds.length > 0 && !structuredApplied) q = q.in('crd_number', matchedCrds)
 
     // Superlatives and top-N
     const sq = (decomposition.semantic_query || '').toLowerCase()
