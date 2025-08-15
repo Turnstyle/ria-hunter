@@ -186,6 +186,7 @@ async function main() {
     } catch {}
 
     const execInserts: any[] = []
+    const crdToExecs: Map<number, { name: string, title?: string | null }[]> = new Map()
     for (const e of executives) {
       const crd = filingToCRD.get(e.filingId)
       if (!crd) continue
@@ -199,6 +200,11 @@ async function main() {
       if (hasFilingFk) base.filing_fk = null
       execInserts.push(base)
       processedExecKey.add(key)
+
+      // Aggregate for executives_by_firm
+      const list = crdToExecs.get(crdNum) || []
+      list.push({ name: e.name, title: e.title || null })
+      crdToExecs.set(crdNum, list)
     }
 
     console.log(`Prepared ${execInserts.length} control_person records`)
@@ -230,8 +236,40 @@ async function main() {
     for (let i = 0; i < execInserts.length; i += 500) {
       const batch = execInserts.slice(i, i + 500)
       const { error } = await supabase.from('control_persons').insert(batch)
-      if (error) console.error('Executives insert warning:', error.message)
-      else console.log(`Inserted executives ${i + 1} - ${i + batch.length}`)
+      if (error) console.error('Executives insert warning (control_persons):', error.message || JSON.stringify(error))
+      else console.log(`Inserted executives ${i + 1} - ${i + batch.length} into control_persons`)
+    }
+
+    // Upsert executives_by_firm from aggregated map
+    if (crdToExecs.size > 0) {
+      const crds = Array.from(crdToExecs.keys())
+      // Fetch legal names for CRDs
+      const crdNameMap: Map<number, string> = new Map()
+      for (let i = 0; i < crds.length; i += 1000) {
+        const chunk = crds.slice(i, i + 1000)
+        const { data, error } = await supabase
+          .from('ria_profiles')
+          .select('crd_number, legal_name')
+          .in('crd_number', chunk)
+        if (error) console.warn('ria_profiles lookup warning:', error.message)
+        else {
+          for (const row of data || []) {
+            crdNameMap.set(Number(row.crd_number), row.legal_name as string)
+          }
+        }
+      }
+      const ebfRows = crds.map(crd => ({
+        crd_number: crd,
+        executives: crdToExecs.get(crd) || [],
+      }))
+      for (let i = 0; i < ebfRows.length; i += 500) {
+        const batch = ebfRows.slice(i, i + 500)
+        const { error } = await supabase
+          .from('executives_by_firm_manual')
+          .upsert(batch, { onConflict: 'crd_number' })
+        if (error) console.error('executives_by_firm_manual upsert warning:', error.message || JSON.stringify(error))
+        else console.log(`Upserted executives_by_firm_manual ${i + 1} - ${i + batch.length}`)
+      }
     }
   }
 
