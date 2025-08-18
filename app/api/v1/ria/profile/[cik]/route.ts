@@ -162,18 +162,17 @@ export async function GET(req: NextRequest, ctx: { params: { cik: string } }) {
     const projectId = supabaseUrl?.match(/https:\/\/([^.]+)\.supabase\.co/)?.[1] || 'unknown'
     
     const result = {
-      // TEMP DEBUG INFO (only for BlackRock CRD 162262)
-      ...(profile.crd_number === 162262 ? {
-        DEBUG_DATABASE_INFO: {
-          project_id: projectId,
-          status: projectId === 'llusjnpltqxhokycwzry' ? '✅ CORRECT' : 
-                  projectId === 'mshjimyrftxojporisxb' ? '❌ WRONG (Budgetbuddy)' :
-                  projectId === 'aqngxprpznclhtsmibsi' ? '❌ WRONG (Linkedly)' : '❌ UNKNOWN',
-          expected: 'llusjnpltqxhokycwzry',
-          full_url: supabaseUrl?.substring(0, 60) + '...',
-          has_service_key: !!process.env.SUPABASE_SERVICE_ROLE_KEY
-        }
-      } : {}),
+      // EMERGENCY DEBUG: Show for ALL profiles to force visibility
+      EMERGENCY_DEBUG: {
+        project_id: projectId,
+        status: projectId === 'llusjnpltqxhokycwzry' ? '✅ CORRECT' : 
+                projectId === 'mshjimyrftxojporisxb' ? '❌ WRONG (Budgetbuddy)' :
+                projectId === 'aqngxprpznclhtsmibsi' ? '❌ WRONG (Linkedly)' : '❌ UNKNOWN',
+        expected: 'llusjnpltqxhokycwzry',
+        full_url: supabaseUrl?.substring(0, 60) + '...',
+        profile_crd: profile.crd_number,
+        timestamp: new Date().toISOString()
+      },
       // canonical core - return actual CIK if available, otherwise use CRD number
       cik: profile.cik || String(profile.crd_number),
       crd_number: profile.crd_number,
