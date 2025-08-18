@@ -587,69 +587,69 @@ export async function POST(req: NextRequest) {
       aiProvider?: AIProvider 
     }
 
-    // Handle exact CRD/CIK lookup
+    // Handle exact CRD/CIK lookup - Use the SAME logic as the working profile endpoint
     if (crd_number && exact_match) {
       try {
         console.log(`🎯 Exact match requested for CRD/CIK: ${crd_number}`)
         
-        // Try CRD first (most reliable), then CIK
+        // Use the exact same logic as the working profile endpoint
         let profile = null
-        
-        // Try numeric CRD first
-        const numericCrd = parseInt(crd_number, 10)
-        if (!isNaN(numericCrd)) {
+        let profileError = null
+
+        try {
+          // First try to find by CIK (if column exists)
+          const { data: cikProfile, error: cikError } = await supabaseAdmin
+            .from('ria_profiles')
+            .select('*')
+            .eq('cik', crd_number)
+            .single()
+
+          if (cikProfile) {
+            profile = cikProfile
+          }
+        } catch (err: any) {
+          // Ignore CIK column errors (column doesn't exist)
+          if (err?.code !== '42703') {
+            console.warn('CIK query error:', err)
+          }
+        }
+
+        // If not found by CIK or CIK column doesn't exist, try by CRD number
+        if (!profile) {
           const { data: crdProfile, error: crdError } = await supabaseAdmin
             .from('ria_profiles')
             .select('*')
-            .eq('crd_number', numericCrd)
+            .eq('crd_number', parseInt(crd_number))
             .single()
-          
-          if (crdProfile && !crdError) {
+
+          if (crdProfile) {
             profile = crdProfile
-            console.log(`✅ Found by CRD number: ${crdProfile.legal_name}`)
-          } else if (crdError) {
-            console.log(`CRD query error:`, crdError.message)
-          }
-        }
-        
-        // If not found by CRD, try CIK (if column exists)
-        if (!profile) {
-          try {
-            const { data: cikProfile, error: cikError } = await supabaseAdmin
-              .from('ria_profiles')
-              .select('*')
-              .eq('cik', crd_number)
-              .single()
-            
-            if (cikProfile && !cikError) {
-              profile = cikProfile
-              console.log(`✅ Found by CIK: ${cikProfile.legal_name}`)
-            } else if (cikError && cikError.code !== '42703') {
-              console.log(`CIK query error:`, cikError.message)
-            }
-          } catch (err: any) {
-            // Ignore CIK column errors (column might not exist)
-            if (err?.code !== '42703') {
-              console.log(`CIK query exception:`, err.message)
-            }
+          } else {
+            profileError = crdError
           }
         }
 
         if (profile) {
-          // Log usage and return exact match
+          console.log(`✅ Found exact match: ${profile.legal_name}`)
+          
+          // Log usage
           if (userId) await logQueryUsage(userId)
           
           const response = NextResponse.json({
             results: [{
               ...profile,
+              // Convert to expected format
+              main_addr_city: profile.city,
+              main_addr_state: profile.state, 
+              total_aum: profile.aum,
               source: 'database',
               sourceCategory: 'exact_match',
-              matchReason: `exact_crd_cik_${crd_number}`
+              matchReason: `exact_crd_${crd_number}`
             }],
             total: 1,
             remaining,
             isSubscriber,
-            query: `CRD/CIK ${crd_number}`,
+            query: `CRD ${crd_number}`,
             decomposition: { semantic_query: '', structured_filters: {} }
           })
           
@@ -658,15 +658,20 @@ export async function POST(req: NextRequest) {
           }
           return corsify(req, response)
         } else {
-          console.log(`❌ No profile found for CRD/CIK: ${crd_number}`)
-          return corsify(req, NextResponse.json({
+          console.log(`❌ No exact match found for: ${crd_number}`)
+          const response = NextResponse.json({
             results: [],
             total: 0,
             remaining,
             isSubscriber,
-            query: `CRD/CIK ${crd_number}`,
+            query: `CRD ${crd_number}`,
             decomposition: { semantic_query: '', structured_filters: {} }
-          }))
+          })
+          
+          if (needsCookieUpdate) {
+            response.cookies.set('anonQueries', String(anonCount + 1), { maxAge: 86400 })
+          }
+          return corsify(req, response)
         }
       } catch (error) {
         console.error('Exact match error:', error)

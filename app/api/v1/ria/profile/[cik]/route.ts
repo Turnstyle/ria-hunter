@@ -51,6 +51,28 @@ export async function GET(req: NextRequest, ctx: { params: { cik: string } }) {
     if (!identifier) {
       return corsify(req, NextResponse.json({ error: 'Missing identifier', code: 'BAD_REQUEST' }, { status: 400 }))
     }
+    
+    // Special debug mode for query endpoint testing
+    const url = new URL(req.url)
+    const isQueryDebug = url.searchParams.get('query_debug') === '1'
+    
+    if (isQueryDebug) {
+      // Return in query endpoint format for testing
+      const result = {
+        results: [{
+          crd_number: parseInt(identifier),
+          legal_name: "QUERY_ENDPOINT_TEST",
+          cik: identifier,
+          source: 'debug',
+          sourceCategory: 'exact_match',
+          matchReason: `debug_test_${identifier}`
+        }],
+        total: 1,
+        query: `Debug test ${identifier}`,
+        decomposition: { semantic_query: '', structured_filters: {} }
+      }
+      return corsify(req, NextResponse.json(result))
+    }
 
     // Core profile - Look up by CRD number (primary key)
     let profile = null
