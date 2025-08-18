@@ -55,21 +55,54 @@ export async function GET(req: NextRequest, ctx: { params: { cik: string } }) {
     let profile = null
     let profileError = null
     
-    console.log(`Looking up profile with identifier: ${identifier}`)
+    console.log(`🔍 Looking up profile with identifier: ${identifier} (type: ${typeof identifier})`)
     
+    // Try as string first
     const { data: crdProfile, error: crdError } = await supabaseAdmin
       .from('ria_profiles')
       .select('*')
       .eq('crd_number', identifier)
       .single()
     
-    console.log(`CRD lookup result:`, { found: !!crdProfile, error: crdError?.message })
+    console.log(`📊 CRD lookup result (string):`, { 
+      found: !!crdProfile, 
+      error: crdError?.message, 
+      errorCode: crdError?.code,
+      identifier: identifier,
+      identifierType: typeof identifier
+    })
     
     if (crdProfile) {
       profile = crdProfile
     } else {
       profileError = crdError
-      console.log(`Profile ${identifier} not found, error:`, crdError)
+      console.log(`❌ Profile ${identifier} not found as string, error:`, crdError)
+      
+      // Try as integer if string failed
+      const numericIdentifier = parseInt(identifier, 10)
+      if (!isNaN(numericIdentifier) && String(numericIdentifier) === identifier) {
+        console.log(`🔄 Retrying with numeric identifier: ${numericIdentifier}`)
+        
+        const { data: numericProfile, error: numericError } = await supabaseAdmin
+          .from('ria_profiles')
+          .select('*')
+          .eq('crd_number', numericIdentifier)
+          .single()
+        
+        console.log(`📊 CRD lookup result (numeric):`, { 
+          found: !!numericProfile, 
+          error: numericError?.message,
+          errorCode: numericError?.code,
+          identifier: numericIdentifier,
+          identifierType: typeof numericIdentifier
+        })
+        
+        if (numericProfile) {
+          profile = numericProfile
+          profileError = null
+          console.log(`✅ Found profile with numeric lookup: ${numericProfile.legal_name}`)
+        }
+      }
     }
 
     if (profileError || !profile) {
