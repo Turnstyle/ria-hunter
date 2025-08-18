@@ -55,17 +55,26 @@ export async function GET(req: NextRequest, ctx: { params: { cik: string } }) {
     let profile = null
     let profileError = null
     
-    // First try to find by CIK
-    const { data: cikProfile, error: cikError } = await supabaseAdmin
-      .from('ria_profiles')
-      .select('*')
-      .eq('cik', identifier)
-      .single()
+    try {
+      // First try to find by CIK (if column exists)
+      const { data: cikProfile, error: cikError } = await supabaseAdmin
+        .from('ria_profiles')
+        .select('*')
+        .eq('cik', identifier)
+        .single()
+      
+      if (cikProfile) {
+        profile = cikProfile
+      }
+    } catch (err: any) {
+      // Ignore CIK column errors (column doesn't exist)
+      if (err?.code !== '42703') {
+        console.warn('CIK query error:', err)
+      }
+    }
     
-    if (cikProfile) {
-      profile = cikProfile
-    } else {
-      // If not found by CIK, try by CRD number
+    // If not found by CIK or CIK column doesn't exist, try by CRD number
+    if (!profile) {
       const { data: crdProfile, error: crdError } = await supabaseAdmin
         .from('ria_profiles')
         .select('*')
