@@ -575,11 +575,89 @@ export async function POST(req: NextRequest) {
     const authHeader = req.headers.get('authorization')
     const userId = decodeJwtSub(authHeader)
     const body = await req.json().catch(() => null)
-    if (!body || typeof body.query !== 'string') {
-      return corsify(req, NextResponse.json({ error: 'Invalid body. Expected { "query": string }', code: 'BAD_REQUEST' }, { status: 400 }))
+    if (!body || (typeof body.query !== 'string' && !body.crd_number)) {
+      return corsify(req, NextResponse.json({ error: 'Invalid body. Expected { "query": string } or { "crd_number": string }', code: 'BAD_REQUEST' }, { status: 400 }))
     }
 
-    const { query } = body as { query: string; aiProvider?: AIProvider }
+    const { query, crd_number, exact_match, limit } = body as { 
+      query?: string; 
+      crd_number?: string; 
+      exact_match?: boolean; 
+      limit?: number;
+      aiProvider?: AIProvider 
+    }
+
+    // Handle exact CRD/CIK lookup
+    if (crd_number && exact_match) {
+      try {
+        console.log(`🎯 Exact match requested for CRD/CIK: ${crd_number}`)
+        
+        // Try CIK first, then CRD
+        let profile = null
+        
+        const { data: cikProfile } = await supabaseAdmin
+          .from('ria_profiles')
+          .select('*')
+          .eq('cik', crd_number)
+          .single()
+        
+        if (cikProfile) {
+          profile = cikProfile
+          console.log(`✅ Found by CIK: ${cikProfile.legal_name}`)
+        } else {
+          const { data: crdProfile } = await supabaseAdmin
+            .from('ria_profiles')
+            .select('*')
+            .eq('crd_number', parseInt(crd_number))
+            .single()
+          
+          if (crdProfile) {
+            profile = crdProfile
+            console.log(`✅ Found by CRD: ${crdProfile.legal_name}`)
+          }
+        }
+
+        if (profile) {
+          // Log usage and return exact match
+          if (userId) await logQueryUsage(userId)
+          
+          const response = NextResponse.json({
+            results: [{
+              ...profile,
+              source: 'database',
+              sourceCategory: 'exact_match',
+              matchReason: `exact_crd_cik_${crd_number}`
+            }],
+            total: 1,
+            remaining,
+            isSubscriber,
+            query: `CRD/CIK ${crd_number}`,
+            decomposition: { semantic_query: '', structured_filters: {} }
+          })
+          
+          if (needsCookieUpdate) {
+            response.cookies.set('anonQueries', String(anonCount + 1), { maxAge: 86400 })
+          }
+          return corsify(req, response)
+        } else {
+          console.log(`❌ No profile found for CRD/CIK: ${crd_number}`)
+          return corsify(req, NextResponse.json({
+            results: [],
+            total: 0,
+            remaining,
+            isSubscriber,
+            query: `CRD/CIK ${crd_number}`,
+            decomposition: { semantic_query: '', structured_filters: {} }
+          }))
+        }
+      } catch (error) {
+        console.error('Exact match error:', error)
+        return corsify(req, NextResponse.json({ error: 'Exact match failed', code: 'INTERNAL_ERROR' }, { status: 500 }))
+      }
+    }
+
+    // Fall back to semantic search if no exact match requested
+    const queryString = query || `Profile ${crd_number}`
 
     // Auth and allowance
     let allowed = true
@@ -634,10 +712,10 @@ export async function POST(req: NextRequest) {
     // Decompose query with LLM
     let decomposition: QueryDecomposition
     try {
-      decomposition = await callLLMToDecomposeQuery(query)
+      decomposition = await callLLMToDecomposeQuery(queryString)
     } catch (e) {
       // Fallback to deterministic parser when LLM fails
-      decomposition = fallbackDecompose(query)
+      decomposition = fallbackDecompose(queryString)
     }
 
     // Generate embedding for semantic query (Vertex 384). If unavailable, skip vector step
@@ -798,16 +876,19 @@ export async function POST(req: NextRequest) {
     let response = corsify(
       req,
       NextResponse.json({
-         results,
+        results,
+        total: results.length,
         remaining: userId ? (isSubscriber ? -1 : Math.max(0, (remaining || 0) - 1)) : Math.max(0, 2 - (anonCount + 1)),
         isSubscriber: !!isSubscriber,
+        query: queryString,
+        decomposition,
         meta: {
           relaxed: relaxationLevel !== null,
           relaxationLevel,
           resolvedRegion: { city: city || null, state: state || null },
-           n: topMatch ? Math.max(1, Math.min(50, Number(topMatch[1]) || 5)) : null,
-           aggregated: true,
-           fetched: (riaRows || []).length,
+          n: topMatch ? Math.max(1, Math.min(50, Number(topMatch[1]) || 5)) : null,
+          aggregated: true,
+          fetched: (riaRows || []).length,
         },
       }),
     )
