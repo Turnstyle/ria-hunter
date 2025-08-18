@@ -144,11 +144,13 @@ async function run() {
       
       // Generate embedding
       const embedding = await generateEmbedding(row.narrative);
+      // Truncate to 384 dims for compatibility with vector(384)
+      const toStore = Array.isArray(embedding) && embedding.length > 384 ? embedding.slice(0, 384) : embedding;
       
       // Update database  
       const { error: updateError } = await supabase
         .from('narratives')
-        .update({ embedding: embedding })
+        .update({ embedding: toStore })
         .eq('crd_number', row.crd_number);
 
       if (updateError) {

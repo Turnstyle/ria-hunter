@@ -193,10 +193,9 @@ async function main() {
       const crdNum = Number(crd)
       const key = `${crdNum}::${e.name}::${e.title || ''}`
       if (processedExecKey.has(key)) continue
-      // Insert using adviser_id and person_name for stability across cache refreshes
-      const base: any = { adviser_id: crdNum, person_name: e.name, title: e.title || null }
-      // Keep legacy 'name' populated if present for forward/backward compatibility
-      base.name = e.name
+      // Insert using adviser_id and name to match production schema
+      // Some environments may also accept person_name, but 'name' exists in prod
+      const base: any = { adviser_id: crdNum, name: e.name, title: e.title || null }
       if (hasFilingFk) base.filing_fk = null
       execInserts.push(base)
       processedExecKey.add(key)
