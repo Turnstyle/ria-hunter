@@ -5,8 +5,9 @@ import { buildAnswerContext } from '@/app/api/ask/context-builder'
 import { streamAnswerTokens } from '@/app/api/ask/generator'
 
 const DEFAULT_ALLOWED_ORIGINS = [
-	'https://www.ria-hunter.app',
-	'https://ria-hunter.app',
+  'https://www.ria-hunter.app',
+  'https://ria-hunter.app',
+  'https://ria-hunter-app.vercel.app',
 ]
 const ALLOWED_ORIGINS = (process.env.CORS_ORIGINS || '')
 	.split(',')
