@@ -6,6 +6,7 @@ import { createAIService, getAIProvider, type AIProvider } from '@/lib/ai-provid
 const DEFAULT_ALLOWED_ORIGINS = [
   'https://www.ria-hunter.app',
   'https://ria-hunter.app',
+  'https://ria-hunter-app.vercel.app',
 ]
 const ALLOWED_ORIGINS = (process.env.CORS_ORIGINS || '')
   .split(',')
