@@ -107,20 +107,7 @@ export async function GET(req: NextRequest, ctx: { params: { cik: string } }) {
     }
 
     if (profileError || !profile) {
-      // For debugging: include database info in 404 responses
-      const debugInfo = {
-        error: 'Profile not found',
-        code: 'NOT_FOUND',
-        debug: {
-          identifier: identifier,
-          database_url: (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL)?.substring(0, 50) + '...',
-          project_id: (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL)?.match(/https:\/\/([^.]+)\.supabase\.co/)?.[1] || 'unknown',
-          has_service_key: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
-          node_env: process.env.NODE_ENV,
-          profileError: profileError?.message || null
-        }
-      }
-      return corsify(req, NextResponse.json(debugInfo, { status: 404 }))
+      return corsify(req, NextResponse.json({ error: 'Profile not found', code: 'NOT_FOUND' }, { status: 404 }))
     }
 
     // Optional related data - use the actual CRD number from the profile
@@ -158,22 +145,7 @@ export async function GET(req: NextRequest, ctx: { params: { cik: string } }) {
       executives = execRes.data || []
     } catch {}
 
-    // TEMP DEBUG: Show database info for CRD 162262 (BlackRock)
-    const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
-    const projectId = supabaseUrl?.match(/https:\/\/([^.]+)\.supabase\.co/)?.[1] || 'unknown'
-    
     const result = {
-      // EMERGENCY DEBUG: Show for ALL profiles to force visibility
-      EMERGENCY_DEBUG: {
-        project_id: projectId,
-        status: projectId === 'llusjnpltqxhokycwzry' ? '✅ CORRECT' : 
-                projectId === 'mshjimyrftxojporisxb' ? '❌ WRONG (Budgetbuddy)' :
-                projectId === 'aqngxprpznclhtsmibsi' ? '❌ WRONG (Linkedly)' : '❌ UNKNOWN',
-        expected: 'llusjnpltqxhokycwzry',
-        full_url: supabaseUrl?.substring(0, 60) + '...',
-        profile_crd: profile.crd_number,
-        timestamp: new Date().toISOString()
-      },
       // canonical core - return actual CIK if available, otherwise use CRD number
       cik: profile.cik || String(profile.crd_number),
       crd_number: profile.crd_number,
