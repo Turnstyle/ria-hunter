@@ -35,7 +35,35 @@ export async function GET(request: NextRequest) {
   // Supabase connectivity + table checks
   try {
     const ping = await supabaseAdmin.from('ria_profiles').select('crd_number', { count: 'exact', head: true })
-    results.supabase_ping = { ok: !ping.error, error: ping.error?.message }
+    
+    // Get detailed database info
+    const { count: totalProfiles } = await supabaseAdmin
+      .from('ria_profiles')
+      .select('*', { count: 'exact', head: true })
+    
+    const { count: placeholderCount } = await supabaseAdmin
+      .from('ria_profiles')
+      .select('*', { count: 'exact', head: true })
+      .in('legal_name', ['N', 'Y'])
+    
+    // Test specific profile
+    const { data: edwardJones } = await supabaseAdmin
+      .from('ria_profiles')
+      .select('crd_number, legal_name')
+      .eq('crd_number', 29880)
+      .single()
+    
+    results.supabase_ping = { 
+      ok: !ping.error, 
+      error: ping.error?.message,
+      database_url: (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL)?.substring(0, 50) + '...',
+      total_profiles: totalProfiles,
+      placeholder_profiles: placeholderCount,
+      edward_jones_test: {
+        found: !!edwardJones,
+        legal_name: edwardJones?.legal_name || null
+      }
+    }
   } catch (e: any) {
     results.supabase_ping = { ok: false, error: e?.message || String(e) }
   }
