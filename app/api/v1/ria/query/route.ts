@@ -592,28 +592,46 @@ export async function POST(req: NextRequest) {
       try {
         console.log(`🎯 Exact match requested for CRD/CIK: ${crd_number}`)
         
-        // Try CIK first, then CRD
+        // Try CRD first (most reliable), then CIK
         let profile = null
         
-        const { data: cikProfile } = await supabaseAdmin
-          .from('ria_profiles')
-          .select('*')
-          .eq('cik', crd_number)
-          .single()
-        
-        if (cikProfile) {
-          profile = cikProfile
-          console.log(`✅ Found by CIK: ${cikProfile.legal_name}`)
-        } else {
-          const { data: crdProfile } = await supabaseAdmin
+        // Try numeric CRD first
+        const numericCrd = parseInt(crd_number, 10)
+        if (!isNaN(numericCrd)) {
+          const { data: crdProfile, error: crdError } = await supabaseAdmin
             .from('ria_profiles')
             .select('*')
-            .eq('crd_number', parseInt(crd_number))
+            .eq('crd_number', numericCrd)
             .single()
           
-          if (crdProfile) {
+          if (crdProfile && !crdError) {
             profile = crdProfile
-            console.log(`✅ Found by CRD: ${crdProfile.legal_name}`)
+            console.log(`✅ Found by CRD number: ${crdProfile.legal_name}`)
+          } else if (crdError) {
+            console.log(`CRD query error:`, crdError.message)
+          }
+        }
+        
+        // If not found by CRD, try CIK (if column exists)
+        if (!profile) {
+          try {
+            const { data: cikProfile, error: cikError } = await supabaseAdmin
+              .from('ria_profiles')
+              .select('*')
+              .eq('cik', crd_number)
+              .single()
+            
+            if (cikProfile && !cikError) {
+              profile = cikProfile
+              console.log(`✅ Found by CIK: ${cikProfile.legal_name}`)
+            } else if (cikError && cikError.code !== '42703') {
+              console.log(`CIK query error:`, cikError.message)
+            }
+          } catch (err: any) {
+            // Ignore CIK column errors (column might not exist)
+            if (err?.code !== '42703') {
+              console.log(`CIK query exception:`, err.message)
+            }
           }
         }
 
