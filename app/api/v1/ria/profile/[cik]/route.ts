@@ -106,7 +106,20 @@ export async function GET(req: NextRequest, ctx: { params: { cik: string } }) {
     }
 
     if (profileError || !profile) {
-      return corsify(req, NextResponse.json({ error: 'Profile not found', code: 'NOT_FOUND' }, { status: 404 }))
+      // For debugging: include database info in 404 responses
+      const debugInfo = {
+        error: 'Profile not found',
+        code: 'NOT_FOUND',
+        debug: {
+          identifier: identifier,
+          database_url: (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL)?.substring(0, 50) + '...',
+          project_id: (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL)?.match(/https:\/\/([^.]+)\.supabase\.co/)?.[1] || 'unknown',
+          has_service_key: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+          node_env: process.env.NODE_ENV,
+          profileError: profileError?.message || null
+        }
+      }
+      return corsify(req, NextResponse.json(debugInfo, { status: 404 }))
     }
 
     // Optional related data - use the actual CRD number from the profile
