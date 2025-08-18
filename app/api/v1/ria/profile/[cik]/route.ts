@@ -51,41 +51,25 @@ export async function GET(req: NextRequest, ctx: { params: { cik: string } }) {
       return corsify(req, NextResponse.json({ error: 'Missing identifier', code: 'BAD_REQUEST' }, { status: 400 }))
     }
 
-    // Core profile - Try by CIK first, then by CRD number
+    // Core profile - Look up by CRD number (primary key)
     let profile = null
     let profileError = null
     
-    try {
-      // First try to find by CIK (if column exists)
-      const { data: cikProfile, error: cikError } = await supabaseAdmin
-        .from('ria_profiles')
-        .select('*')
-        .eq('cik', identifier)
-        .single()
-      
-      if (cikProfile) {
-        profile = cikProfile
-      }
-    } catch (err: any) {
-      // Ignore CIK column errors (column doesn't exist)
-      if (err?.code !== '42703') {
-        console.warn('CIK query error:', err)
-      }
-    }
+    console.log(`Looking up profile with identifier: ${identifier}`)
     
-    // If not found by CIK or CIK column doesn't exist, try by CRD number
-    if (!profile) {
-      const { data: crdProfile, error: crdError } = await supabaseAdmin
-        .from('ria_profiles')
-        .select('*')
-        .eq('crd_number', identifier)
-        .single()
-      
-      if (crdProfile) {
-        profile = crdProfile
-      } else {
-        profileError = crdError
-      }
+    const { data: crdProfile, error: crdError } = await supabaseAdmin
+      .from('ria_profiles')
+      .select('*')
+      .eq('crd_number', identifier)
+      .single()
+    
+    console.log(`CRD lookup result:`, { found: !!crdProfile, error: crdError?.message })
+    
+    if (crdProfile) {
+      profile = crdProfile
+    } else {
+      profileError = crdError
+      console.log(`Profile ${identifier} not found, error:`, crdError)
     }
 
     if (profileError || !profile) {
