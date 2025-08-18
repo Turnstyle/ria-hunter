@@ -46,22 +46,45 @@ export function OPTIONS(req: NextRequest) {
 
 export async function GET(req: NextRequest, ctx: { params: { cik: string } }) {
   try {
-    const cik = ctx.params.cik
-    if (!cik) {
-      return corsify(req, NextResponse.json({ error: 'Missing cik', code: 'BAD_REQUEST' }, { status: 400 }))
+    const identifier = ctx.params.cik
+    if (!identifier) {
+      return corsify(req, NextResponse.json({ error: 'Missing identifier', code: 'BAD_REQUEST' }, { status: 400 }))
     }
 
-    // Core profile
-    const { data: profile, error: profileError } = await supabaseAdmin
+    // Core profile - Try by CIK first, then by CRD number
+    let profile = null
+    let profileError = null
+    
+    // First try to find by CIK
+    const { data: cikProfile, error: cikError } = await supabaseAdmin
       .from('ria_profiles')
       .select('*')
-      .eq('crd_number', cik)
+      .eq('cik', identifier)
       .single()
+    
+    if (cikProfile) {
+      profile = cikProfile
+    } else {
+      // If not found by CIK, try by CRD number
+      const { data: crdProfile, error: crdError } = await supabaseAdmin
+        .from('ria_profiles')
+        .select('*')
+        .eq('crd_number', identifier)
+        .single()
+      
+      if (crdProfile) {
+        profile = crdProfile
+      } else {
+        profileError = crdError
+      }
+    }
+
     if (profileError || !profile) {
       return corsify(req, NextResponse.json({ error: 'Profile not found', code: 'NOT_FOUND' }, { status: 404 }))
     }
 
-    // Optional related data
+    // Optional related data - use the actual CRD number from the profile
+    const crdNumber = profile.crd_number
     let filings: any[] = []
     let private_funds: any[] = []
     let executives: any[] = []
@@ -70,7 +93,7 @@ export async function GET(req: NextRequest, ctx: { params: { cik: string } }) {
       const filingsRes = await supabaseAdmin
         .from('ria_filings')
         .select('*')
-        .eq('crd_number', cik)
+        .eq('crd_number', crdNumber)
         .order('filing_date', { ascending: false })
         .limit(20)
       filings = filingsRes.data || []
@@ -80,7 +103,7 @@ export async function GET(req: NextRequest, ctx: { params: { cik: string } }) {
       const fundsRes = await supabaseAdmin
         .from('ria_private_funds')
         .select('*')
-        .eq('crd_number', cik)
+        .eq('crd_number', crdNumber)
         .limit(50)
       private_funds = fundsRes.data || []
     } catch {}
@@ -90,14 +113,14 @@ export async function GET(req: NextRequest, ctx: { params: { cik: string } }) {
       const execRes = await supabaseAdmin
         .from('control_persons')
         .select('*')
-        .eq('crd_number', cik)
+        .eq('crd_number', crdNumber)
         .order('person_name', { ascending: true })
       executives = execRes.data || []
     } catch {}
 
     const result = {
-      // canonical core
-      cik: String(profile.crd_number),
+      // canonical core - return actual CIK if available, otherwise use CRD number
+      cik: profile.cik || String(profile.crd_number),
       crd_number: profile.crd_number,
       legal_name: profile.legal_name,
       main_office_location: {
