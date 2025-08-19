@@ -70,37 +70,50 @@ export async function GET(req: NextRequest, ctx: { params: { cik: string } }) {
       return corsify(req, NextResponse.json({ error: 'Missing cik', code: 'BAD_REQUEST' }, { status: 400 }))
     }
 
+    // Resolve CRD by CIK if needed
+    let crd = cik
+    try {
+      if (isNaN(Number(cik))) {
+        const { data: profile } = await supabaseAdmin
+          .from('ria_profiles')
+          .select('crd_number')
+          .eq('cik', cik)
+          .single()
+        if (profile?.crd_number) crd = String(profile.crd_number)
+      }
+    } catch {}
+
     // Parallelize the three queries
     const [summaryRes, fundsRes, marketersRes] = await Promise.all([
       supabaseAdmin
         .from('ria_private_funds')
         .select('fund_type, count:count()')
-        .eq('crd_number', cik)
+        .eq('crd_number', crd)
         .group('fund_type'),
       supabaseAdmin
         .from('ria_private_funds')
         .select('*')
-        .eq('crd_number', cik)
+        .eq('crd_number', crd)
         .order('gross_asset_value', { ascending: false })
         .limit(1000),
       supabaseAdmin
         .from('ria_fund_marketers')
         .select('*')
-        .eq('crd_number', cik)
+        .eq('crd_number', crd)
         .limit(1000),
     ])
 
     if (summaryRes.error) {
       console.error('summary error:', summaryRes.error)
-      return corsify(req, NextResponse.json({ error: 'Summary query failed', code: 'INTERNAL_ERROR' }, { status: 500 }))
+      return corsify(req, NextResponse.json({ crd_number: crd, summary: [], funds: [], marketers: [] }))
     }
     if (fundsRes.error) {
       console.error('funds error:', fundsRes.error)
-      return corsify(req, NextResponse.json({ error: 'Funds query failed', code: 'INTERNAL_ERROR' }, { status: 500 }))
+      return corsify(req, NextResponse.json({ crd_number: crd, summary: [], funds: [], marketers: [] }))
     }
     if (marketersRes.error) {
       console.error('marketers error:', marketersRes.error)
-      return corsify(req, NextResponse.json({ error: 'Marketers query failed', code: 'INTERNAL_ERROR' }, { status: 500 }))
+      return corsify(req, NextResponse.json({ crd_number: crd, summary: [], funds: [], marketers: [] }))
     }
 
     // Build summary with short labels
@@ -117,7 +130,7 @@ export async function GET(req: NextRequest, ctx: { params: { cik: string } }) {
     return corsify(
       req,
       NextResponse.json({
-        crd_number: cik,
+        crd_number: crd,
         summary,
         funds: fundsRes.data || [],
         marketers: marketersRes.data || [],
@@ -125,7 +138,7 @@ export async function GET(req: NextRequest, ctx: { params: { cik: string } }) {
     )
   } catch (e) {
     console.error('combined funds endpoint error:', e)
-    return corsify(req, NextResponse.json({ error: 'Internal server error', code: 'INTERNAL_ERROR' }, { status: 500 }))
+    return corsify(req, NextResponse.json({ crd_number: ctx.params.cik, summary: [], funds: [], marketers: [] }))
   }
 }
 

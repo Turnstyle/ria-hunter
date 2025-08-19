@@ -70,16 +70,30 @@ export async function GET(req: NextRequest, ctx: { params: { cik: string } }) {
       return corsify(req, NextResponse.json({ error: 'Missing cik', code: 'BAD_REQUEST' }, { status: 400 }))
     }
 
+    // Resolve CRD by CIK if needed
+    let crd = cik
+    try {
+      if (isNaN(Number(cik))) {
+        const { data: profile } = await supabaseAdmin
+          .from('ria_profiles')
+          .select('crd_number')
+          .eq('cik', cik)
+          .single()
+        if (profile?.crd_number) crd = String(profile.crd_number)
+      }
+    } catch {}
+
     // Group counts by fund_type; include "Unknown" bucket for nulls
     const { data, error } = await supabaseAdmin
       .from('ria_private_funds')
       .select('fund_type, count:count()')
-      .eq('crd_number', cik)
+      .eq('crd_number', crd)
       .group('fund_type')
 
     if (error) {
       console.error('fund summary query error:', error)
-      return corsify(req, NextResponse.json({ error: 'Query failed', code: 'INTERNAL_ERROR' }, { status: 500 }))
+      // Return empty summary instead of 500 to avoid breaking UI
+      return corsify(req, NextResponse.json({ crd_number: crd, summary: [] }))
     }
 
     // Normalize: collapse null/empty to "Unknown", and sort desc by count
@@ -93,10 +107,11 @@ export async function GET(req: NextRequest, ctx: { params: { cik: string } }) {
       .map(([type, n]) => ({ type, type_short: type === 'Unknown' ? 'Other' : mapFundTypeToShort(type), count: n }))
       .sort((a, b) => b.count - a.count)
 
-    return corsify(req, NextResponse.json({ crd_number: cik, summary }))
+    return corsify(req, NextResponse.json({ crd_number: crd, summary }))
   } catch (e) {
     console.error('funds summary endpoint error:', e)
-    return corsify(req, NextResponse.json({ error: 'Internal server error', code: 'INTERNAL_ERROR' }, { status: 500 }))
+    // Soft-fail with empty summary
+    return corsify(req, NextResponse.json({ crd_number: ctx.params.cik, summary: [] }))
   }
 }
 
