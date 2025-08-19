@@ -74,44 +74,65 @@ export async function GET(req: NextRequest, ctx: { params: { cik: string } }) {
       return corsify(req, NextResponse.json(result))
     }
 
-    // Core profile - Look up by CRD number (primary key)
+    // Core profile - Look up by CIK (text) or CRD number (primary key)
     let profile = null
     let profileError = null
     
     console.log(`🔍 Looking up profile with identifier: ${identifier} (type: ${typeof identifier})`)
     
-    // Try as string first
-    const { data: crdProfile, error: crdError } = await supabaseAdmin
-      .from('ria_profiles')
-      .select('*')
-      .eq('crd_number', identifier)
-      .single()
+    // First try by CIK (text)
+    try {
+      const { data: cikProfile, error: cikError } = await supabaseAdmin
+        .from('ria_profiles')
+        .select('*')
+        .eq('cik', identifier)
+        .single()
+
+      if (cikProfile) {
+        profile = cikProfile
+      } else if (cikError) {
+        profileError = cikError
+      }
+    } catch (err) {
+      // ignore
+    }
+
+    // If not found by CIK, try CRD as string first
+    let crdLookupAttempted = false
+    if (!profile) {
+      const { data: crdProfile, error: crdError } = await supabaseAdmin
+        .from('ria_profiles')
+        .select('*')
+        .eq('crd_number', identifier)
+        .single()
     
-    console.log(`📊 CRD lookup result (string):`, { 
-      found: !!crdProfile, 
-      error: crdError?.message, 
-      errorCode: crdError?.code,
-      identifier: identifier,
-      identifierType: typeof identifier
-    })
+      crdLookupAttempted = true
+      console.log(`📊 CRD lookup result (string):`, { 
+        found: !!crdProfile, 
+        error: crdError?.message, 
+        errorCode: crdError?.code,
+        identifier: identifier,
+        identifierType: typeof identifier
+      })
     
-    if (crdProfile) {
-      profile = crdProfile
-    } else {
-      profileError = crdError
-      console.log(`❌ Profile ${identifier} not found as string, error:`, crdError)
-      
-      // Try as integer if string failed
+      if (crdProfile) {
+        profile = crdProfile
+      } else {
+        profileError = crdError
+        console.log(`❌ Profile ${identifier} not found as string, error:`, crdError)
+      }
+    }
+
+    // If still not found, try CRD as integer
+    if (!profile) {
       const numericIdentifier = parseInt(identifier, 10)
-      if (!isNaN(numericIdentifier) && String(numericIdentifier) === identifier) {
+      if (!isNaN(numericIdentifier) && (!crdLookupAttempted || String(numericIdentifier) === identifier)) {
         console.log(`🔄 Retrying with numeric identifier: ${numericIdentifier}`)
-        
         const { data: numericProfile, error: numericError } = await supabaseAdmin
           .from('ria_profiles')
           .select('*')
           .eq('crd_number', numericIdentifier)
           .single()
-        
         console.log(`📊 CRD lookup result (numeric):`, { 
           found: !!numericProfile, 
           error: numericError?.message,
@@ -119,7 +140,6 @@ export async function GET(req: NextRequest, ctx: { params: { cik: string } }) {
           identifier: numericIdentifier,
           identifierType: typeof numericIdentifier
         })
-        
         if (numericProfile) {
           profile = numericProfile
           profileError = null
@@ -179,12 +199,17 @@ export async function GET(req: NextRequest, ctx: { params: { cik: string } }) {
         zipcode: profile.zip_code || undefined,
         country: 'US',
       },
+      // Explicit main_addr_* fields for frontend convenience/backfill
+      main_addr_street1: profile.address || null,
+      main_addr_street2: null,
       main_addr_city: profile.city,
       main_addr_state: profile.state,
+      main_addr_zip: profile.zip_code || null,
+      main_addr_country: 'United States',
       total_aum: profile.aum,
-      phone_number: profile.phone || undefined,
-      fax_number: profile.fax || undefined,
-      website: profile.website || undefined,
+      phone_number: profile.phone || null,
+      fax_number: profile.fax || null,
+      website: profile.website || null,
       executives: executives.map((p: any) => ({
         name: p.person_name,
         title: p.title || undefined,
@@ -195,6 +220,7 @@ export async function GET(req: NextRequest, ctx: { params: { cik: string } }) {
         filing_date: f.filing_date,
         total_aum: f.total_aum,
         manages_private_funds_flag: f.manages_private_funds_flag,
+        report_period_end_date: (f as any).report_period_end_date || null,
         private_fund_count: f.private_fund_count,
       })),
       private_funds: private_funds.map((pf: any) => ({
