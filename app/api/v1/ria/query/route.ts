@@ -1,8 +1,172 @@
-import type { NextRequest } from 'next/server'
-import { NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabaseAdmin'
-import { createAIService, getAIProvider, type AIProvider } from '@/lib/ai-providers'
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
 
+// Supabase client setup with service role key for admin access
+const supabaseAdmin = createClient(
+  process.env.SUPABASE_URL || 'https://llusjnpltqxhokycwzry.supabase.co',
+  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+)
+
+export interface QueryParams {
+  query?: string;
+  state?: string;
+  minAum?: number;
+  minVcActivity?: number;
+  limit?: number;
+  offset?: number;
+  hybrid?: boolean;
+}
+
+/**
+ * Process a natural language query and return RIA profiles that match
+ */
+export async function GET(request: NextRequest) {
+  try {
+    // Extract query parameters
+    const searchParams = request.nextUrl.searchParams;
+    const query = searchParams.get('query') || '';
+    const state = searchParams.get('state') || '';
+    const minAum = Number(searchParams.get('minAum') || '0');
+    const minVcActivity = Number(searchParams.get('minVcActivity') || '0');
+    const limit = Number(searchParams.get('limit') || '20');
+    const offset = Number(searchParams.get('offset') || '0');
+    const hybrid = searchParams.get('hybrid') === 'true';
+
+    // Validate input
+    if (!query) {
+      return NextResponse.json(
+        { error: 'Query parameter is required' },
+        { status: 400 }
+      );
+    }
+
+    // Get embedding for the query
+    const embeddingResponse = await generateEmbedding(query);
+
+    if (!embeddingResponse || !embeddingResponse.embedding) {
+      return NextResponse.json(
+        { error: 'Failed to generate embedding for query' },
+        { status: 500 }
+      );
+    }
+
+    const queryEmbedding = embeddingResponse.embedding;
+
+    // Execute the database query
+    let response;
+    if (hybrid) {
+      // Use hybrid search (combine semantic and lexical)
+      response = await supabaseAdmin.rpc('hybrid_search_rias', {
+        query_text: query,
+        query_embedding: queryEmbedding,
+        match_threshold: 0.5,
+        match_count: limit,
+        state_filter: state || null,
+        min_vc_activity: minVcActivity,
+        min_aum: minAum,
+      });
+    } else {
+      // Use vector search only
+      response = await supabaseAdmin.rpc('search_rias', {
+        query_embedding: queryEmbedding,
+        match_threshold: 0.5,
+        match_count: limit,
+        state_filter: state || null,
+        min_vc_activity: minVcActivity,
+        min_aum: minAum,
+      });
+    }
+
+    if (response.error) {
+      console.error('Database query error:', response.error);
+      return NextResponse.json(
+        { error: 'Database query failed' },
+        { status: 500 }
+      );
+    }
+
+    // For each result, fetch executives and funds
+    const results = response.data;
+    const enhancedResults = await Promise.all(
+      results.map(async (result) => {
+        const executivesResponse = await supabaseAdmin.rpc(
+          'get_firm_executives',
+          { firm_id: result.id }
+        );
+        
+        const fundsResponse = await supabaseAdmin.rpc(
+          'get_firm_private_funds',
+          { firm_id: result.id }
+        );
+
+        return {
+          ...result,
+          executives: executivesResponse.error ? [] : executivesResponse.data,
+          funds: fundsResponse.error ? [] : fundsResponse.data,
+        };
+      })
+    );
+
+    return NextResponse.json({
+      query,
+      results: enhancedResults,
+      count: enhancedResults.length,
+      hybrid,
+    });
+  } catch (error) {
+    console.error('Error processing RIA query:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * Generate an embedding for the given text using the configured AI provider
+ */
+async function generateEmbedding(text: string) {
+  const aiProvider = process.env.AI_PROVIDER || 'mock';
+  
+  // In a real implementation, this would call OpenAI or Vertex AI
+  // For this sample, we'll generate a mock embedding
+  if (aiProvider === 'mock') {
+    console.log('Using mock embeddings for demo');
+    return {
+      embedding: generateMockEmbedding(384),
+    };
+  }
+  
+  // In production, you would implement these provider integrations
+  if (aiProvider === 'openai') {
+    // Implement OpenAI embedding generation
+    throw new Error('OpenAI embeddings not implemented in sample');
+  }
+  
+  if (aiProvider === 'vertex') {
+    // Implement Vertex AI embedding generation
+    throw new Error('Vertex AI embeddings not implemented in sample');
+  }
+  
+  // Default fallback
+  return {
+    embedding: generateMockEmbedding(384),
+  };
+}
+
+/**
+ * Generate a mock embedding vector for demonstration purposes
+ */
+function generateMockEmbedding(dimensions: number): number[] {
+  // Create a random unit vector
+  const vec = Array(dimensions).fill(0).map(() => Math.random() * 2 - 1);
+  
+  // Normalize to unit length
+  const magnitude = Math.sqrt(vec.reduce((sum, val) => sum + val * val, 0));
+  return vec.map(val => val / magnitude);
+}
+
+// Legacy CORS support code
 const DEFAULT_ALLOWED_ORIGINS = [
   'https://www.ria-hunter.app',
   'https://ria-hunter.app',
@@ -587,6 +751,56 @@ export async function POST(req: NextRequest) {
       aiProvider?: AIProvider 
     }
 
+    // Auth and allowance (must be computed before any early returns)
+    let allowed = true
+    let remaining = -1
+    let isSubscriber = false
+    let needsCookieUpdate = false
+    let anonCount = 0
+
+    if (userId) {
+      const limitInfo = await checkQueryLimit(userId)
+      allowed = limitInfo.allowed
+      remaining = limitInfo.remaining
+      isSubscriber = limitInfo.isSubscriber
+      if (!allowed) {
+        return corsify(
+          req,
+          NextResponse.json(
+            {
+              error: limitInfo.isSubscriber
+                ? 'Subscription expired. Please renew your subscription to continue.'
+                : 'Free query limit reached. Upgrade to continue.',
+              code: 'PAYMENT_REQUIRED',
+              remaining: limitInfo.remaining,
+              isSubscriber: limitInfo.isSubscriber,
+              upgradeRequired: true,
+            },
+            { status: 402 },
+          ),
+        )
+      }
+    } else {
+      const anon = parseAnonCookie(req)
+      anonCount = anon.count
+      if (anonCount >= 2) {
+        return corsify(
+          req,
+          NextResponse.json(
+            {
+              error: 'Free query limit reached. Create an account for more searches.',
+              code: 'PAYMENT_REQUIRED',
+              remaining: 0,
+              isSubscriber: false,
+              upgradeRequired: true,
+            },
+            { status: 402 },
+          ),
+        )
+      }
+      needsCookieUpdate = true
+    }
+
     // Handle exact CRD/CIK lookup - Use the SAME logic as the working profile endpoint
     if (crd_number && exact_match) {
       try {
@@ -681,56 +895,6 @@ export async function POST(req: NextRequest) {
 
     // Fall back to semantic search if no exact match requested
     const queryString = query || `Profile ${crd_number}`
-
-    // Auth and allowance
-    let allowed = true
-    let remaining = -1
-    let isSubscriber = false
-    let needsCookieUpdate = false
-    let anonCount = 0
-
-    if (userId) {
-      const limit = await checkQueryLimit(userId)
-      allowed = limit.allowed
-      remaining = limit.remaining
-      isSubscriber = limit.isSubscriber
-      if (!allowed) {
-        return corsify(
-          req,
-          NextResponse.json(
-            {
-              error: limit.isSubscriber
-                ? 'Subscription expired. Please renew your subscription to continue.'
-                : 'Free query limit reached. Upgrade to continue.',
-              code: 'PAYMENT_REQUIRED',
-              remaining: limit.remaining,
-              isSubscriber: limit.isSubscriber,
-              upgradeRequired: true,
-            },
-            { status: 402 },
-          ),
-        )
-      }
-    } else {
-      const anon = parseAnonCookie(req)
-      anonCount = anon.count
-      if (anonCount >= 2) {
-        return corsify(
-          req,
-          NextResponse.json(
-            {
-              error: 'Free query limit reached. Create an account for more searches.',
-              code: 'PAYMENT_REQUIRED',
-              remaining: 0,
-              isSubscriber: false,
-              upgradeRequired: true,
-            },
-            { status: 402 },
-          ),
-        )
-      }
-      needsCookieUpdate = true
-    }
 
     // Decompose query with LLM
     let decomposition: QueryDecomposition
