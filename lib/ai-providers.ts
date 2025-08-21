@@ -1,4 +1,5 @@
 import { VertexAI } from '@google-cloud/vertexai';
+import { PredictionServiceClient, helpers } from '@google-cloud/aiplatform';
 import OpenAI from 'openai';
 
 export type AIProvider = 'vertex' | 'openai';
@@ -25,7 +26,8 @@ export interface AIService {
 // Vertex AI implementation
 export class VertexAIService implements AIService {
   private vertexAI: VertexAI;
-  private embeddingModel: any;
+  private predictionClient: PredictionServiceClient;
+  private embeddingEndpoint: string;
   private generativeModel: any;
 
   constructor(projectId: string, location: string) {
@@ -34,27 +36,75 @@ export class VertexAIService implements AIService {
       location: location,
     });
     
-    // Initialize models
-    this.embeddingModel = this.vertexAI.preview.getGenerativeModel({
-      model: 'textembedding-gecko@003',
-    });
+    // Initialize prediction client for embeddings
+    this.predictionClient = new PredictionServiceClient();
+    // Use current embedding model instead of deprecated textembedding-gecko@003
+    this.embeddingEndpoint = `projects/${projectId}/locations/${location}/publishers/google/models/text-embedding-005`;
     
+    // Keep generative model for text generation
     this.generativeModel = this.vertexAI.preview.getGenerativeModel({
       model: 'gemini-2.5-flash-lite',
     });
   }
 
   async generateEmbedding(text: string): Promise<EmbeddingResult> {
-    const request = {
-      instances: [{ content: text }],
-    };
+    const instances = [helpers.toValue({
+      content: text,
+      task_type: "RETRIEVAL_DOCUMENT"
+    })];
+    const parameters = helpers.toValue({});
     
-    const result = await this.embeddingModel.predict(request);
-    if (result.predictions && result.predictions[0]) {
-      return { embedding: result.predictions[0].embeddings.values };
+    try {
+      const [response] = await this.predictionClient.predict({
+        endpoint: this.embeddingEndpoint,
+        instances,
+        parameters
+      });
+      
+      if (response.predictions && response.predictions[0]) {
+        const prediction = helpers.fromValue(response.predictions[0]) as any;
+        if (prediction && typeof prediction === 'object' && prediction.embeddings && prediction.embeddings.values) {
+          return { embedding: prediction.embeddings.values };
+        }
+      }
+      
+      throw new Error('Invalid embedding response structure from Vertex AI');
+    } catch (error) {
+      console.error('Vertex AI embedding error:', error);
+      throw new Error(`Failed to generate embedding from Vertex AI: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
+  }
+
+  // Batch embedding method for efficiency
+  async generateEmbeddings(texts: string[]): Promise<EmbeddingResult[]> {
+    const instances = texts.map(text => helpers.toValue({
+      content: text,
+      task_type: "RETRIEVAL_DOCUMENT"
+    }));
+    const parameters = helpers.toValue({});
     
-    throw new Error('Failed to generate embedding from Vertex AI');
+    try {
+      const [response] = await this.predictionClient.predict({
+        endpoint: this.embeddingEndpoint,
+        instances,
+        parameters
+      });
+      
+      if (response.predictions) {
+        return response.predictions.map(prediction => {
+          const pred = helpers.fromValue(prediction) as any;
+          if (pred && typeof pred === 'object' && pred.embeddings && pred.embeddings.values) {
+            return { embedding: pred.embeddings.values };
+          }
+          throw new Error('Invalid prediction structure in batch response');
+        });
+      }
+      
+      throw new Error('No predictions in batch response from Vertex AI');
+    } catch (error) {
+      console.error('Vertex AI batch embedding error:', error);
+      throw new Error(`Failed to generate batch embeddings from Vertex AI: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   }
 
   async generateText(prompt: string): Promise<GenerationResult> {
@@ -120,7 +170,8 @@ export function createAIService(config: AIConfig): AIService | null {
   switch (config.provider) {
     case 'vertex':
       const projectId = process.env.GOOGLE_PROJECT_ID || process.env.GOOGLE_CLOUD_PROJECT;
-      const location = process.env.DOCUMENT_AI_PROCESSOR_LOCATION || process.env.GOOGLE_CLOUD_LOCATION || 'us-central1';
+      // Use specific Vertex AI location or default to us-central1 (Document AI location might be different)
+      const location = process.env.VERTEX_AI_LOCATION || process.env.GOOGLE_CLOUD_LOCATION || 'us-central1';
       
       if (!projectId) {
         console.warn('Vertex AI: Missing Google Cloud project ID');
