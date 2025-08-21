@@ -153,7 +153,7 @@ Maintain two progress logs (one for backend, one for frontend) in a file `overha
   ```
   Alternatively, you can enable the extension via the Supabase Dashboard under **Database → Extensions → vector**【412497434558884†L294-L301】.  Once enabled, you gain access to the `vector(N)` data type.  
   
-  **Define embedding column:**  Decide on the embedding dimension based on your model.  For example, Vertex AI’s `textembedding‑gecko@003` produces **384‑dimensional** embeddings, while OpenAI’s `text‑embedding‑3‑small` yields **1536 dimensions**.  In the `narratives` table, add an `embedding vector(D)` column where `D` matches your chosen model (e.g. `vector(384)`).  
+  **Define embedding column:**  Decide on the embedding dimension based on your model.  For example, Vertex AI's `text-embedding-005` produces **768‑dimensional** embeddings, while OpenAI's `text‑embedding‑3‑small` yields **1536 dimensions**.  In the `narratives` table, add an `embedding vector(D)` column where `D` matches your chosen model (e.g. `vector(768)`).  
   
   **Create HNSW index:**  To speed up approximate nearest‑neighbour search, create an **HNSW (Hierarchical Navigable Small World) index** on the embedding column.  Use the inner‑product operator (`vector_ip_ops`) for cosine similarity or `vector_l2_ops` for Euclidean distance.  Example:  
   ```sql

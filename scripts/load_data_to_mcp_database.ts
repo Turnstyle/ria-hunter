@@ -6,9 +6,9 @@ import path from 'path'
 import { parse } from 'csv-parse/sync'
 import { createClient } from '@supabase/supabase-js'
 
-// Use the MCP tools database (where we can check production via MCP)
-const supabaseUrl = 'https://aqngxprpznclhtsmibsi.supabase.co'
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxbmd4cHJwem5jbGh0c21pYnNpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczNzQ3MjY2MywiZXhwIjoyMDUzMDQ4NjYzfQ.Vk1iCfD7fPfRkgmqL2Xr4_OU1lSh0xr8_6x5TJzQGGE'
+// Use the correct RIA Hunter production database
+const supabaseUrl = process.env.SUPABASE_URL || 'https://llusjnpltqxhokycwzry.supabase.co'
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
 type ProfileRow = {
   crd_number?: string | number | null

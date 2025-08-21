@@ -18,5 +18,5 @@ create table if not exists public.ria_profiles (
 create table if not exists public.narratives (
   crd_number bigint references ria_profiles(crd_number) on delete cascade,
   narrative text,
-  embedding vector(384) -- pgvector extension
+  embedding vector(768) -- pgvector extension
 );

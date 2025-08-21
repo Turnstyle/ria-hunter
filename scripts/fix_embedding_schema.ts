@@ -31,8 +31,8 @@ async function fixEmbeddingSchema() {
       console.log('📊 Current schema:', schemaData);
     }
 
-    // Clear all fake embeddings first (they're 384-dimensional)
-    console.log('🧹 Clearing fake 384-dimensional embeddings...');
+    // Clear all old embeddings first (they're wrong dimensions)
+    console.log('🧹 Clearing old embeddings...');
     const { error: clearError } = await supabase
       .from('narratives')
       .update({ embedding: null })

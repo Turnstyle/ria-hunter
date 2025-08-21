@@ -18,7 +18,7 @@ if (projectId) {
 async function generateQueryEmbedding(text: string): Promise<number[] | null> {
   if (!vertexAI) {
     console.log('⚠️  Vertex AI not configured, using mock embedding');
-    return Array(384).fill(0.1); // Mock embedding for testing
+    return Array(768).fill(0.1); // Mock embedding for testing
   }
 
   try {
@@ -29,8 +29,8 @@ async function generateQueryEmbedding(text: string): Promise<number[] | null> {
     const result = await model.embedContent(text);
     const embedding = result.embedding?.values || [];
     
-    // Truncate to 384 dimensions to match database schema
-    return embedding.slice(0, 384);
+    // Ensure 768 dimensions to match database schema
+    return embedding.slice(0, 768);
   } catch (error) {
     console.error('Error generating embedding:', error);
     return null;

@@ -41,8 +41,8 @@ async function generateEmbedding(text: string): Promise<number[]> {
       return a & a;
     }, 0);
     
-    // Generate 384-dimensional embedding (matching our schema)
-    const embedding = Array.from({ length: 384 }, (_, i) => {
+    // Generate 768-dimensional embedding (matching our schema)
+    const embedding = Array.from({ length: 768 }, (_, i) => {
       return Math.sin(hash * (i + 1) * 0.01) * 0.1 + Math.cos(hash * (i + 1) * 0.02) * 0.1;
     });
     

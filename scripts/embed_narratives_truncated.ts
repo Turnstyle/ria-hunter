@@ -84,7 +84,7 @@ async function generateEmbedding(text: string): Promise<number[]> {
 
 async function run() {
   console.log(`🚀 Processing ${LIMIT} narrative(s) with Vertex AI text-embedding-005...`);
-  console.log('✂️  Truncating 768D embeddings to 384D to match database schema');
+  console.log('✅ Using 768D embeddings to match updated database schema');
   
   // Fetch narratives without embeddings 
   const { data, error } = await supabase
@@ -148,7 +148,7 @@ async function run() {
   
   if (successCount > 0) {
     console.log(`\n🚀 🎉 SUCCESS! Real Vertex AI embeddings are working! 🎉`);
-    console.log(`📊 Database now has real 384D embeddings from text-embedding-005`);
+    console.log(`📊 Database now has real 768D embeddings from text-embedding-005`);
     console.log(`🔥 Ready to process all remaining narratives!`);
     console.log(`\n📋 Next steps:`); 
     console.log(`   1. Run with --limit=100 to test larger batch`);

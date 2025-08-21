@@ -45,7 +45,7 @@ class MockEmbeddingGenerator:
     Mock embedding generator for demonstration purposes.
     In a real system, this would be replaced with calls to OpenAI or Vertex AI.
     """
-    def __init__(self, dimensions=384):
+    def __init__(self, dimensions=768):
         self.dimensions = dimensions
         console.print("[yellow]Using mock embedding generator with random vectors.[/yellow]")
         console.print("[yellow]For production, set AI_PROVIDER to 'vertex' or 'openai' and configure API keys.[/yellow]")
