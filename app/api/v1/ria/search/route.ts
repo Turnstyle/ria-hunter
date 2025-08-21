@@ -198,12 +198,12 @@ export async function POST(req: NextRequest) {
       results = data;
     } else {
       // Use vector similarity search only
-      const { data, error } = await supabaseAdmin.rpc('search_rias_by_narrative', {
+      const { data, error } = await supabaseAdmin.rpc('search_rias', {
         query_embedding: embedding,
         match_threshold: 0.5,
         match_count: limit || 20,
-        location_filter: state || null,
-        min_private_funds: minVcActivity || 0
+        state_filter: state || null,
+        min_aum: minAum || 0
       });
       
       if (error) {
@@ -214,26 +214,36 @@ export async function POST(req: NextRequest) {
       results = data;
     }
 
-    // Enrich results with executives data
-    const enrichedResults = await Promise.all((results || []).map(async (result: any) => {
-      try {
-        const { data: executives } = await supabaseAdmin
-          .from('control_persons')
-          .select('person_name, title')
-          .eq('crd_number', result.crd_number);
-          
-        return {
-          ...result,
-          executives: (executives || []).map((exec: any) => ({
-            name: exec.person_name,
-            title: exec.title
-          }))
-        };
-      } catch (error) {
-        console.error(`Error fetching executives for CRD ${result.crd_number}:`, error);
-        return { ...result, executives: [] };
-      }
-    }));
+    // Enrich results with executives data - fix N+1 query problem
+    let enrichedResults = results || [];
+    
+    if (results && results.length > 0) {
+      const crdNumbers = results.map((r: any) => r.crd_number);
+      
+      // Single query to get all executives for all results
+      const { data: allExecutives } = await supabaseAdmin
+        .from('control_persons')
+        .select('crd_number, person_name, title')
+        .in('crd_number', crdNumbers);
+      
+      // Group executives by CRD number
+      const executivesByCrd: Record<number, any[]> = {};
+      (allExecutives || []).forEach(exec => {
+        if (!executivesByCrd[exec.crd_number]) {
+          executivesByCrd[exec.crd_number] = [];
+        }
+        executivesByCrd[exec.crd_number].push({
+          name: exec.person_name,
+          title: exec.title
+        });
+      });
+      
+      // Attach executives to each result
+      enrichedResults = results.map((result: any) => ({
+        ...result,
+        executives: executivesByCrd[result.crd_number] || []
+      }));
+    }
 
     const response = NextResponse.json({
       results: enrichedResults,

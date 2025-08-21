@@ -31,6 +31,8 @@ export async function middleware(request: NextRequest) {
     '/api/save-form-data',
     // v1 centralized endpoints handle anonymous + auth internally
     '/api/v1/ria/',
+    // Simple search endpoints for public access
+    '/api/ria/',
     // Alias to v1 query; allow anonymous to reach handler for free-tier logic
     '/api/ask',
     // Streaming version of ask; allow anonymous
