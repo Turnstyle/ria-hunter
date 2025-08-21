@@ -43,9 +43,9 @@ async function generateEmbedding(text: string): Promise<number[]> {
 
     // Use current models with 384-dimensional output to match database schema
     const modelConfigs = [
-      { model: 'text-embedding-005', dimensions: 384 },  // Default model with custom dimensions
-      { model: 'text-embedding-004', dimensions: 384 },  // Alternative
-      { model: 'text-multilingual-embedding-002', dimensions: 384 },  // Multilingual
+      { model: 'text-embedding-005', dimensions: 768 },  // Default model with correct dimensions
+      { model: 'text-embedding-004', dimensions: 768 },  // Alternative
+      { model: 'text-multilingual-embedding-002', dimensions: 768 },  // Multilingual
     ];
     
     let lastError;
@@ -144,8 +144,8 @@ async function run() {
       
       // Generate embedding
       const embedding = await generateEmbedding(row.narrative);
-      // Truncate to 384 dims for compatibility with vector(384)
-      const toStore = Array.isArray(embedding) && embedding.length > 384 ? embedding.slice(0, 384) : embedding;
+      // Use full 768 dims for compatibility with vector(768)
+      const toStore = Array.isArray(embedding) && embedding.length > 768 ? embedding.slice(0, 768) : embedding;
       
       // Update database  
       const { error: updateError } = await supabase

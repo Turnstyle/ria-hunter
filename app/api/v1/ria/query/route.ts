@@ -150,7 +150,7 @@ async function generateEmbedding(text: string) {
   
   // Default fallback
   return {
-    embedding: generateMockEmbedding(384),
+          embedding: generateMockEmbedding(768),
   };
 }
 

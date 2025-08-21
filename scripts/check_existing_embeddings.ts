@@ -44,7 +44,7 @@ async function checkExistingEmbeddings() {
       } else if (dimensions === 768) {
         console.log('- Likely Vertex AI textembedding-gecko (768 dimensions)');
       } else if (dimensions === 384) {
-        console.log('- Likely smaller embedding model (384 dimensions)');
+        console.log('- Likely older embedding model (384 dimensions, should be upgraded to 768)');
       } else {
         console.log(`- Unknown model type (${dimensions} dimensions)`);
       }

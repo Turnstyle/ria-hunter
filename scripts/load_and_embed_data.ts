@@ -34,7 +34,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // Configuration
 const EMBEDDING_BATCH_SIZE = 10;
 const LOAD_LIMIT = parseInt(process.env.LOAD_LIMIT || '0', 10) || undefined; // Optional limit for testing
-const EMBEDDING_MODEL_DIMENSION = 384; // Vertex AI gecko@003 = 384, OpenAI embedding = 1536
+const EMBEDDING_MODEL_DIMENSION = 768; // Vertex AI text-embedding-005 = 768, OpenAI embedding = 1536
 
 // Interfaces
 interface RIAProfile {

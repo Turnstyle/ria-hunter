@@ -3,7 +3,7 @@ create extension if not exists vector;
 
 -- Create vector similarity search function for narratives
 create or replace function match_narratives (
-  query_embedding vector(384),
+  query_embedding vector(768),
   match_threshold float,
   match_count int
 )
@@ -39,7 +39,7 @@ comment on function match_narratives is
 
 -- Create enhanced search function that joins with RIA profiles
 create or replace function search_rias_by_narrative (
-  query_embedding vector(384),
+  query_embedding vector(768),
   match_threshold float default 0.3,
   match_count int default 50,
   location_filter text default null,

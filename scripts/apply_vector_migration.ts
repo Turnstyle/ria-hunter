@@ -55,7 +55,7 @@ async function applyVectorMigration() {
     // Check if functions exist
     const { data: functions, error: funcError } = await supabase
       .rpc('match_narratives', {
-        query_embedding: Array(384).fill(0.1),
+        query_embedding: Array(768).fill(0.1),
         match_threshold: 0.1,
         match_count: 1
       });
