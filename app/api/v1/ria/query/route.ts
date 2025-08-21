@@ -133,7 +133,7 @@ async function generateEmbedding(text: string) {
   if (aiProvider === 'mock') {
     console.log('Using mock embeddings for demo');
     return {
-      embedding: generateMockEmbedding(384),
+      embedding: generateMockEmbedding(768),
     };
   }
   
@@ -619,7 +619,7 @@ Return ONLY the raw JSON object. Do not include markdown formatting or any other
   }
 }
 
-async function generateVertex384Embedding(text: string): Promise<number[] | null> {
+async function generateVertex768Embedding(text: string): Promise<number[] | null> {
   const projectId = process.env.GOOGLE_PROJECT_ID || process.env.GOOGLE_CLOUD_PROJECT
   const location = process.env.DOCUMENT_AI_PROCESSOR_LOCATION || process.env.GOOGLE_CLOUD_LOCATION || 'us-central1'
   if (!projectId) return null
@@ -633,7 +633,7 @@ async function generateVertex384Embedding(text: string): Promise<number[] | null
 
     const url = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/text-embedding-005:predict`
     const body = {
-      instances: [{ content: text, outputDimensionality: 384 }],
+      instances: [{ content: text }],
     }
     const response = await fetch(url, {
       method: 'POST',
@@ -905,12 +905,12 @@ export async function POST(req: NextRequest) {
       decomposition = fallbackDecompose(queryString)
     }
 
-    // Generate embedding for semantic query (Vertex 384). If unavailable, skip vector step
-    const embedding = await generateVertex384Embedding(decomposition.semantic_query)
+    // Generate embedding for semantic query (Vertex 768). If unavailable, skip vector step
+    const embedding = await generateVertex768Embedding(decomposition.semantic_query)
 
     // Vector search to get relevant CRDs
     let matchedCrds: string[] = []
-    if (embedding && Array.isArray(embedding) && embedding.length === 384) {
+    if (embedding && Array.isArray(embedding) && embedding.length === 768) {
       const { data: matches, error } = await supabaseAdmin.rpc('match_narratives', {
         query_embedding: embedding,
         match_threshold: 0.3,
