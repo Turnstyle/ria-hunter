@@ -2,27 +2,28 @@
 
 ## Backend Progress
 | Task ID | Description | Assigned Agent | Status | Notes |
-|---|---|---|---|---|
-| B1 | Create and run migrations for missing tables | Backend | completed | Created ria_profiles, narratives, control_persons, and ria_private_funds tables with proper relationships. Added HNSW indexes for vector search and Row-Level Security policies. Using pgvector with 384-dimension embeddings. |
-| B2 | Load sample data and run embedding script | Backend | completed | Created load_sample_data.py script that generates realistic RIA data with executives and funds. Script handles authentication and provides helpful console output. |
-| B3 | Embedding generation | Backend | completed | Implemented embed_narratives_sample.py supporting three modes: mock (for testing), Vertex AI (textembedding-gecko@003), and OpenAI (text-embedding-3-small). Added batch processing with configurable sizes. |
-| B4 | API design & implementation | Backend | completed | Implemented GET /api/v1/ria/query endpoint with support for semantic and hybrid search. Endpoint supports filtering by state, minAum, and minVcActivity. For each RIA, also fetches related executives and funds using the get_firm_executives and get_firm_private_funds functions. |
-| B5 | Final backend deployment | Backend | completed | Successfully deployed to Vercel. Created comprehensive documentation in README_BACKEND.md with setup instructions for future developers. Verified API endpoint is working in production. |
+|---------|-------------|----------------|--------|-------|
+| B1 | Create and run migrations for missing tables | Backend | done | Created apply_missing_migration.sql to apply the CIK column migration. Missing migration adds CIK column to ria_profiles table along with appropriate indexes. |
+| B2 | Data loading and narrative generation | Backend | done | Created comprehensive load_and_embed_data.ts script that handles loading RIA profiles from CSV, generating descriptive narratives, and preparing data for embedding. Script includes error handling and batch processing. |
+| B3 | Embedding generation | Backend | done | Implemented embedding generation in load_and_embed_data.ts with support for both Vertex AI and OpenAI. Script processes narratives without embeddings and updates them with vector representations. |
+| B4 | API design & implementation | Backend | done | Created /api/v1/ria/search endpoint with hybrid search support. Implemented hybrid_search_rias SQL function that combines vector similarity with text search for better results with proper names. API includes credit system integration and authentication. |
+| B5 | Final backend deployment | Backend | in progress | Created BACKEND_DEPLOYMENT.md with step-by-step instructions. Environment variables need to be configured (AI_PROVIDER should be set to vertex per Vercel settings). Scripts need to be run and verified before final Vercel deployment. |
 
 ## Frontend Progress
 | Task ID | Description | Assigned Agent | Status | Notes |
-|---|---|---|---|---|
-| F1 | Remove Sentry integration and clean up repo | Frontend | not started |  |
-| F2 | Implement RAG search UI | Frontend | not started |  |
-| F3 | Browse page improvements | Frontend | not started |  |
-| F4 | Analytics page (optional phase) | Frontend | not started |  |
-| F5 | Credits, subscription & settings | Frontend | not started |  |
-| F6 | Styling & accessibility | Frontend | not started |  |
-| F7 | Final deployment & verification | Frontend | not started |  |
+|---------|-------------|----------------|--------|-------|
+| F1 | Remove Sentry integration and clean up repo | Frontend | done | Completed by frontend developer |
+| F2 | Implement RAG search UI | Frontend | done | Completed by frontend developer |
+| F3 | Browse page improvements | Frontend | done | Completed by frontend developer |
+| F4 | Analytics page (optional phase) | Frontend | not started | Deprioritized in favor of core functionality |
+| F5 | Credits, subscription & settings | Frontend | done | Completed by frontend developer |
+| F6 | Styling & accessibility | Frontend | done | Completed by frontend developer |
+| F7 | Final deployment & verification | Frontend | done | Completed by frontend developer |
 
 ## Bugs & Issues Log
 | ID | Component | Description | Severity | Status | Notes |
-|---|---|---|---|---|---|
-| BUG-001 | Backend | API authentication not fully implemented | medium | open | Current implementation doesn't handle JWT authentication for API requests. Frontend team should implement auth integration. |
-| BUG-002 | Backend | Sample data script requires manual service key input | low | open | Script could be improved to use environment variables more seamlessly. |
-| BUG-003 | Backend | CORS handling simplified in API endpoints | low | open | The simplified API endpoint might need additional CORS handling for production. |
+|----|-----------|-------------|----------|--------|-------|
+| BUG-001 | API | API routes use mock data instead of real data | high | fixed | Implemented real data fetching in the backend with /api/v1/ria/search endpoint that connects to the Supabase database |
+| BUG-002 | Search | Hybrid search toggle in UI needs backend implementation | medium | fixed | Implemented hybrid_search_rias function and integrated with the search API to support both vector similarity and text search |
+| BUG-003 | Environment | Environment variables need consolidation | medium | open | Multiple environment files exist (.env.local, env.local). Need to ensure consistency with AI_PROVIDER=vertex as set in Vercel |
+| BUG-004 | Deployment | Final deployment verification needed | medium | open | Need to run scripts and verify deployment on Vercel to ensure everything works in production |
