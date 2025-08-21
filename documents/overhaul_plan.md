@@ -50,17 +50,17 @@ This document defines a detailed, step‑by‑step plan for overhauling the RIA�
 Maintain two progress logs (one for backend, one for frontend) in a file `overhaul_progress.md` at the root of your planning repository (or in this document if easier).  Each log should contain the tasks listed below with their status and notes.  Example structure:
 
 ```markdown
-### Backend Progress - UPDATED BY AGENT 2 (January 20, 2025)
+### Backend Progress - UPDATED BY AGENT 2 (August 21, 2025)
 | Task ID | Description | Assigned Agent | Status | Notes |
 |---|---|---|---|---|
 | B1 | Create and run migrations for missing tables | Backend Agent 2 | ✅ **COMPLETED** | All schemas corrected to vector(768) |
-| B2 | Load sample data and run embedding script | Backend Agent 2 | ✅ **COMPLETED** | 9,606/41,303 embeddings generated and growing |
+| B2 | Load sample data and run embedding script | Backend Agent 2 | ✅ **COMPLETED** | Embedding pipeline successfully started |
 | B2.1 | Fix Supabase project contamination | Backend Agent 2 | ✅ **COMPLETED** | Fixed wrong project URLs throughout codebase |
 | B2.2 | Correct API schema mismatches | Backend Agent 2 | ✅ **COMPLETED** | All column names aligned with database schema |
 | B2.3 | Fix embedding dimension conflicts | Backend Agent 2 | ✅ **COMPLETED** | Updated all 384→768 dimension references |
 | B2.4 | Optimize database query performance | Backend Agent 2 | ✅ **COMPLETED** | Fixed N+1 query problems, optimized executives fetching |
-| B3 | Embedding generation | Backend Agent 2 | 🔄 **IN PROGRESS** | Background process: 23% complete (~8 hours remaining) |
-| B4 | API design & implementation | Backend Agent 2 | ⚠️ **NEEDS MANUAL STEP** | APIs ready, DB functions need deployment via SQL Editor |
+| B3 | Embedding generation | Backend Agent 2 | 🔄 **IN PROGRESS** | Background process: 51% complete (21,160/41,303 embeddings) |
+| B4 | API design & implementation | Backend Agent 2 | ⚠️ **NEEDS MANUAL STEP** | APIs ready, DB functions need deployment via SQL Editor using DEPLOY_INSTRUCTIONS.md |
 …
 
 ### Frontend Progress
@@ -69,7 +69,7 @@ Maintain two progress logs (one for backend, one for frontend) in a file `overha
 | F1 | Remove Sentry integration and clean up repo | Frontend | not started |  |
 …
 
-### Bugs & Issues Log - UPDATED BY AGENT 2
+### Bugs & Issues Log - UPDATED BY AGENT 2 (August 21, 2025)
 | ID | Component | Description | Severity | Status | Notes |
 |---|---|---|---|---|---|
 | BUG-001 | Database | Wrong Supabase project contamination | **CRITICAL** | ✅ **RESOLVED** | Fixed all hardcoded llusjnpltqxhokycwzry references |
@@ -77,7 +77,7 @@ Maintain two progress logs (one for backend, one for frontend) in a file `overha
 | BUG-003 | Embeddings | 384 vs 768 dimension conflicts | **HIGH** | ✅ **RESOLVED** | Updated all code to use correct 768 dimensions |
 | BUG-004 | Performance | N+1 query problem with executives | **MEDIUM** | ✅ **RESOLVED** | Optimized to single query with grouping |
 | BUG-005 | Functions | Non-existent database function calls | **HIGH** | ✅ **RESOLVED** | Fixed function names and parameters |
-| MANUAL-001 | Database | Vector functions need manual deployment | **HIGH** | ⚠️ **PENDING** | Execute SQL in DEPLOY_INSTRUCTIONS.md
+| MANUAL-001 | Database | Vector functions need manual deployment | **HIGH** | ⚠️ **PENDING** | Execute SQL in DEPLOY_INSTRUCTIONS.md via Supabase SQL Editor |
 ```
 
 - **Status values:** `not started`, `in progress`, `blocked`, `done`.  
@@ -110,7 +110,7 @@ Maintain two progress logs (one for backend, one for frontend) in a file `overha
      - `id uuid primary key default gen_random_uuid()`  
      - `ria_id uuid references ria_profiles(id) on delete cascade`  
      - `narrative_text text not null`  
-     - `embedding vector(D)` – vector column sized to match your embedding dimension (e.g. 384)  
+     - `embedding vector(D)` – vector column sized to match your embedding dimension (e.g. 768)  
      - `created_at timestamp with time zone default now()`  
      - `updated_at timestamp with time zone default now()`  
    - **`control_persons`**: holds executive and owner information.  Columns:  
@@ -399,7 +399,7 @@ Misconfigured environment variables and project contexts have been a recurring s
   - `OPENAI_API_KEY` – your OpenAI API key (only if using OpenAI).  
   - `GOOGLE_PROJECT_ID` / `GOOGLE_CLOUD_PROJECT` – your Google Cloud project ID (`ria-hunter-backend`).  
   - `GOOGLE_APPLICATION_CREDENTIALS` or `GOOGLE_APPLICATION_CREDENTIALS_JSON` – credentials for Vertex AI.  
-  - `AI_EMBED_DIM` – optional; set to `384` for Vertex embeddings or `1536` for OpenAI; used to keep table definitions consistent.
+  - `AI_EMBED_DIM` – optional; set to `768` for Vertex embeddings or `1536` for OpenAI; used to keep table definitions consistent.
 
 ### 9.2 Backend project (`ria-hunter`)
 
