@@ -1,7 +1,19 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { createAIService, getAIProvider } from '@/lib/ai-providers';
-import { corsify } from '@/lib/utils';
+// Local CORS helper function
+function corsify(req: NextRequest, res: Response, preflight = false): Response {
+  const headers = new Headers(res.headers);
+  headers.set('Access-Control-Allow-Origin', '*');
+  headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  
+  if (preflight) {
+    return new Response(null, { status: 204, headers });
+  }
+  
+  return new Response(res.body, { status: res.status, statusText: res.statusText, headers });
+}
 
 // Function to decode JWT and extract user ID
 function decodeJwtSub(authHeader?: string | null): string | null {
