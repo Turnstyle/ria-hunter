@@ -1,113 +1,47 @@
-# RIA Hunter Implementation Status
+# RIA Hunter Vector Migration Implementation Status
 
-## ✅ Completed Tasks
+## Phase 1 Implementation Summary (Completed)
 
-1. **Enhanced Query Parsing**
-   - Created `lib/states.ts` with comprehensive US state mappings
-   - Created `lib/queryParser.ts` with intelligent query parsing that detects:
-     - State names and abbreviations (e.g., "Missouri", "MO")
-     - Superlatives (largest, smallest, top N)
-     - Specific firm names
-     - Investment focus terms
-     - Count queries
+### Vector Migration Success
+- ✅ **Converted 41,303 narratives** from JSON string embeddings to native PostgreSQL vector(768) format
+- ✅ **Created vector search functions**:
+  - `match_narratives`: For direct vector similarity searches
+  - `search_rias_vector`: For enhanced searches with company information
 
-2. **Updated /api/ask Endpoint**
-   - Integrated enhanced query parsing
-   - Improved search logic with proper state filtering
-   - Enhanced prompt engineering for Vertex AI Gemini
-   - Added specific instructions based on query type
-   - Prepared for vector similarity search integration
+### Technical Details
+- Used correct **768-dimensional vectors** (not 384 as originally thought)
+- Successfully performed the conversion in batches through the Supabase SQL Editor
+- Created SQL functions utilizing PostgreSQL's vector operators (<=> for cosine similarity)
 
-3. **Vector Search Infrastructure**
-   - Created SQL function `match_narratives` for vector similarity search
-   - Prepared embedding generation scripts for Vertex AI
-   - Set up proper 768-dimensional vectors for textembedding-gecko@003
+### Remaining Items
+- **HNSW Index Creation**: This will need to be done through direct database access or management tools, as it exceeded the SQL Editor limits. This index will enable the target 507x performance improvement.
+- **IVFFlat Indexes**: Additional supporting indexes for filtered searches also need to be created through admin tools.
 
-## 🚧 In Progress
+## Next Steps
 
-1. **Narrative Embeddings**
-   - Need to run `scripts/setup_embeddings.sql` in Supabase SQL editor
-   - Then run `scripts/embed_narratives_simple.ts` to generate embeddings
-   - This will enable semantic search for investment focus queries
+### Phase 2: ETL Pipeline (Pending)
+- Processing the ~62,317 missing narratives 
+- Processing missing private funds data (99.99% unprocessed)
+- Processing missing control persons data (99.56% unprocessed)
 
-## 📋 Next Steps
+### Phase 3-7 (Pending)
+- API standardization
+- Infrastructure and monitoring
+- Scheduled jobs and automation
+- Security and compliance
+- Performance testing and validation
 
-### 1. Apply Database Migrations
-Run the following SQL in Supabase SQL editor (https://app.supabase.com/project/llusjnpltqxhokycwzry/sql):
-```sql
--- Copy contents of scripts/setup_embeddings.sql
-```
+## Implementation Notes
 
-### 2. Generate Embeddings
-```bash
-# Set environment variables
-export SUPABASE_URL="https://llusjnpltqxhokycwzry.supabase.co"
-export SUPABASE_SERVICE_ROLE_KEY="your-service-role-key"
-export GOOGLE_PROJECT_ID="ria-hunter-backend"
-export GOOGLE_APPLICATION_CREDENTIALS="./gcp-key.json"
+### Issues Encountered
+- The SQL Editor in Supabase has transaction timeout limitations for long-running operations
+- HNSW index creation for large vector data requires direct database access
+- Standard B-tree indexes have size limitations (2704 bytes) that prevent direct indexing of 768-dimensional vectors (3088 bytes)
 
-# Run embedding generation (start with small batch)
-npx tsx scripts/embed_narratives_simple.ts --limit=100
+### Performance Expectations
+Once the HNSW index is created, vector search performance should improve from ~1800ms to <10ms per query, achieving the target 507x performance improvement specified in the refactor plan.
 
-# Once verified working, run for all narratives
-npx tsx scripts/embed_narratives_simple.ts --limit=30000
-```
-
-### 3. Test the Implementation
-```bash
-# Start the dev server
-npm run dev
-
-# In another terminal, run tests
-npx tsx scripts/test_api_endpoint.ts
-```
-
-### 4. Deploy to Production
-1. Ensure all environment variables are set in Vercel:
-   - `SUPABASE_URL`
-   - `SUPABASE_SERVICE_ROLE_KEY`
-   - `GOOGLE_PROJECT_ID`
-   - `GOOGLE_APPLICATION_CREDENTIALS_B64` (base64 encoded GCP key)
-   - `OPENAI_API_KEY` (as fallback)
-
-2. Deploy:
-```bash
-git add .
-git commit -m "feat: Implement enhanced RAG with Vertex AI for RIA queries"
-git push origin main
-```
-
-## 🎯 Expected Behavior After Implementation
-
-1. **"What is the largest RIA in Missouri?"**
-   - Will correctly filter to only Missouri firms
-   - Will return the single firm with highest AUM
-   - Clear answer: "The largest RIA in Missouri is [Firm Name] with $X billion in assets under management."
-
-2. **"Show me the top 5 RIAs in California"**
-   - Will filter to California firms
-   - Return exactly 5 firms ordered by AUM
-
-3. **"Which RIAs specialize in sustainable investing?"**
-   - Once embeddings are loaded, will search narrative content
-   - Return firms whose descriptions mention ESG/sustainable investing
-
-## 🔧 Troubleshooting
-
-### If Vertex AI is not working:
-1. Check GCP credentials: `ls -la gcp-key.json`
-2. Verify project ID is correct
-3. Ensure Vertex AI API is enabled in GCP console
-4. Check logs for specific error messages
-
-### If embeddings fail:
-1. Verify the narratives table has data
-2. Check that the embedding column exists with correct dimensions (768)
-3. Monitor rate limits - the script includes delays
-4. Start with small batches to test
-
-### If queries return wrong results:
-1. Check that state parsing is working correctly
-2. Verify the database has the expected data
-3. Look at the generated SQL queries in logs
-4. Test the prompt directly with sample data
+### Migration Approach Used
+- Converted string embeddings to vectors using a custom SQL function
+- Processed in small batches (5,000 records at a time) to avoid timeouts
+- Maintained backward compatibility with existing API functions
