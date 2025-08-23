@@ -21,12 +21,28 @@ function validateEnvVars() {
     process.exit(1)
   }
   
+  // Check AI provider configuration
+  const aiProvider = process.env.AI_PROVIDER || 'openai'
+  console.log(`🤖 AI Provider: ${aiProvider.toUpperCase()}`)
+  
+  if (aiProvider === 'openai' && !process.env.OPENAI_API_KEY) {
+    console.error('❌ OPENAI_API_KEY required when AI_PROVIDER=openai')
+    process.exit(1)
+  }
+  
+  if (aiProvider === 'vertex' && !process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+    console.warn('⚠️ GOOGLE_APPLICATION_CREDENTIALS not set for Vertex AI')
+  }
+  
   console.log('✅ Environment variables loaded successfully')
   return {
     supabaseUrl: process.env.SUPABASE_URL,
     supabaseServiceKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
     supabaseAnonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    openaiApiKey: process.env.OPENAI_API_KEY
+    openaiApiKey: process.env.OPENAI_API_KEY,
+    aiProvider: aiProvider,
+    googleCredentials: process.env.GOOGLE_APPLICATION_CREDENTIALS,
+    googleProjectId: process.env.GOOGLE_PROJECT_ID
   }
 }
 
