@@ -1,17 +1,9 @@
-# 🚨 URGENT: Execute This SQL in Supabase SQL Editor
+-- Fix vector search functions with correct return types based on actual schema
+-- Schema discovered:
+-- narratives: id (string), crd_number (number), narrative (string), embedding_vector (string but contains vector data)
+-- ria_profiles: crd_number (number, PK), legal_name (string), city (string), state (string), aum (number)
 
-## Current Status
-- ✅ **Database State**: All tables healthy, 100% vector coverage on 41,303 narratives
-- ✅ **RLS Policies**: Working on all 4 core tables
-- ❌ **Vector Functions**: Return type mismatches preventing searches
-- 🎯 **Solution**: Execute corrected functions below
-
-## Required Action
-**Copy and paste the following SQL blocks into Supabase SQL Editor:**
-
-### 1. Create Missing Infrastructure Table
-
-```sql
+-- Create missing search_errors table first
 CREATE TABLE IF NOT EXISTS search_errors (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     function_name TEXT NOT NULL,
@@ -19,21 +11,15 @@ CREATE TABLE IF NOT EXISTS search_errors (
     query_params JSONB,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
-```
 
-### 2. Drop Old Functions
-
-```sql
+-- Drop old functions
 DROP FUNCTION IF EXISTS match_narratives CASCADE;
 DROP FUNCTION IF EXISTS search_rias CASCADE;  
 DROP FUNCTION IF EXISTS hybrid_search_rias CASCADE;
 DROP FUNCTION IF EXISTS test_vector_search_performance CASCADE;
 DROP FUNCTION IF EXISTS check_vector_search_performance CASCADE;
-```
 
-### 3. Create Corrected match_narratives Function
-
-```sql
+-- Fixed match_narratives function with correct return types
 CREATE OR REPLACE FUNCTION match_narratives(
     query_embedding vector(768),
     match_threshold float DEFAULT 0.75,
@@ -41,11 +27,11 @@ CREATE OR REPLACE FUNCTION match_narratives(
     narrative_type text DEFAULT NULL
 )
 RETURNS TABLE(
-    id text,
+    id text,                    -- Changed from bigint to text (matches actual schema)
     narrative_text text,
     similarity_score float,
-    crd_number bigint,
-    firm_name text
+    crd_number bigint,          -- This matches the actual schema
+    firm_name text              -- We'll alias legal_name as firm_name
 )
 LANGUAGE plpgsql AS $$
 BEGIN
@@ -64,11 +50,8 @@ BEGIN
     LIMIT match_count;
 END;
 $$;
-```
 
-### 4. Create Corrected search_rias Function
-
-```sql
+-- Fixed search_rias function with correct schema
 CREATE OR REPLACE FUNCTION search_rias(
     query_embedding vector(768),
     match_threshold float DEFAULT 0.8,
@@ -76,9 +59,9 @@ CREATE OR REPLACE FUNCTION search_rias(
     filter_criteria jsonb DEFAULT '{}'::jsonb
 )
 RETURNS TABLE(
-    crd_number bigint,
+    crd_number bigint,          -- Using crd_number as primary identifier
     firm_name text,
-    description text,
+    description text,           -- We'll use narrative as description
     similarity_score float,
     city text,
     state text,
@@ -145,6 +128,7 @@ BEGIN
     
 EXCEPTION
     WHEN OTHERS THEN
+        -- Log error and return empty result
         INSERT INTO search_errors (function_name, error_message, query_params)
         VALUES (
             'search_rias',
@@ -158,11 +142,8 @@ EXCEPTION
         RETURN;
 END;
 $$;
-```
 
-### 5. Create Performance Test Function
-
-```sql
+-- Performance test function with correct return types
 CREATE OR REPLACE FUNCTION test_vector_search_performance()
 RETURNS TABLE(
     test_name TEXT,
@@ -177,6 +158,7 @@ DECLARE
     result_count INTEGER;
     test_embedding vector(768);
 BEGIN
+    -- Create a test embedding (all 0.1 values for consistency)
     test_embedding := array_fill(0.1, ARRAY[768])::vector(768);
     
     -- Test 1: match_narratives performance
@@ -243,11 +225,13 @@ BEGIN
         END;
 END;
 $$ LANGUAGE plpgsql;
-```
 
-### 6. Create Index Monitoring Function
+-- Grant permissions
+GRANT EXECUTE ON FUNCTION match_narratives TO authenticated, service_role, anon;
+GRANT EXECUTE ON FUNCTION search_rias TO authenticated, service_role, anon;
+GRANT EXECUTE ON FUNCTION test_vector_search_performance TO authenticated, service_role, anon;
 
-```sql
+-- Create index usage monitoring function
 CREATE OR REPLACE FUNCTION check_vector_indexes()
 RETURNS TABLE(
     table_name TEXT,
@@ -281,11 +265,14 @@ BEGIN
     ORDER BY t.tablename, t.indexname;
 END;
 $$ LANGUAGE plpgsql;
-```
 
-### 7. Create ETL Helper Function
+-- Add comments
+COMMENT ON FUNCTION match_narratives IS 'Vector similarity search for narrative content - corrected return types';
+COMMENT ON FUNCTION search_rias IS 'Main vector search function for RIA profiles with filtering - corrected schema';
+COMMENT ON FUNCTION test_vector_search_performance IS 'Performance monitoring for vector search functions';
+COMMENT ON FUNCTION check_vector_indexes IS 'Check status and size of vector indexes';
 
-```sql
+-- Create a helper function for ETL pipeline (Phase 2)
 CREATE OR REPLACE FUNCTION get_missing_narratives()
 RETURNS TABLE(
     crd_number bigint,
@@ -304,44 +291,10 @@ BEGIN
         (n.crd_number IS NOT NULL) as has_narrative
     FROM ria_profiles r
     LEFT JOIN narratives n ON r.crd_number = n.crd_number
-    WHERE n.crd_number IS NULL
+    WHERE n.crd_number IS NULL  -- Missing narratives
     ORDER BY r.crd_number
-    LIMIT 100;
+    LIMIT 100;  -- Limit for testing
 END;
 $$ LANGUAGE plpgsql;
-```
 
-### 8. Grant Permissions
-
-```sql
-GRANT EXECUTE ON FUNCTION match_narratives TO authenticated, service_role, anon;
-GRANT EXECUTE ON FUNCTION search_rias TO authenticated, service_role, anon;
-GRANT EXECUTE ON FUNCTION test_vector_search_performance TO authenticated, service_role, anon;
-GRANT EXECUTE ON FUNCTION check_vector_indexes TO authenticated, service_role, anon;
-GRANT EXECUTE ON FUNCTION get_missing_narratives TO authenticated, service_role, anon;
-```
-
-## Execution Instructions
-
-1. **Open Supabase SQL Editor**: https://supabase.com/dashboard/project/llusjnpltqxhokycwzry/sql
-2. **Copy and paste each section above in order**
-3. **Execute each section** (click "Run" for each)
-4. **Verify execution** - all should complete without errors
-
-## Expected Results
-After execution:
-- ✅ Vector search functions working without return type errors
-- ✅ Performance testing functional
-- ✅ Ready for 507x performance optimization
-- ✅ ETL helper functions ready for Phase 2
-
-## Verification Command
-After executing all SQL, run this to verify:
-```bash
-node scripts/validate_implementation.js
-```
-
-Should show:
-- ✅ Vector Search Validation: All functions working
-- ✅ Performance Testing: Results in milliseconds
-- 🎯 Ready for Phase 2 ETL pipeline implementation
+COMMENT ON FUNCTION get_missing_narratives IS 'Identify RIA profiles without narratives for ETL processing';
