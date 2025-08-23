@@ -11,16 +11,16 @@
 ```sql
 -- Create optimized HNSW index for 41,303 narratives
 -- This will enable 50-100x performance improvement
-CREATE INDEX CONCURRENTLY IF NOT EXISTS narratives_embedding_vector_hnsw_idx 
+CREATE INDEX IF NOT EXISTS narratives_embedding_vector_hnsw_idx 
 ON narratives 
-USING hnsw (embedding_vector::vector(768) vector_cosine_ops) 
+USING hnsw (embedding_vector vector_cosine_ops) 
 WITH (m = 16, ef_construction = 64);
 
 -- Set optimal HNSW search parameters for best performance
 ALTER DATABASE postgres SET hnsw.ef_search = 100;
 
 -- Create supporting index for CRD number lookups
-CREATE INDEX CONCURRENTLY IF NOT EXISTS narratives_crd_number_idx 
+CREATE INDEX IF NOT EXISTS narratives_crd_number_idx 
 ON narratives(crd_number) WHERE embedding_vector IS NOT NULL;
 
 -- Update table statistics for query planner optimization

@@ -6,14 +6,14 @@
 
 const { createClient } = require('@supabase/supabase-js')
 const OpenAI = require('openai')
+const { validateEnvVars } = require('./load-env')
 
-// Configuration
-const supabaseUrl = process.env.SUPABASE_URL || 'https://llusjnpltqxhokycwzry.supabase.co'
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+// Load and validate environment variables
+const { supabaseUrl, supabaseServiceKey, openaiApiKey } = validateEnvVars()
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey)
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
+  apiKey: openaiApiKey
 })
 
 class NarrativeETLProcessor {
@@ -54,7 +54,21 @@ class NarrativeETLProcessor {
   async getMissingProfiles(limit = 100) {
     console.log(`\n🔍 Getting ${limit} profiles without narratives...`)
     
-    const { data: profiles, error } = await supabase
+    // Get existing narrative CRD numbers for exclusion
+    const { data: existingNarratives, error: narrativeError } = await supabase
+      .from('narratives')
+      .select('crd_number')
+    
+    if (narrativeError) {
+      throw new Error(`Failed to fetch existing narratives: ${narrativeError.message}`)
+    }
+    
+    // Create a Set for faster lookup
+    const existingCrds = new Set(existingNarratives.map(n => n.crd_number))
+    console.log(`   📊 Found ${existingCrds.size} existing narratives to exclude`)
+    
+    // Get profiles that don't have narratives
+    const { data: allProfiles, error: profileError } = await supabase
       .from('ria_profiles')
       .select(`
         crd_number,
@@ -68,20 +82,21 @@ class NarrativeETLProcessor {
         phone,
         website
       `)
-      .not('crd_number', 'in', 
-        supabase
-          .from('narratives')
-          .select('crd_number')
-      )
       .not('legal_name', 'is', null)
-      .limit(limit)
+      .limit(limit * 3) // Get more than needed to account for filtering
     
-    if (error) {
-      throw new Error(`Failed to fetch missing profiles: ${error.message}`)
+    if (profileError) {
+      throw new Error(`Failed to fetch profiles: ${profileError.message}`)
     }
     
-    console.log(`   ✅ Found ${data?.length || 0} profiles needing narratives`)
-    return data || []
+    // Filter out profiles that already have narratives
+    const missingProfiles = allProfiles.filter(profile => !existingCrds.has(profile.crd_number))
+    
+    // Return up to the requested limit
+    const results = missingProfiles.slice(0, limit)
+    
+    console.log(`   ✅ Found ${results.length} profiles needing narratives (from ${allProfiles.length} candidates)`)
+    return results
   }
 
   async generateNarrative(profile) {
