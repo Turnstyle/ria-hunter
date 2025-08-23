@@ -17,70 +17,44 @@ let aiClient = null
 let isVertexAI = false
 
 if (aiProvider === 'vertex') {
-  console.log('🤖 Initializing Vertex AI using existing service account...')
+  console.log('🤖 Initializing Google AI Studio (Gemini)...')
   try {
-    // Use the @google-cloud/vertexai package which automatically uses Application Default Credentials
-    // This will use the existing docs-ai-service-account credentials from your gcp-key.json
-    const { VertexAI } = require('@google-cloud/vertexai')
+    const { GoogleGenerativeAI } = require('@google/generative-ai')
+    const { googleAiStudioKey } = validateEnvVars()
     
-    // Initialize with your project details
-    const vertexAI = new VertexAI({
-      project: googleProjectId || 'ria-hunter-backend', 
-      location: 'us-central1'
-    })
-    
-    // Create clients for text generation and embedding using AVAILABLE models
-    // IMPORTANT: Using fully qualified model names with publishers and versions
-    console.log('🔍 Looking for available model...')
-    
-    // First try with gemini-pro model (newer naming convention)
-    try {
-      aiClient = {
-        // Use Gemini Pro model which should be available in any enabled project
-        generativeModel: vertexAI.getGenerativeModel({ 
-          model: 'gemini-pro',  // This is the newer model name format
-          generationConfig: {
-            temperature: 0.3,
-            topP: 0.8,
-            maxOutputTokens: 300
-          }
-        }),
-        
-        // Use text-embedding model which should be available
-        textEmbedding: vertexAI.getGenerativeModel({ 
-          model: 'textembedding-gecko',  // This is the correct model name
-          // This model produces 768-dimensional embeddings
-          dimensions: 768
-        })
-      }
-      console.log('✅ Using newer model names: gemini-pro and textembedding-gecko')
-    } catch (e) {
-      console.log('⚠️ Newer model names failed, trying legacy format...')
-      
-      // Try with legacy model names as fallback
-      aiClient = {
-        generativeModel: vertexAI.getGenerativeModel({ 
-          model: 'gemini-1.0-pro-001',  // Try with specific version
-          generationConfig: {
-            temperature: 0.3,
-            topP: 0.8,
-            maxOutputTokens: 300
-          }
-        }),
-        
-        // Use Gecko embedding model for vectors
-        textEmbedding: vertexAI.getGenerativeModel({ 
-          model: 'text-embedding-gecko-001',  // Try with specific version
-          dimensions: 768
-        })
-      }
-      console.log('✅ Using legacy model names with versions')
+    if (!googleAiStudioKey) {
+      throw new Error('GOOGLE_AI_STUDIO_API_KEY required for Gemini models')
     }
     
-    isVertexAI = true
-    console.log('✅ Vertex AI initialized successfully with Gemini 1.0 Pro')
+    console.log('🔑 Using Google AI Studio API key')
+    const genAI = new GoogleGenerativeAI(googleAiStudioKey)
+    
+    // Use Gemini 1.5 Flash - perfect for narrative generation (33x cheaper than Pro!)
+    const modelNames = {
+      generative: 'gemini-1.5-flash',  // Cost-effective and fast for narratives
+      embedding: 'text-embedding-004'  // Note: We'll use OpenAI for embeddings since Google doesn't have embedding models via this API
+    };
+    
+    aiClient = {
+      generativeModel: genAI.getGenerativeModel({ 
+        model: modelNames.generative,
+        generationConfig: {
+          temperature: 0.3,
+          topP: 0.8,
+          maxOutputTokens: 300
+        }
+      }),
+      // Note: Google AI Studio doesn't provide embedding models, so we'll use OpenAI for embeddings
+      isGoogleAiStudio: true
+    }
+    
+    // Model setup complete - will test on first actual use
+    console.log('📝 Gemini model ready for use')
+    
+    isVertexAI = true  // Keep this true for compatibility
+    console.log('✅ Google AI Studio (Gemini) initialized successfully!')
   } catch (error) {
-    console.warn('⚠️ Vertex AI initialization failed:', error.message)
+    console.warn('⚠️ Google AI Studio initialization failed:', error.message)
     console.log('⚠️ Error details:', error)
     console.log('🔄 Falling back to OpenAI...')
   }
@@ -102,9 +76,9 @@ if (!aiClient) {
       apiKey: openaiApiKey
     })
     
-    // Test that the client is working
-    if (!aiClient.chat || typeof aiClient.chat.completions?.create !== 'function') {
-      throw new Error('OpenAI client does not have expected methods')
+    // Basic validation that the client has expected structure
+    if (!aiClient.chat || !aiClient.embeddings) {
+      throw new Error('OpenAI client missing required methods')
     }
     
     isVertexAI = false
@@ -194,7 +168,7 @@ class NarrativeETLProcessor {
       console.warn(`   ⚠️ Warning: Loaded ${existingCrds.size} but database has ${narrativeCount} narratives`)
     }
     
-    // Get profiles that don't have narratives
+    // Get profiles that don't have narratives - search more broadly
     const { data: allProfiles, error: profileError } = await supabase
       .from('ria_profiles')
       .select(`
@@ -210,7 +184,8 @@ class NarrativeETLProcessor {
         website
       `)
       .not('legal_name', 'is', null)
-      .limit(limit * 5) // Get more candidates to account for filtering
+      .range(1000, 10000)  // Start from position 1000 where missing narratives exist
+      .limit(limit * 10) // Get many more candidates
     
     if (profileError) {
       throw new Error(`Failed to fetch profiles: ${profileError.message}`)
@@ -235,12 +210,38 @@ class NarrativeETLProcessor {
     try {
       let narrative = null
       
-      if (isVertexAI) {
-        // Use Vertex AI Gemini 1.0 Pro
+      if (isVertexAI && aiClient.isGoogleAiStudio) {
+        // Use Google AI Studio Gemini
+        console.log(`   🤖 Generating narrative for ${legal_name || 'unnamed firm'} using Google AI Studio...`)
+        
+        try {
+          const fullPrompt = `You are a financial services analyst creating professional investment advisor narratives. 
+Write informative, factual descriptions without making unverified claims.
+
+${prompt}`;
+          
+          // Google AI Studio format is simpler
+          const result = await aiClient.generativeModel.generateContent([fullPrompt]);
+          const response = await result.response;
+          narrative = response.text().trim();
+          
+          if (!narrative || narrative.length < 10) {
+            throw new Error('Generated narrative too short or empty');
+          }
+          
+        } catch (studioError) {
+          console.error(`   ❌ Google AI Studio error:`, studioError.message);
+          console.log('   🔄 Falling back to OpenAI for this narrative');
+          // Fall back to OpenAI for this specific narrative
+          return this.generateNarrativeWithOpenAI(prompt);
+        }
+        
+      } else if (isVertexAI) {
+        // Legacy Vertex AI code (keeping for compatibility)
         console.log(`   🤖 Generating narrative for ${legal_name || 'unnamed firm'} using Vertex AI...`)
         
         try {
-          // Format the request according to Gemini API structure (based on your example)
+          // Format the request according to Vertex AI Gemini API structure
           const response = await aiClient.generativeModel.generateContent({
             contents: [{
               role: 'user',
@@ -272,6 +273,18 @@ class NarrativeETLProcessor {
         } catch (vertexError) {
           console.error(`   ❌ Vertex AI error:`, vertexError.message)
           console.log('   🔄 Falling back to OpenAI for this narrative')
+          // Initialize OpenAI client for fallback if not already done
+          if (!aiClient || isVertexAI) {
+            const OpenAI = require('openai')
+            const { openaiApiKey } = require('./load-env').validateEnvVars()
+            
+            if (!openaiApiKey) {
+              throw new Error('OpenAI API key required for fallback but not found')
+            }
+            
+            aiClient = new OpenAI({ apiKey: openaiApiKey })
+            console.log('   🔧 OpenAI client initialized for fallback')
+          }
           // Fall back to OpenAI for this specific narrative
           return this.generateNarrativeWithOpenAI(prompt)
         }
@@ -352,8 +365,14 @@ class NarrativeETLProcessor {
     try {
       let embedding = null
       
-      if (isVertexAI) {
-        // Use Vertex AI text embeddings with Gecko model
+      if (isVertexAI && aiClient.isGoogleAiStudio) {
+        // Google AI Studio doesn't provide embedding models
+        // Use OpenAI for embeddings
+        console.log(`   🧠 Generating embedding using OpenAI (Google AI Studio doesn't support embeddings)...`)
+        return this.generateEmbeddingWithOpenAI(text)
+        
+      } else if (isVertexAI) {
+        // Legacy Vertex AI text embeddings with Gecko model
         console.log(`   🧠 Generating embedding using Vertex AI text-embedding-gecko...`)
         
         try {
@@ -384,7 +403,6 @@ class NarrativeETLProcessor {
         } catch (vertexError) {
           console.error(`   ❌ Vertex AI embedding error:`, vertexError.message)
           console.log('   🔄 Falling back to OpenAI for this embedding')
-          // Fall back to OpenAI for this specific embedding
           return this.generateEmbeddingWithOpenAI(text)
         }
         
@@ -417,9 +435,23 @@ class NarrativeETLProcessor {
   
   // Separate method for OpenAI embeddings to simplify fallback logic
   async generateEmbeddingWithOpenAI(text) {
-    console.log(`   📏 Generating embedding using OpenAI fallback...`)
+    console.log(`   📏 Generating embedding using OpenAI...`)
     
-    const response = await aiClient.embeddings.create({
+    // Initialize OpenAI client if needed (e.g., when using Gemini for text but OpenAI for embeddings)
+    let openaiClient = aiClient
+    if (isVertexAI && aiClient.isGoogleAiStudio) {
+      // We're using Gemini for text but need OpenAI for embeddings
+      const OpenAI = require('openai')
+      const { openaiApiKey } = validateEnvVars()
+      
+      if (!openaiApiKey) {
+        throw new Error('OpenAI API key required for embeddings but not found')
+      }
+      
+      openaiClient = new OpenAI({ apiKey: openaiApiKey })
+    }
+    
+    const response = await openaiClient.embeddings.create({
       model: "text-embedding-3-small",
       input: text,
       dimensions: 768

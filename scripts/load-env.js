@@ -42,7 +42,8 @@ function validateEnvVars() {
     openaiApiKey: process.env.OPENAI_API_KEY,
     aiProvider: aiProvider,
     googleCredentials: process.env.GOOGLE_APPLICATION_CREDENTIALS,
-    googleProjectId: process.env.GOOGLE_PROJECT_ID
+    googleProjectId: process.env.GOOGLE_PROJECT_ID,
+    googleAiStudioKey: process.env.GOOGLE_AI_STUDIO_API_KEY
   }
 }
 
