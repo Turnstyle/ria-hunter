@@ -1,0 +1,6939 @@
+[
+  {
+    "crd_number": 1,
+    "legal_name": "PROTERRA INVESTMENT PARTNERS LP",
+    "city": "MINNEAPOLIS",
+    "state": "MN",
+    "aum": 21000
+  },
+  {
+    "crd_number": 2,
+    "legal_name": "CONSTITUTION WEALTH LLC",
+    "city": "RAMONA",
+    "state": "CA",
+    "aum": 138000
+  },
+  {
+    "crd_number": 3,
+    "legal_name": "INVESCO PRIVATE CAPITAL, INC.",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 12000
+  },
+  {
+    "crd_number": 4,
+    "legal_name": "WL ROSS & CO. LLC",
+    "city": "DALLAS",
+    "state": "TX",
+    "aum": 13000
+  },
+  {
+    "crd_number": 5,
+    "legal_name": "VAN LEEUWEN RETIREMENT & INVESTMENT SERVICES",
+    "city": "RICHMOND",
+    "state": "KY",
+    "aum": 981000
+  },
+  {
+    "crd_number": 6,
+    "legal_name": "AXONIC CAPITAL LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 35000
+  },
+  {
+    "crd_number": 7,
+    "legal_name": "ACUMEN WEALTH ADVISORS, LLC",
+    "city": "CHATTANOOGA",
+    "state": "TN",
+    "aum": 247000
+  },
+  {
+    "crd_number": 8,
+    "legal_name": "ROCKHILL ADVISORS LLC",
+    "city": "VICTOR",
+    "state": "ID",
+    "aum": 142000
+  },
+  {
+    "crd_number": 9,
+    "legal_name": "SLO MONEY MANAGERS",
+    "city": "ATASCADERO",
+    "state": "CA",
+    "aum": 0
+  },
+  {
+    "crd_number": 10,
+    "legal_name": "PRESILIUM PRIVATE WEALTH, LLC",
+    "city": "RADNOR",
+    "state": "PA",
+    "aum": 1112000
+  },
+  {
+    "crd_number": 11,
+    "legal_name": "FOYSTON, GORDON & PAYNE INC.",
+    "city": "TORONTO",
+    "state": null,
+    "aum": 2326000
+  },
+  {
+    "crd_number": 12,
+    "legal_name": "GLASSMAN WEALTH SERVICES, LLC",
+    "city": "VIENNA",
+    "state": "VA",
+    "aum": 2720000
+  },
+  {
+    "crd_number": 13,
+    "legal_name": "RICHMOND INVESTMENT SERVICES LLC",
+    "city": "MEQUON",
+    "state": "WI",
+    "aum": 1255000
+  },
+  {
+    "crd_number": 14,
+    "legal_name": "INNOVATIVE CAPITAL ADVISORS, LLC",
+    "city": "CHICAGO",
+    "state": "IL",
+    "aum": 26000
+  },
+  {
+    "crd_number": 15,
+    "legal_name": "STONEHAGE FLEMING",
+    "city": "LONDON, GREATER LONDON",
+    "state": null,
+    "aum": 672000
+  },
+  {
+    "crd_number": 16,
+    "legal_name": "PERCEPTIVE ADVISORS",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 29000
+  },
+  {
+    "crd_number": 17,
+    "legal_name": "ROCKEFELLER CAPITAL MANAGEMENT",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 61461000
+  },
+  {
+    "crd_number": 18,
+    "legal_name": "WEWORK CAPITAL ADVISORS LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 8000
+  },
+  {
+    "crd_number": 19,
+    "legal_name": "SENTINEL PENSION ADVISORS INC",
+    "city": "WAKEFIELD",
+    "state": "MA",
+    "aum": 2794000
+  },
+  {
+    "crd_number": 20,
+    "legal_name": "VINCENT WEALTH ADVISORS, LLC",
+    "city": "HANOVER",
+    "state": "MA",
+    "aum": 0
+  },
+  {
+    "crd_number": 21,
+    "legal_name": "HILLTOP SECURITIES INC.",
+    "city": "DALLAS",
+    "state": "TX",
+    "aum": 4546000
+  },
+  {
+    "crd_number": 22,
+    "legal_name": "STRATOS WEALTH ADVISORS LLC",
+    "city": "BEACHWOOD",
+    "state": "OH",
+    "aum": 12529000
+  },
+  {
+    "crd_number": 23,
+    "legal_name": "PL3 CAPITAL LP",
+    "city": "SUNNY ISLES BEACH",
+    "state": "FL",
+    "aum": 1000
+  },
+  {
+    "crd_number": 24,
+    "legal_name": "MONON WEALTH MANAGEMENT",
+    "city": "CARMEL",
+    "state": "IN",
+    "aum": 1306000
+  },
+  {
+    "crd_number": 25,
+    "legal_name": "ARENA INVESTORS, LP",
+    "city": "PURCHASE",
+    "state": "NY",
+    "aum": 22000
+  },
+  {
+    "crd_number": 26,
+    "legal_name": "ACADIAN ASSET MANAGEMENT",
+    "city": "BOSTON",
+    "state": "MA",
+    "aum": 292000
+  },
+  {
+    "crd_number": 27,
+    "legal_name": "STEWARD INC.",
+    "city": "WASHINGTON",
+    "state": "DC",
+    "aum": 258000
+  },
+  {
+    "crd_number": 28,
+    "legal_name": "INNOVATIVE CAPITAL ADVISORS, LLC",
+    "city": "CHICAGO",
+    "state": "IL",
+    "aum": 26000
+  },
+  {
+    "crd_number": 29,
+    "legal_name": "SCHOLAR FINANCIAL ADVISING, LLC",
+    "city": "LEWISVILLE",
+    "state": "NC",
+    "aum": 0
+  },
+  {
+    "crd_number": 30,
+    "legal_name": "ELECTRON CAPITAL PARTNERS, LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 17000
+  },
+  {
+    "crd_number": 31,
+    "legal_name": "U.S. CAPITAL WEALTH ADVISORS, LLC",
+    "city": "HOUSTON",
+    "state": "TX",
+    "aum": 10149000
+  },
+  {
+    "crd_number": 32,
+    "legal_name": "U.S. CAPITAL WEALTH ADVISORS, LLC",
+    "city": "HOUSTON",
+    "state": "TX",
+    "aum": 10149000
+  },
+  {
+    "crd_number": 33,
+    "legal_name": "SWP INVESTMENT MANAGEMENT LLC",
+    "city": "INDEPENDENCE",
+    "state": "OH",
+    "aum": 0
+  },
+  {
+    "crd_number": 34,
+    "legal_name": "SILVER OAK WEALTH ADVISORS SERVICES, LLC",
+    "city": "LOS ANGELES",
+    "state": "CA",
+    "aum": 532000
+  },
+  {
+    "crd_number": 35,
+    "legal_name": "FORUM FINANCIAL MANAGEMENT, LP",
+    "city": "LOMBARD",
+    "state": "IL",
+    "aum": 21698000
+  },
+  {
+    "crd_number": 36,
+    "legal_name": "KONZA GLOBAL WEALTH GROUP",
+    "city": "OVERLAND PARK",
+    "state": "KS",
+    "aum": 0
+  },
+  {
+    "crd_number": 37,
+    "legal_name": "THE ASCENT GROUP, LLC",
+    "city": "VIRGINIA BEACH",
+    "state": "VA",
+    "aum": 4261000
+  },
+  {
+    "crd_number": 38,
+    "legal_name": "HS WEALTH PARTNERS",
+    "city": "ALBUQUERQUE",
+    "state": "NM",
+    "aum": 568000
+  },
+  {
+    "crd_number": 39,
+    "legal_name": "IMA ADVISORY SERVICES, INC.",
+    "city": "WICHITA",
+    "state": "KS",
+    "aum": 970000
+  },
+  {
+    "crd_number": 40,
+    "legal_name": "OA PRIVATE CAPITAL",
+    "city": "GRAND RAPIDS",
+    "state": "MI",
+    "aum": 85000
+  },
+  {
+    "crd_number": 41,
+    "legal_name": "WEALTH ASSET MANAGERS",
+    "city": "SPOKANE",
+    "state": "WA",
+    "aum": 2061000
+  },
+  {
+    "crd_number": 42,
+    "legal_name": "PAMPLONA CAPITAL MANAGEMENT LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 4000
+  },
+  {
+    "crd_number": 43,
+    "legal_name": "GRAYHAWK WEALTH US INC.",
+    "city": "CALGARY, ALBERTA",
+    "state": null,
+    "aum": 0
+  },
+  {
+    "crd_number": 44,
+    "legal_name": "EVOLUTIONARY TREE CAPITAL MANAGEMENT, LLC",
+    "city": "ALEXANDRIA",
+    "state": "VA",
+    "aum": 98000
+  },
+  {
+    "crd_number": 45,
+    "legal_name": "D. E. SHAW INVESTMENT MANAGEMENT, L.L.C.",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 23000
+  },
+  {
+    "crd_number": 46,
+    "legal_name": "SCHERER FINANCIAL ADVISORY SERVICES, LLC",
+    "city": "DALLAS",
+    "state": "TX",
+    "aum": 159000
+  },
+  {
+    "crd_number": 47,
+    "legal_name": "LEBENTHAL GLOBAL ADVISORS, LLC",
+    "city": "HAUPPAUGE",
+    "state": "NY",
+    "aum": 3176000
+  },
+  {
+    "crd_number": 48,
+    "legal_name": "LIGHTHOUSE WEALTH STRATEGIES, LLC",
+    "city": "GIG HARBOR",
+    "state": "WA",
+    "aum": 1825000
+  },
+  {
+    "crd_number": 49,
+    "legal_name": "EXPAND FINANCIAL, LLC",
+    "city": "LITTLETON",
+    "state": "CO",
+    "aum": 1521000
+  },
+  {
+    "crd_number": 50,
+    "legal_name": "CBIZ INVESTMENT ADVISORY SERVICES, LLC",
+    "city": "CLEVELAND",
+    "state": "OH",
+    "aum": 2257000
+  },
+  {
+    "crd_number": 51,
+    "legal_name": "BUCKINGHAM STRATEGIC WEALTH, LLC",
+    "city": "ST LOUIS",
+    "state": "MO",
+    "aum": 51749000
+  },
+  {
+    "crd_number": 52,
+    "legal_name": "SFM, LLC",
+    "city": "MANCHESTER",
+    "state": "NH",
+    "aum": 627000
+  },
+  {
+    "crd_number": 53,
+    "legal_name": "FSC WEALTH ADVISORS, LLC",
+    "city": "FISHKILL",
+    "state": "NY",
+    "aum": 2036000
+  },
+  {
+    "crd_number": 54,
+    "legal_name": "5CLP ADVISOR",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 0
+  },
+  {
+    "crd_number": 55,
+    "legal_name": "WESTWIND CAPITAL",
+    "city": "LAS CRUCES",
+    "state": "NM",
+    "aum": 1832000
+  },
+  {
+    "crd_number": 56,
+    "legal_name": "CGC FINANCIAL SERVICES",
+    "city": "LAKE OSWEGO",
+    "state": "OR",
+    "aum": 2857000
+  },
+  {
+    "crd_number": 57,
+    "legal_name": "CITI GLOBAL ALTERNATIVES, LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 196000
+  },
+  {
+    "crd_number": 58,
+    "legal_name": "TWO PRIME LLC",
+    "city": "ASHEVILLE",
+    "state": "NC",
+    "aum": 22000
+  },
+  {
+    "crd_number": 59,
+    "legal_name": "D. E. SHAW INVESTMENT MANAGEMENT, L.L.C.",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 23000
+  },
+  {
+    "crd_number": 60,
+    "legal_name": "ACORE CAPITAL, LP",
+    "city": "SAN FRANCISCO",
+    "state": "CA",
+    "aum": 24000
+  },
+  {
+    "crd_number": 61,
+    "legal_name": "USI SECURITIES, INC.",
+    "city": "GLASTONBURY",
+    "state": "CT",
+    "aum": 0
+  },
+  {
+    "crd_number": 62,
+    "legal_name": "WELLINGTONWS, LLC",
+    "city": "INDIANAPOLIS",
+    "state": "IN",
+    "aum": 0
+  },
+  {
+    "crd_number": 63,
+    "legal_name": "SMALLWOOD WEALTH MANAGEMENT",
+    "city": "RED BANK",
+    "state": "NJ",
+    "aum": 874000
+  },
+  {
+    "crd_number": 64,
+    "legal_name": "INDIE ASSET PARTNERS, LLC",
+    "city": "CARMEL",
+    "state": "IN",
+    "aum": 821000
+  },
+  {
+    "crd_number": 65,
+    "legal_name": "RIVERPATH INVESTMENTS LLC",
+    "city": "EL DORADO HILLS",
+    "state": "CA",
+    "aum": 206000
+  },
+  {
+    "crd_number": 66,
+    "legal_name": "VOYA INVESTMENTS, LLC",
+    "city": "SCOTTSDALE",
+    "state": "AZ",
+    "aum": 69000
+  },
+  {
+    "crd_number": 67,
+    "legal_name": "AVENTURA PRIVATE WEALTH, LLC",
+    "city": "AVENTURA",
+    "state": "FL",
+    "aum": 0
+  },
+  {
+    "crd_number": 68,
+    "legal_name": "INFINIUM INVESTMENT ADVISORS, LLC",
+    "city": "DENVER",
+    "state": "CO",
+    "aum": 388000
+  },
+  {
+    "crd_number": 69,
+    "legal_name": "HALBERT HARGROVE",
+    "city": "LONG BEACH",
+    "state": "CA",
+    "aum": 4434000
+  },
+  {
+    "crd_number": 70,
+    "legal_name": "AB CARVAL INVESTORS, LP",
+    "city": "MINNEAPOLIS",
+    "state": "MN",
+    "aum": 70000
+  },
+  {
+    "crd_number": 71,
+    "legal_name": "GRANITE STATE RETIREMENT PLANNING, INC.",
+    "city": "BEDFORD",
+    "state": "NH",
+    "aum": 501000
+  },
+  {
+    "crd_number": 72,
+    "legal_name": "EMSO ASSET MANAGEMENT US LLC",
+    "city": "GREENWICH",
+    "state": "CT",
+    "aum": 13000
+  },
+  {
+    "crd_number": 73,
+    "legal_name": "PERSPECTIVE WEALTH ADVISORS",
+    "city": "LOVELAND",
+    "state": "CO",
+    "aum": 0
+  },
+  {
+    "crd_number": 74,
+    "legal_name": "CL WEALTH MANAGEMENT LLC",
+    "city": "SCHAUMBURG",
+    "state": "IL",
+    "aum": 2003000
+  },
+  {
+    "crd_number": 75,
+    "legal_name": "INDEPENDENT FINANCIAL PARTNERS",
+    "city": "TAMPA",
+    "state": "FL",
+    "aum": 37391000
+  },
+  {
+    "crd_number": 76,
+    "legal_name": "MONEYLION",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 624434000
+  },
+  {
+    "crd_number": 77,
+    "legal_name": "BENTHAM WEALTH ADVISORS",
+    "city": "WILLIAMSVILLE",
+    "state": "NY",
+    "aum": 0
+  },
+  {
+    "crd_number": 78,
+    "legal_name": "SUGARLOAF WEALTH MANAGEMENT, LLC",
+    "city": "DULUTH",
+    "state": "GA",
+    "aum": 1536000
+  },
+  {
+    "crd_number": 79,
+    "legal_name": "AGELLUS CAPITAL, LLC",
+    "city": "CLAYTON",
+    "state": "MO",
+    "aum": 2000
+  },
+  {
+    "crd_number": 80,
+    "legal_name": "ARBOR POINT ADVISORS",
+    "city": "LAVISTA",
+    "state": "NE",
+    "aum": 28010000
+  },
+  {
+    "crd_number": 81,
+    "legal_name": "CEDRUS LLC",
+    "city": "LITTLETON",
+    "state": "CO",
+    "aum": 2007000
+  },
+  {
+    "crd_number": 82,
+    "legal_name": "TSG ADVICE PARTNERS, LLC",
+    "city": "COLUMBUS",
+    "state": "OH",
+    "aum": 2969000
+  },
+  {
+    "crd_number": 83,
+    "legal_name": "KAI WEALTH LLC",
+    "city": "CHICAGO",
+    "state": "IL",
+    "aum": 0
+  },
+  {
+    "crd_number": 84,
+    "legal_name": "M3F, INC.",
+    "city": "SALT LAKE CITY",
+    "state": "UT",
+    "aum": 1000
+  },
+  {
+    "crd_number": 85,
+    "legal_name": "N1 ADVISORS",
+    "city": "NEWARK",
+    "state": "DE",
+    "aum": 450000
+  },
+  {
+    "crd_number": 86,
+    "legal_name": "GUGGENHEIM WEALTH SOLUTIONS, LLC",
+    "city": "SANTA MONICA",
+    "state": "CA",
+    "aum": 0
+  },
+  {
+    "crd_number": 87,
+    "legal_name": "ENTREWEALTH",
+    "city": "AUSTIN",
+    "state": "TX",
+    "aum": 492000
+  },
+  {
+    "crd_number": 88,
+    "legal_name": "HILLTOP SECURITIES ASSET MANAGEMENT, LLC",
+    "city": "DALLAS",
+    "state": "TX",
+    "aum": 51000
+  },
+  {
+    "crd_number": 89,
+    "legal_name": "SIHARUM ADVISORS, LLC",
+    "city": "BOSTON",
+    "state": "MA",
+    "aum": 323000
+  },
+  {
+    "crd_number": 90,
+    "legal_name": "GOANNA CAPITAL MANAGEMENT LLC",
+    "city": "WEST PALM BEACH",
+    "state": "FL",
+    "aum": 33000
+  },
+  {
+    "crd_number": 91,
+    "legal_name": "WILLOWRIDGE PARTNERS, INC.",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 9000
+  },
+  {
+    "crd_number": 92,
+    "legal_name": "ROUTE 20 PRIVATE WEALTH INC.",
+    "city": "FORT LAUDERDALE",
+    "state": "FL",
+    "aum": 0
+  },
+  {
+    "crd_number": 93,
+    "legal_name": "OSPRAIE MANAGEMENT, LLC",
+    "city": "RYE",
+    "state": "NY",
+    "aum": 3000
+  },
+  {
+    "crd_number": 94,
+    "legal_name": "SCHOLAR FINANCIAL ADVISING, LLC",
+    "city": "LEWISVILLE",
+    "state": "NC",
+    "aum": 0
+  },
+  {
+    "crd_number": 95,
+    "legal_name": "PATHWAYS WEALTH MANAGEMENT, INC.",
+    "city": "TROY",
+    "state": "OH",
+    "aum": 624000
+  },
+  {
+    "crd_number": 96,
+    "legal_name": "OSAIC FS, INC.",
+    "city": "FORT WAYNE",
+    "state": "IN",
+    "aum": 21454000
+  },
+  {
+    "crd_number": 97,
+    "legal_name": "PALOUSE CAPITAL MANAGEMENT, INC.",
+    "city": "SPOKANE",
+    "state": "WA",
+    "aum": 572000
+  },
+  {
+    "crd_number": 98,
+    "legal_name": "ALPHA CAPITAL FAMILY OFFICE, LLC",
+    "city": "GREENWOOD VILLAGE",
+    "state": "CO",
+    "aum": 416000
+  },
+  {
+    "crd_number": 99,
+    "legal_name": "SG TRADING SOLUTIONS, LLC",
+    "city": "BOUNTIFUL",
+    "state": "UT",
+    "aum": 2000
+  },
+  {
+    "crd_number": 100,
+    "legal_name": "CERITY PARTNERS LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 16424000
+  },
+  {
+    "crd_number": 101,
+    "legal_name": "CERITY PARTNERS RETIREMENT PLAN ADVISORS",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 601000
+  },
+  {
+    "crd_number": 102,
+    "legal_name": "PERSHING SQUARE CAPITAL MANAGEMENT, L.P.",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 8000
+  },
+  {
+    "crd_number": 103,
+    "legal_name": "REMORA CAPITAL PARTNERS",
+    "city": "NASHVILLE",
+    "state": "TN",
+    "aum": 4000
+  },
+  {
+    "crd_number": 104,
+    "legal_name": "BRIDGE GENERATIONS WEALTH MANAGEMENT",
+    "city": "SOUTH MIAMI",
+    "state": "FL",
+    "aum": 0
+  },
+  {
+    "crd_number": 105,
+    "legal_name": "LANE BROTHERS INVESTMENT COUNSEL",
+    "city": "PRESCOTT",
+    "state": "AZ",
+    "aum": 787000
+  },
+  {
+    "crd_number": 106,
+    "legal_name": "WOMACK WEALTH MANAGEMENT, INC.",
+    "city": "MANHATTAN BEACH",
+    "state": "CA",
+    "aum": 559000
+  },
+  {
+    "crd_number": 107,
+    "legal_name": "FOUNDATIONS INVESTMENT ADVISORS LLC",
+    "city": "PHOENIX",
+    "state": "AZ",
+    "aum": 47304000
+  },
+  {
+    "crd_number": 108,
+    "legal_name": "ARC ADVISORY LLC",
+    "city": "SAN FRANCISCO",
+    "state": "CA",
+    "aum": 18000
+  },
+  {
+    "crd_number": 109,
+    "legal_name": "LORNE STEINBERG WEALTH MANAGEMENT INC.",
+    "city": "MONTREAL, QUEBEC",
+    "state": null,
+    "aum": 2120000
+  },
+  {
+    "crd_number": 110,
+    "legal_name": "MUTUAL ADVISORS, LLC",
+    "city": "OMAHA",
+    "state": "NE",
+    "aum": 20381000
+  },
+  {
+    "crd_number": 111,
+    "legal_name": "WARD FERRY MANAGEMENT LIMITED",
+    "city": "HONG KONG",
+    "state": null,
+    "aum": 2000
+  },
+  {
+    "crd_number": 112,
+    "legal_name": "OAK STREET INVESTMENTS",
+    "city": "GREENWOOD VILLAGE",
+    "state": "CO",
+    "aum": 141000
+  },
+  {
+    "crd_number": 113,
+    "legal_name": "RBF CAPITAL MANAGEMENT, INC.",
+    "city": "SARASOTA",
+    "state": "FL",
+    "aum": 25000
+  },
+  {
+    "crd_number": 114,
+    "legal_name": "ROBINSON VALUE MANAGEMENT, LTD.",
+    "city": "SAN ANTONIO",
+    "state": "TX",
+    "aum": 116000
+  },
+  {
+    "crd_number": 115,
+    "legal_name": "ROCKPORT WEALTH ADVISORS",
+    "city": "FAIRVIEW PARK",
+    "state": "OH",
+    "aum": 503000
+  },
+  {
+    "crd_number": 116,
+    "legal_name": "CION INVESTMENT MANAGEMENT, LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 1000
+  },
+  {
+    "crd_number": 117,
+    "legal_name": "ALERA INVESTMENT ADVISORS, LLC",
+    "city": "DEERFIELD",
+    "state": "IL",
+    "aum": 3323000
+  },
+  {
+    "crd_number": 118,
+    "legal_name": "33 CAPITAL MANAGEMENT LLC",
+    "city": "GREENWICH",
+    "state": "CT",
+    "aum": 21000
+  },
+  {
+    "crd_number": 119,
+    "legal_name": "PLATFORM WEALTH ADVISORS",
+    "city": "HOLLADAY",
+    "state": "UT",
+    "aum": 555000
+  },
+  {
+    "crd_number": 120,
+    "legal_name": "SOUNDCORE CAPITAL PARTNERS, LP",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 4000
+  },
+  {
+    "crd_number": 121,
+    "legal_name": "SERENITY INVESTMENT ADVISORS",
+    "city": "CHICAGO",
+    "state": "IL",
+    "aum": 270000
+  },
+  {
+    "crd_number": 122,
+    "legal_name": "PAPAMARKOU WELLNER PERKIN ADVISORS",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 112000
+  },
+  {
+    "crd_number": 123,
+    "legal_name": "RESILIENCE MANAGEMENT",
+    "city": "CLEVELAND",
+    "state": "OH",
+    "aum": 15000
+  },
+  {
+    "crd_number": 124,
+    "legal_name": "DOWNSHIFT FINANCIAL",
+    "city": "BOULDER",
+    "state": "CO",
+    "aum": 59000
+  },
+  {
+    "crd_number": 125,
+    "legal_name": "UCAP AMERICAS",
+    "city": "MIAMI",
+    "state": "FL",
+    "aum": 222000
+  },
+  {
+    "crd_number": 126,
+    "legal_name": "FORT PITT CAPITAL GROUP, LLC",
+    "city": "PITTSBURGH",
+    "state": "PA",
+    "aum": 9164000
+  },
+  {
+    "crd_number": 127,
+    "legal_name": "ALLEGIANT WEALTH ADVISORS, LLC",
+    "city": "TULSA",
+    "state": "OK",
+    "aum": 16000
+  },
+  {
+    "crd_number": 128,
+    "legal_name": "EP WEALTH ADVISORS",
+    "city": "TORRANCE",
+    "state": "CA",
+    "aum": 13185000
+  },
+  {
+    "crd_number": 129,
+    "legal_name": "BELVOIR WEALTH MANAGEMENT AG",
+    "city": "ZURICH",
+    "state": null,
+    "aum": 38000
+  },
+  {
+    "crd_number": 130,
+    "legal_name": "ALIGNE WEALTH ADVISORS INVESTMENT MANAGEMENT (AWAIM)",
+    "city": "LOS ANGELES",
+    "state": "CA",
+    "aum": 307000
+  },
+  {
+    "crd_number": 131,
+    "legal_name": "SCRATCH CAPITAL",
+    "city": "BOISE",
+    "state": "ID",
+    "aum": 276000
+  },
+  {
+    "crd_number": 132,
+    "legal_name": "VISTA INVESTMENT PARTNERS LLC",
+    "city": "OKLAHOMA CITY",
+    "state": "OK",
+    "aum": 1476000
+  },
+  {
+    "crd_number": 133,
+    "legal_name": "OSAIC ADVISORY SERVICES, LLC",
+    "city": "ATLANTA",
+    "state": "GA",
+    "aum": 20269000
+  },
+  {
+    "crd_number": 134,
+    "legal_name": "EOS MANAGEMENT, L.P.",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 9000
+  },
+  {
+    "crd_number": 135,
+    "legal_name": "OLD WEST INVESTMENT MANAGEMENT, LLC",
+    "city": "LOS ANGELES",
+    "state": "CA",
+    "aum": 328000
+  },
+  {
+    "crd_number": 136,
+    "legal_name": "TSPI, LP",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 5000
+  },
+  {
+    "crd_number": 137,
+    "legal_name": "THEPARTNERS WEALTH MANAGEMENT",
+    "city": "MONTEREY",
+    "state": "CA",
+    "aum": 565000
+  },
+  {
+    "crd_number": 138,
+    "legal_name": "BNY MELLON INVESTMENT ADVISER, INC.",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 117000
+  },
+  {
+    "crd_number": 139,
+    "legal_name": "LIFEGUIDE FINANCIAL ADVISORS, LLC",
+    "city": "MECHANICSBURG",
+    "state": "PA",
+    "aum": 2271000
+  },
+  {
+    "crd_number": 140,
+    "legal_name": "LIBERTY SQUARE WEALTH PARTNERS LLC",
+    "city": "BETHLEHEM",
+    "state": "PA",
+    "aum": 0
+  },
+  {
+    "crd_number": 141,
+    "legal_name": "BAIN CAPITAL CREDIT, LP",
+    "city": "BOSTON",
+    "state": "MA",
+    "aum": 170000
+  },
+  {
+    "crd_number": 142,
+    "legal_name": "FLORENCE CAPITAL ADVISORS, LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 45000
+  },
+  {
+    "crd_number": 143,
+    "legal_name": "CADARET GRANT & CO INC",
+    "city": "SYRACUSE",
+    "state": "NY",
+    "aum": 25405000
+  },
+  {
+    "crd_number": 144,
+    "legal_name": "CASTLE HOOK PARTNERS LP",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 8000
+  },
+  {
+    "crd_number": 145,
+    "legal_name": "J.P. MORGAN INVESTMENT MANAGEMENT INC.",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 92898000
+  },
+  {
+    "crd_number": 146,
+    "legal_name": "COLE WEALTH MANAGEMENT, LLC",
+    "city": "SCOTTSDALE",
+    "state": "AZ",
+    "aum": 285000
+  },
+  {
+    "crd_number": 147,
+    "legal_name": "SIEBERT ADVISORNXT, LLC.",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 544000
+  },
+  {
+    "crd_number": 148,
+    "legal_name": "FORVIS MAZARS WEALTH ADVISORS, LLC",
+    "city": "SPRINGFIELD",
+    "state": "MO",
+    "aum": 12871000
+  },
+  {
+    "crd_number": 149,
+    "legal_name": "SILVER OAK SECURITIES, INC.",
+    "city": "JACKSON",
+    "state": "TN",
+    "aum": 10311000
+  },
+  {
+    "crd_number": 150,
+    "legal_name": "RREEF AMERICA L.L.C.",
+    "city": "CHICAGO",
+    "state": "IL",
+    "aum": 118000
+  },
+  {
+    "crd_number": 151,
+    "legal_name": "ATX FINANCIAL PLANNING, LLC",
+    "city": "AUSTIN",
+    "state": "TX",
+    "aum": 146000
+  },
+  {
+    "crd_number": 152,
+    "legal_name": "SRS CAPITAL ADVISORS, LLC",
+    "city": "DENVER",
+    "state": "CO",
+    "aum": 3686000
+  },
+  {
+    "crd_number": 153,
+    "legal_name": "TRANEL INTELLIGENT INVESTING, LLC",
+    "city": "LIBERTYVILLE",
+    "state": "IL",
+    "aum": 0
+  },
+  {
+    "crd_number": 154,
+    "legal_name": "LORD ABBETT FIF ADVISOR LLC",
+    "city": "JERSEY CITY",
+    "state": "NJ",
+    "aum": 0
+  },
+  {
+    "crd_number": 155,
+    "legal_name": "CLEARSTEAD; HARTLAND & CO., LLC; CLEARSTEAD ADVISORY SOLUTIONS",
+    "city": "CLEVELAND",
+    "state": "OH",
+    "aum": 11645000
+  },
+  {
+    "crd_number": 156,
+    "legal_name": "ONEASCENT FINANCIAL SERVICES LLC",
+    "city": "BIRMINGHAM",
+    "state": "AL",
+    "aum": 7877000
+  },
+  {
+    "crd_number": 157,
+    "legal_name": "EATON FINANCIAL GROUP",
+    "city": "CORAL SPRINGS",
+    "state": "FL",
+    "aum": 1953000
+  },
+  {
+    "crd_number": 158,
+    "legal_name": "ACCELERATE RETIREMENT",
+    "city": "ALISO VIEJO",
+    "state": "CA",
+    "aum": 525000
+  },
+  {
+    "crd_number": 159,
+    "legal_name": "BURKETT FINANCIAL SERVICES, LLC",
+    "city": "ROCK HILL",
+    "state": "SC",
+    "aum": 1524000
+  },
+  {
+    "crd_number": 160,
+    "legal_name": "GRIMES & COMPANY, INC.",
+    "city": "WESTBOROUGH",
+    "state": "MA",
+    "aum": 8908000
+  },
+  {
+    "crd_number": 161,
+    "legal_name": "PARIAX PRIVATE WEALTH MANAGEMENT",
+    "city": "NEWPORT BEACH",
+    "state": "CA",
+    "aum": 116000
+  },
+  {
+    "crd_number": 162,
+    "legal_name": "SCHRODERS CAPITAL MANAGEMENT (US) INC.",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 140000
+  },
+  {
+    "crd_number": 163,
+    "legal_name": "ELEVATED CAPITAL ADVISORS, LLC",
+    "city": "DRAPER",
+    "state": "UT",
+    "aum": 2382000
+  },
+  {
+    "crd_number": 164,
+    "legal_name": "TEEPLE SNYDER NEWSOME WEALTH MANAGEMENT",
+    "city": "BROWNSBURG",
+    "state": "IN",
+    "aum": 1559000
+  },
+  {
+    "crd_number": 165,
+    "legal_name": "CURIO WEALTH, LLC",
+    "city": "ANNAPOLIS",
+    "state": "MD",
+    "aum": 1044000
+  },
+  {
+    "crd_number": 166,
+    "legal_name": "MAGNETIC NORTH ADVISORS",
+    "city": "MAPLE GROVE",
+    "state": "MN",
+    "aum": 1463000
+  },
+  {
+    "crd_number": 167,
+    "legal_name": "MISSION INVESTMENT ADVISORS LLC",
+    "city": "SAN FRANCISCO",
+    "state": "CA",
+    "aum": 0
+  },
+  {
+    "crd_number": 168,
+    "legal_name": "WEALTHCARE CAPITAL PARTNERS, LLC",
+    "city": "WEST CHESTER",
+    "state": "PA",
+    "aum": 801000
+  },
+  {
+    "crd_number": 169,
+    "legal_name": "DECISIONMAP WEALTH MANAGEMENT, LLC",
+    "city": "RESTON",
+    "state": "VA",
+    "aum": 675000
+  },
+  {
+    "crd_number": 170,
+    "legal_name": "WAO ADVISORY, LLC",
+    "city": "LAS VEGAS",
+    "state": "NV",
+    "aum": 2000
+  },
+  {
+    "crd_number": 171,
+    "legal_name": "MISSION FINANCIAL GROUP, LLC",
+    "city": "HONOLULU",
+    "state": "HI",
+    "aum": 672000
+  },
+  {
+    "crd_number": 172,
+    "legal_name": "BLUE BEAR FINANCIAL, LLC",
+    "city": "MT. PLEASANT",
+    "state": "SC",
+    "aum": 0
+  },
+  {
+    "crd_number": 173,
+    "legal_name": "GENERAL INNOVATION CAPITAL, LLC",
+    "city": "MIAMI",
+    "state": "FL",
+    "aum": 0
+  },
+  {
+    "crd_number": 174,
+    "legal_name": "LYNX1 CAPITAL MANAGEMENT LP",
+    "city": "SAN JUAN",
+    "state": "PR",
+    "aum": 4000
+  },
+  {
+    "crd_number": 175,
+    "legal_name": "STOCK MANAGEMENT LLC",
+    "city": "PUYALLUP",
+    "state": "WA",
+    "aum": 415000
+  },
+  {
+    "crd_number": 176,
+    "legal_name": "STOCK MANAGEMENT LLC",
+    "city": "PUYALLUP",
+    "state": "WA",
+    "aum": 415000
+  },
+  {
+    "crd_number": 177,
+    "legal_name": "ABOUND FINANCIAL",
+    "city": "GRANITE BAY",
+    "state": "CA",
+    "aum": 1611000
+  },
+  {
+    "crd_number": 178,
+    "legal_name": "EVERSIDE CAPITAL PARTNERS",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 18000
+  },
+  {
+    "crd_number": 179,
+    "legal_name": "PKS INVESTMENT ADVISORS LLC",
+    "city": "SALISBURY",
+    "state": "MD",
+    "aum": 771000
+  },
+  {
+    "crd_number": 180,
+    "legal_name": "PARADIGM FUNDS ADVISOR LLC",
+    "city": "ALBANY",
+    "state": "NY",
+    "aum": 3000
+  },
+  {
+    "crd_number": 181,
+    "legal_name": "ORG PARTNERS",
+    "city": "ROANOKE",
+    "state": "IN",
+    "aum": 3016000
+  },
+  {
+    "crd_number": 182,
+    "legal_name": "ONE WEALTH CAPITAL MANAGEMENT, LLC",
+    "city": "SCOTTSDALE",
+    "state": "AZ",
+    "aum": 498000
+  },
+  {
+    "crd_number": 183,
+    "legal_name": "ADVISORY SERVICES NETWORK",
+    "city": "ATLANTA",
+    "state": "GA",
+    "aum": 24286000
+  },
+  {
+    "crd_number": 184,
+    "legal_name": "INTEGRATED WEALTH MANAGEMENT, INC.",
+    "city": "UNIONTOWN",
+    "state": "OH",
+    "aum": 860000
+  },
+  {
+    "crd_number": 185,
+    "legal_name": "USA FINANCIAL FORMULAS CORPORATION",
+    "city": "ADA",
+    "state": "MI",
+    "aum": 6411000
+  },
+  {
+    "crd_number": 186,
+    "legal_name": "GLOBAL RETIREMENT PARTNERS LLC",
+    "city": "SAN RAFAEL",
+    "state": "CA",
+    "aum": 28908000
+  },
+  {
+    "crd_number": 187,
+    "legal_name": "STRONGBOX WEALTH, LLC",
+    "city": "LEE'S SUMMIT",
+    "state": "MO",
+    "aum": 1419000
+  },
+  {
+    "crd_number": 188,
+    "legal_name": "CARDEA CAPITAL ADVISORS, LLC",
+    "city": "ATLANTA",
+    "state": "GA",
+    "aum": 219000
+  },
+  {
+    "crd_number": 189,
+    "legal_name": "PROSPECT PARTNERS ADVISORS LLC",
+    "city": "CHICAGO",
+    "state": "IL",
+    "aum": 3000
+  },
+  {
+    "crd_number": 190,
+    "legal_name": "CARDEA CAPITAL ADVISORS, LLC",
+    "city": "ATLANTA",
+    "state": "GA",
+    "aum": 219000
+  },
+  {
+    "crd_number": 191,
+    "legal_name": "VOYA INVESTMENT MANAGEMENT CO. LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 96377000
+  },
+  {
+    "crd_number": 192,
+    "legal_name": "VOYA INVESTMENT MANAGEMENT (UK) LIMITED",
+    "city": "LONDON",
+    "state": null,
+    "aum": 2000
+  },
+  {
+    "crd_number": 193,
+    "legal_name": "CAPITAL UNITED, LLC",
+    "city": "HILLSBORO",
+    "state": "OR",
+    "aum": 1000
+  },
+  {
+    "crd_number": 194,
+    "legal_name": "RETIREMENT RESOURCES INVESTMENT CORPORATION",
+    "city": "PEABODY",
+    "state": "MA",
+    "aum": 261000
+  },
+  {
+    "crd_number": 195,
+    "legal_name": "WEALTH ADVISORS NW",
+    "city": "PORTLAND",
+    "state": "OR",
+    "aum": 1121000
+  },
+  {
+    "crd_number": 196,
+    "legal_name": "SANDBROOK CAPITAL MANAGEMENT LP",
+    "city": "STAMFORD",
+    "state": "CT",
+    "aum": 9000
+  },
+  {
+    "crd_number": 197,
+    "legal_name": "INHERENT WEALTH FUND, LLC",
+    "city": "PALM DESERT",
+    "state": "CA",
+    "aum": 2000
+  },
+  {
+    "crd_number": 198,
+    "legal_name": "CALIFORNIA FINANCIAL ADVISORS",
+    "city": "SAN RAMON",
+    "state": "CA",
+    "aum": 1490000
+  },
+  {
+    "crd_number": 199,
+    "legal_name": "TRUE WEALTH GROUP",
+    "city": "BEND",
+    "state": "OR",
+    "aum": 0
+  },
+  {
+    "crd_number": 200,
+    "legal_name": "TRACTION FINANCIAL PARTNERS",
+    "city": "ENCAMPMENT",
+    "state": "WY",
+    "aum": 937000
+  },
+  {
+    "crd_number": 201,
+    "legal_name": "EMSO ASSET MANAGEMENT LIMITED",
+    "city": "LONDON",
+    "state": null,
+    "aum": 13000
+  },
+  {
+    "crd_number": 202,
+    "legal_name": "THE KOCEN FINANCIAL GROUP, INC.",
+    "city": "RANCHO MIRAGE",
+    "state": "CA",
+    "aum": 725000
+  },
+  {
+    "crd_number": 203,
+    "legal_name": "CRAFT&SAGE WEALTH",
+    "city": "KANSAS CITY",
+    "state": "MO",
+    "aum": 1439000
+  },
+  {
+    "crd_number": 204,
+    "legal_name": "INTEGRATED CAPITAL MANAGEMENT, INC.",
+    "city": "JESSUP",
+    "state": "PA",
+    "aum": 850000
+  },
+  {
+    "crd_number": 205,
+    "legal_name": "PERMANENT CAPITAL MANAGEMENT, LP",
+    "city": "CHICAGO",
+    "state": "IL",
+    "aum": 60000
+  },
+  {
+    "crd_number": 206,
+    "legal_name": "LOS ANGELES CAPITAL MANAGEMENT LLC",
+    "city": "LOS ANGELES",
+    "state": "CA",
+    "aum": 69000
+  },
+  {
+    "crd_number": 207,
+    "legal_name": "ARTHUR STEIN FINANCIAL, LLC",
+    "city": "BETHESDA",
+    "state": "MD",
+    "aum": 250000
+  },
+  {
+    "crd_number": 208,
+    "legal_name": "COLLIERS SECURITIES LLC",
+    "city": "MINNEAPOLIS",
+    "state": "MN",
+    "aum": 1055000
+  },
+  {
+    "crd_number": 209,
+    "legal_name": "BLUEHEEL LLC",
+    "city": "DALLAS",
+    "state": "TX",
+    "aum": 0
+  },
+  {
+    "crd_number": 210,
+    "legal_name": "SYON CAPITAL LLC",
+    "city": "SAN FRANCISCO",
+    "state": "CA",
+    "aum": 736000
+  },
+  {
+    "crd_number": 211,
+    "legal_name": "CAPITA FINANCIAL NETWORK, LLC",
+    "city": "SANDY",
+    "state": "UT",
+    "aum": 4976000
+  },
+  {
+    "crd_number": 212,
+    "legal_name": "LASALLE DEBT INVESTORS, INC.",
+    "city": "LOS ANGELES",
+    "state": "CA",
+    "aum": 4000
+  },
+  {
+    "crd_number": 213,
+    "legal_name": "TRG INVESTMENT ADVISORS, LLC",
+    "city": "BRATTLEBORO",
+    "state": "VT",
+    "aum": 519000
+  },
+  {
+    "crd_number": 214,
+    "legal_name": "GLASSMAN WEALTH SERVICES, LLC",
+    "city": "VIENNA",
+    "state": "VA",
+    "aum": 2720000
+  },
+  {
+    "crd_number": 215,
+    "legal_name": "ALLIANCEBERNSTEIN HOLDING L.P.",
+    "city": "NASHVILLE",
+    "state": "TN",
+    "aum": 0
+  },
+  {
+    "crd_number": 216,
+    "legal_name": "ATOMIC VAULTS ADVISORS LLC",
+    "city": "SAN FRANCISCO",
+    "state": "CA",
+    "aum": 0
+  },
+  {
+    "crd_number": 217,
+    "legal_name": "MATRIARCH WEALTH MANAGEMENT, LLC",
+    "city": "MIAMI",
+    "state": "FL",
+    "aum": 155000
+  },
+  {
+    "crd_number": 218,
+    "legal_name": "ELEVATE CAPITAL GROUP, LLC",
+    "city": "NEWPORT BEACH",
+    "state": "CA",
+    "aum": 0
+  },
+  {
+    "crd_number": 219,
+    "legal_name": "HARDIN CAPITAL PARTNERS, LLC",
+    "city": "GREENVILLE",
+    "state": "SC",
+    "aum": 1111000
+  },
+  {
+    "crd_number": 220,
+    "legal_name": "MARTINSEN WEALTH MANAGEMENT",
+    "city": "TEMPE",
+    "state": "AZ",
+    "aum": 0
+  },
+  {
+    "crd_number": 221,
+    "legal_name": "SCHARF INVESTMENTS, LLC",
+    "city": "LOS GATOS",
+    "state": "CA",
+    "aum": 1603000
+  },
+  {
+    "crd_number": 222,
+    "legal_name": "ONEASCENT FINANCIAL SERVICES LLC",
+    "city": "BIRMINGHAM",
+    "state": "AL",
+    "aum": 7877000
+  },
+  {
+    "crd_number": 223,
+    "legal_name": "VERACITY CAPITAL LLC",
+    "city": "ATLANTA",
+    "state": "GA",
+    "aum": 1677000
+  },
+  {
+    "crd_number": 224,
+    "legal_name": "CHEYNE CAPITAL MANAGEMENT (UK) LLP",
+    "city": "LONDON",
+    "state": null,
+    "aum": 41000
+  },
+  {
+    "crd_number": 225,
+    "legal_name": "INTEGRITY RIA, LLC",
+    "city": "LAFAYETTE",
+    "state": "LA",
+    "aum": 1840000
+  },
+  {
+    "crd_number": 226,
+    "legal_name": "ALPHAQ ADVISORS",
+    "city": "WINTER PARK",
+    "state": "FL",
+    "aum": 294000
+  },
+  {
+    "crd_number": 227,
+    "legal_name": "LEGACY WEALTH MANAGEMENT, LLC",
+    "city": "BOISE",
+    "state": "ID",
+    "aum": 3537000
+  },
+  {
+    "crd_number": 228,
+    "legal_name": "CLEAN ENERGY TRANSITION LLP",
+    "city": "LONDON",
+    "state": null,
+    "aum": 8000
+  },
+  {
+    "crd_number": 229,
+    "legal_name": "PHOENIX WEALTH ADVISORS INC.",
+    "city": "CHAPEL HILL",
+    "state": "NC",
+    "aum": 1434000
+  },
+  {
+    "crd_number": 230,
+    "legal_name": "ROBERTSON STEPHENS",
+    "city": "SAN FRANCISCO",
+    "state": "CA",
+    "aum": 4536000
+  },
+  {
+    "crd_number": 231,
+    "legal_name": "CITIGROUP GLOBAL MARKETS INC.",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 53880000
+  },
+  {
+    "crd_number": 232,
+    "legal_name": "BIG SKY WEALTH ADVISORS, LLC",
+    "city": "GREAT FALLS",
+    "state": "MT",
+    "aum": 443000
+  },
+  {
+    "crd_number": 233,
+    "legal_name": "UCAP AMERICAS",
+    "city": "MIAMI",
+    "state": "FL",
+    "aum": 222000
+  },
+  {
+    "crd_number": 235,
+    "legal_name": "CLOUT CAPITAL",
+    "city": "MIAMI",
+    "state": "FL",
+    "aum": 0
+  },
+  {
+    "crd_number": 236,
+    "legal_name": "EVOKE ADVISORS",
+    "city": "LOS ANGELES",
+    "state": "CA",
+    "aum": 10336000
+  },
+  {
+    "crd_number": 237,
+    "legal_name": "7TWO",
+    "city": "DENVER",
+    "state": "CO",
+    "aum": 206000
+  },
+  {
+    "crd_number": 238,
+    "legal_name": "BLACKROCK INVESTMENT MANAGEMENT, LLC",
+    "city": "PRINCETON",
+    "state": "NJ",
+    "aum": 46332000
+  },
+  {
+    "crd_number": 239,
+    "legal_name": "OARSMAN CAPITAL, INC",
+    "city": "MILWAUKEE",
+    "state": "WI",
+    "aum": 1628000
+  },
+  {
+    "crd_number": 240,
+    "legal_name": "NFC INVESTMENTS, LLC",
+    "city": "MEMPHIS",
+    "state": "TN",
+    "aum": 151000
+  },
+  {
+    "crd_number": 241,
+    "legal_name": "NOVA WEALTH MANAGEMENT, INC.",
+    "city": "BONITA SPRINGS",
+    "state": "FL",
+    "aum": 623000
+  },
+  {
+    "crd_number": 242,
+    "legal_name": "FORTITUDE FAMILY OFFICE",
+    "city": "SCOTTSDALE",
+    "state": "AZ",
+    "aum": 432000
+  },
+  {
+    "crd_number": 243,
+    "legal_name": "ALLIANCEBERNSTEIN L.P.",
+    "city": "NASHVILLE",
+    "state": "TN",
+    "aum": 62140000
+  },
+  {
+    "crd_number": 244,
+    "legal_name": "WEALTH BENEFIT ADVISORS, LLC",
+    "city": "HOUSTON",
+    "state": "TX",
+    "aum": 432000
+  },
+  {
+    "crd_number": 245,
+    "legal_name": "NEW CENTURY FINANCIAL GROUP, LLC",
+    "city": "PRINCETON",
+    "state": "NJ",
+    "aum": 986000
+  },
+  {
+    "crd_number": 246,
+    "legal_name": "MILESTONE ASSET MANAGEMENT GROUP, LLC",
+    "city": "AVON",
+    "state": "CT",
+    "aum": 481000
+  },
+  {
+    "crd_number": 248,
+    "legal_name": "SR ALTERNATIVE CREDIT, LLC",
+    "city": "DARIEN",
+    "state": "CT",
+    "aum": 15000
+  },
+  {
+    "crd_number": 249,
+    "legal_name": "TIEMPO CAPITAL PARTNERS",
+    "city": "MIAMI",
+    "state": "FL",
+    "aum": 43000
+  },
+  {
+    "crd_number": 250,
+    "legal_name": "HIGHTOWER ADVISORS, LLC",
+    "city": "CHICAGO",
+    "state": "IL",
+    "aum": 178256000
+  },
+  {
+    "crd_number": 251,
+    "legal_name": "EAGLE WEALTH MANAGEMENT GROUP INC.",
+    "city": "VALENCIA",
+    "state": "CA",
+    "aum": 432000
+  },
+  {
+    "crd_number": 252,
+    "legal_name": "WILLIAM O'NEIL + COMPANY",
+    "city": "LOS ANGELES",
+    "state": "CA",
+    "aum": 0
+  },
+  {
+    "crd_number": 253,
+    "legal_name": "PORT CAPITAL MANAGEMENT",
+    "city": "MASSAPEQUA",
+    "state": "NY",
+    "aum": 5000
+  },
+  {
+    "crd_number": 254,
+    "legal_name": "ADERO PARTNERS, LLC",
+    "city": "PLEASANTON",
+    "state": "CA",
+    "aum": 3511000
+  },
+  {
+    "crd_number": 255,
+    "legal_name": "WEALTH ADVISORY SOLUTIONS, LLC",
+    "city": "ZIONSVILLE",
+    "state": "IN",
+    "aum": 1777000
+  },
+  {
+    "crd_number": 256,
+    "legal_name": "BLACKROCK CAPITAL INVESTMENT ADVISORS, LLC",
+    "city": "WILMINGTON",
+    "state": "DE",
+    "aum": 129000
+  },
+  {
+    "crd_number": 257,
+    "legal_name": "FORTRESS PRIVATE LEDGER, LLC",
+    "city": "RALEIGH",
+    "state": "NC",
+    "aum": 691000
+  },
+  {
+    "crd_number": 258,
+    "legal_name": "COVE WEALTH MANAGEMENT",
+    "city": "HOUSTON",
+    "state": "TX",
+    "aum": 284000
+  },
+  {
+    "crd_number": 260,
+    "legal_name": "MARCUM WEALTH, LLC",
+    "city": "CLEVELAND",
+    "state": "OH",
+    "aum": 6904000
+  },
+  {
+    "crd_number": 261,
+    "legal_name": "BLACKROCK ADVISORS, LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 306000
+  },
+  {
+    "crd_number": 262,
+    "legal_name": "LONG RUN WEALTH ADVISORS, LLC",
+    "city": "LAKE PLACID",
+    "state": "NY",
+    "aum": 2033000
+  },
+  {
+    "crd_number": 263,
+    "legal_name": "BLACKROCK INTERNATIONAL LIMITED",
+    "city": "EDINBURGH",
+    "state": null,
+    "aum": 73000
+  },
+  {
+    "crd_number": 264,
+    "legal_name": "LGIM AMERICA",
+    "city": "CHICAGO",
+    "state": "IL",
+    "aum": 559000
+  },
+  {
+    "crd_number": 265,
+    "legal_name": "WALTER SCOTT & PARTNERS LIMITED",
+    "city": "EDINBURGH",
+    "state": null,
+    "aum": 190000
+  },
+  {
+    "crd_number": 266,
+    "legal_name": "WINDROSE ADVISORS LLC",
+    "city": "WALTHAM",
+    "state": "MA",
+    "aum": 508000
+  },
+  {
+    "crd_number": 267,
+    "legal_name": "MAC ALPHA CAPITAL MANAGEMENT, LP",
+    "city": "TAMPA",
+    "state": "FL",
+    "aum": 9000
+  },
+  {
+    "crd_number": 268,
+    "legal_name": "VANWEELDEN WEALTH MANAGEMENT, LLC",
+    "city": "WEST CHESTER TOWNSHIP",
+    "state": "OH",
+    "aum": 526000
+  },
+  {
+    "crd_number": 270,
+    "legal_name": "BLACKROCK ASSET MANAGEMENT SCHWEIZ AG",
+    "city": "ZURICH",
+    "state": null,
+    "aum": 38000
+  },
+  {
+    "crd_number": 271,
+    "legal_name": "VUEFOLIO, INC",
+    "city": "PALO ALTO",
+    "state": "CA",
+    "aum": 0
+  },
+  {
+    "crd_number": 272,
+    "legal_name": "BLACKROCK ALTERNATIVES MANAGEMENT, LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 33000
+  },
+  {
+    "crd_number": 273,
+    "legal_name": "BLACKROCK REALTY ADVISORS INC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 23000
+  },
+  {
+    "crd_number": 274,
+    "legal_name": "LEVEL FINANCIAL ADVISORS, INC.",
+    "city": "EAST AMHERST",
+    "state": "NY",
+    "aum": 1965000
+  },
+  {
+    "crd_number": 275,
+    "legal_name": "1015 CAPITAL PARTNERS, LLC",
+    "city": "POTTSTOWN",
+    "state": "PA",
+    "aum": 0
+  },
+  {
+    "crd_number": 276,
+    "legal_name": "CRUX WEALTH ADVISORS",
+    "city": "LONG BEACH",
+    "state": "CA",
+    "aum": 0
+  },
+  {
+    "crd_number": 277,
+    "legal_name": "SAXONY CAPITAL MANAGEMENT, LLC",
+    "city": "SAINT LOUIS",
+    "state": "MO",
+    "aum": 1192000
+  },
+  {
+    "crd_number": 278,
+    "legal_name": "CREDIT SUISSE ASSET MANAGEMENT LIMITED",
+    "city": "LONDON (ENGLAND)",
+    "state": null,
+    "aum": 84000
+  },
+  {
+    "crd_number": 279,
+    "legal_name": "WALLEYE CAPITAL LLC",
+    "city": "PLYMOUTH",
+    "state": "MN",
+    "aum": 14000
+  },
+  {
+    "crd_number": 280,
+    "legal_name": "RIVER WEALTH ADVISORS LLC",
+    "city": "CAMP HILL",
+    "state": "PA",
+    "aum": 2257000
+  },
+  {
+    "crd_number": 281,
+    "legal_name": "CROSSOVER CAPITAL",
+    "city": "YARDLEY",
+    "state": "PA",
+    "aum": 258000
+  },
+  {
+    "crd_number": 282,
+    "legal_name": "TREEHOUSE WEALTH ADVISORS",
+    "city": "WALNUT CREEK",
+    "state": "CA",
+    "aum": 339000
+  },
+  {
+    "crd_number": 283,
+    "legal_name": "ELITE RETIREMENT GROUP",
+    "city": "PLOVER",
+    "state": "WI",
+    "aum": 1449000
+  },
+  {
+    "crd_number": 284,
+    "legal_name": "WARREN STREET WEALTH ADVISORS, LLC",
+    "city": "IRVINE",
+    "state": "CA",
+    "aum": 899000
+  },
+  {
+    "crd_number": 285,
+    "legal_name": "CENTURION WEALTH MANAGEMENT",
+    "city": "MCLEAN",
+    "state": "VA",
+    "aum": 478000
+  },
+  {
+    "crd_number": 286,
+    "legal_name": "COGENTBLUE",
+    "city": "KNOXVILLE",
+    "state": "TN",
+    "aum": 394000
+  },
+  {
+    "crd_number": 287,
+    "legal_name": "FUTUREMONEY RIA",
+    "city": "MANCHESTER",
+    "state": "NH",
+    "aum": 170000
+  },
+  {
+    "crd_number": 288,
+    "legal_name": "FLEXPATH STRATEGIES",
+    "city": "ALISO VIEJO",
+    "state": "CA",
+    "aum": 902000
+  },
+  {
+    "crd_number": 289,
+    "legal_name": "OASIS CAPITAL PARTNERS (TEXAS) INC.",
+    "city": "AUSTIN",
+    "state": "TX",
+    "aum": 12000
+  },
+  {
+    "crd_number": 290,
+    "legal_name": "BIP ALLIANCE, LLC",
+    "city": "ATLANTA",
+    "state": "GA",
+    "aum": 666000
+  },
+  {
+    "crd_number": 291,
+    "legal_name": "YORKVILLE ADVISORS GLOBAL, LP",
+    "city": "MOUNTAINSIDE",
+    "state": "NJ",
+    "aum": 5000
+  },
+  {
+    "crd_number": 292,
+    "legal_name": "CAPITAL INVESTMENT ADVISORS, LLC",
+    "city": "ATLANTA",
+    "state": "GA",
+    "aum": 12390000
+  },
+  {
+    "crd_number": 293,
+    "legal_name": "PANORAMIC CAPITAL PARTNERS LLC",
+    "city": "LAKE OSWEGO",
+    "state": "OR",
+    "aum": 0
+  },
+  {
+    "crd_number": 294,
+    "legal_name": "NOVA R WEALTH, INC.",
+    "city": "OVERLAND PARK",
+    "state": "KS",
+    "aum": 882000
+  },
+  {
+    "crd_number": 295,
+    "legal_name": "RCM ROBINSON CAPITAL MANAGEMENT LLC",
+    "city": "MILL VALLEY",
+    "state": "CA",
+    "aum": 10000
+  },
+  {
+    "crd_number": 296,
+    "legal_name": "ARISTA ADVISORY GROUP, LLC",
+    "city": "ALBANY",
+    "state": "NY",
+    "aum": 575000
+  },
+  {
+    "crd_number": 297,
+    "legal_name": "FUNDSTRAT CAPITAL",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 0
+  },
+  {
+    "crd_number": 298,
+    "legal_name": "BESTIGE HOLDINGS, LLC",
+    "city": "PARK CITY",
+    "state": "UT",
+    "aum": 9000
+  },
+  {
+    "crd_number": 299,
+    "legal_name": "GREY ROCK MANAGEMENT PARTNERS IV, LLC",
+    "city": "DALLAS",
+    "state": "TX",
+    "aum": 4000
+  },
+  {
+    "crd_number": 300,
+    "legal_name": "EASTSPRING INVESTMENTS (SINGAPORE) LIMITED",
+    "city": "SINGAPORE",
+    "state": null,
+    "aum": 203000
+  },
+  {
+    "crd_number": 301,
+    "legal_name": "WHITE OAK FINANCIAL MANAGEMENT, INC",
+    "city": "ASHEVILLE",
+    "state": "NC",
+    "aum": 729000
+  },
+  {
+    "crd_number": 302,
+    "legal_name": "SAGEVIEW ADVISORY GROUP, LLC",
+    "city": "NEWPORT BEACH",
+    "state": "CA",
+    "aum": 34543000
+  },
+  {
+    "crd_number": 303,
+    "legal_name": "PALOUSE CAPITAL MANAGEMENT, INC.",
+    "city": "SPOKANE",
+    "state": "WA",
+    "aum": 572000
+  },
+  {
+    "crd_number": 304,
+    "legal_name": "GEODE CAPITAL MANAGEMENT, LLC",
+    "city": "BOSTON",
+    "state": "MA",
+    "aum": 172000
+  },
+  {
+    "crd_number": 305,
+    "legal_name": "HARLOW WEALTH MANAGEMENT, INC.",
+    "city": "VANCOUVER",
+    "state": "WA",
+    "aum": 1629000
+  },
+  {
+    "crd_number": 306,
+    "legal_name": "HARLOW WEALTH MANAGEMENT, INC.",
+    "city": "VANCOUVER",
+    "state": "WA",
+    "aum": 1629000
+  },
+  {
+    "crd_number": 307,
+    "legal_name": "TWO SIGMA VENTURES, LP",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 15000
+  },
+  {
+    "crd_number": 309,
+    "legal_name": "WIMER INVESTMENT MANAGEMENT",
+    "city": "SCOTCH PLAINS",
+    "state": "NJ",
+    "aum": 20000
+  },
+  {
+    "crd_number": 310,
+    "legal_name": "WAYPOINT WEALTH PARTNERS",
+    "city": "MILL VALLEY",
+    "state": "CA",
+    "aum": 887000
+  },
+  {
+    "crd_number": 311,
+    "legal_name": "SHP WEALTH MANAGEMENT, LLC",
+    "city": "PLYMOUTH",
+    "state": "MA",
+    "aum": 5758000
+  },
+  {
+    "crd_number": 312,
+    "legal_name": "THIRTYNORTH INVESTMENTS, LLC",
+    "city": "NEW ORLEANS",
+    "state": "LA",
+    "aum": 360000
+  },
+  {
+    "crd_number": 313,
+    "legal_name": "MITCHELL CAPITAL MANAGEMENT CO",
+    "city": "LEAWOOD",
+    "state": "KS",
+    "aum": 740000
+  },
+  {
+    "crd_number": 314,
+    "legal_name": "A.P. GILFOYLE & CO., L.P.",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 9000
+  },
+  {
+    "crd_number": 315,
+    "legal_name": "REGENTS GATE CAPITAL LLP",
+    "city": "LONDON",
+    "state": null,
+    "aum": 6000
+  },
+  {
+    "crd_number": 316,
+    "legal_name": "CPR INVESTMENTS INC",
+    "city": "ROCHESTER",
+    "state": "MI",
+    "aum": 3510000
+  },
+  {
+    "crd_number": 317,
+    "legal_name": "AMERIPRISE FINANCIAL SERVICES, LLC",
+    "city": "MINNEAPOLIS",
+    "state": "MN",
+    "aum": 2284921000
+  },
+  {
+    "crd_number": 318,
+    "legal_name": "TENON FINANCIAL",
+    "city": "METUCHEN",
+    "state": "NJ",
+    "aum": 279000
+  },
+  {
+    "crd_number": 319,
+    "legal_name": "AFLAC ASSET MANAGEMENT LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 12000
+  },
+  {
+    "crd_number": 320,
+    "legal_name": "BERNSTEIN INSTITUTIONAL SERVICES LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 0
+  },
+  {
+    "crd_number": 321,
+    "legal_name": "SHEPHERD FINANCIAL PARTNERS, LLC",
+    "city": "WINCHESTER",
+    "state": "MA",
+    "aum": 696000
+  },
+  {
+    "crd_number": 322,
+    "legal_name": "ULLMANN WEALTH PARTNERS",
+    "city": "JACKSONVILLE BEACH",
+    "state": "FL",
+    "aum": 1282000
+  },
+  {
+    "crd_number": 323,
+    "legal_name": "ASSET STRATEGY ADVISORS, LLC",
+    "city": "NATICK",
+    "state": "MA",
+    "aum": 539000
+  },
+  {
+    "crd_number": 324,
+    "legal_name": "MAN GLOBAL PRIVATE MARKETS (UK) LIMITED",
+    "city": "LONDON",
+    "state": null,
+    "aum": 11000
+  },
+  {
+    "crd_number": 325,
+    "legal_name": "POLPO CAPITAL MANAGEMENT LLC",
+    "city": "HASTINGS ON HUDSON",
+    "state": "NY",
+    "aum": 2000
+  },
+  {
+    "crd_number": 326,
+    "legal_name": "BRAINS INVESTMENTS, LLC",
+    "city": "GREAT FALLS",
+    "state": "VA",
+    "aum": 1000
+  },
+  {
+    "crd_number": 327,
+    "legal_name": "JM2 CAPITAL INC.",
+    "city": "EDMOND",
+    "state": "OK",
+    "aum": 183000
+  },
+  {
+    "crd_number": 328,
+    "legal_name": "CURIO WEALTH, LLC",
+    "city": "ANNAPOLIS",
+    "state": "MD",
+    "aum": 1044000
+  },
+  {
+    "crd_number": 329,
+    "legal_name": "SUGAR MAPLE ASSET MANAGEMENT, LLC",
+    "city": "SISTER BAY",
+    "state": "WI",
+    "aum": 188000
+  },
+  {
+    "crd_number": 330,
+    "legal_name": "CHILDFREE WEALTH",
+    "city": "MOUNT JULIET",
+    "state": "TN",
+    "aum": 0
+  },
+  {
+    "crd_number": 331,
+    "legal_name": "CHICAGO INVESTMENT ADVISORY GROUP",
+    "city": "MOKENA",
+    "state": "IL",
+    "aum": 1568000
+  },
+  {
+    "crd_number": 332,
+    "legal_name": "YIM INVESTMENT MANAGEMENT, LLC",
+    "city": "HONOLULU",
+    "state": "HI",
+    "aum": 1456000
+  },
+  {
+    "crd_number": 333,
+    "legal_name": "WR WEALTH PLANNERS LLC",
+    "city": "COLUMBIA",
+    "state": "MO",
+    "aum": 3070000
+  },
+  {
+    "crd_number": 334,
+    "legal_name": "PREMIUM 72 CAPITAL",
+    "city": "HOUSTON",
+    "state": "TX",
+    "aum": 15000
+  },
+  {
+    "crd_number": 335,
+    "legal_name": "JDM FINANCIAL GROUP LLC",
+    "city": "AUSTIN",
+    "state": "TX",
+    "aum": 710000
+  },
+  {
+    "crd_number": 336,
+    "legal_name": "ARES COMMERCIAL REAL ESTATE MANAGEMENT LLC",
+    "city": "LOS ANGELES",
+    "state": "CA",
+    "aum": 9000
+  },
+  {
+    "crd_number": 337,
+    "legal_name": "PERRYRIDGE CAPITAL LP",
+    "city": "GREENWICH",
+    "state": "CT",
+    "aum": 4000
+  },
+  {
+    "crd_number": 338,
+    "legal_name": "ASHTON THOMAS ADVISORS LLC",
+    "city": "SCOTTSDALE",
+    "state": "AZ",
+    "aum": 0
+  },
+  {
+    "crd_number": 339,
+    "legal_name": "ASSOCIATED INVESTMENT SERVICES, INC.",
+    "city": "GREEN BAY",
+    "state": "WI",
+    "aum": 4578000
+  },
+  {
+    "crd_number": 340,
+    "legal_name": "ALAMOS CAPITAL, LLC",
+    "city": "TUCSON",
+    "state": "AZ",
+    "aum": 0
+  },
+  {
+    "crd_number": 341,
+    "legal_name": "MALAGA COVE CAPITAL, LLC",
+    "city": "PALOS VERDES ESTATES",
+    "state": "CA",
+    "aum": 505000
+  },
+  {
+    "crd_number": 342,
+    "legal_name": "SSGA FUNDS MANAGEMENT, INC.",
+    "city": "BOSTON",
+    "state": "MA",
+    "aum": 246000
+  },
+  {
+    "crd_number": 343,
+    "legal_name": "CLARENDON PRIVATE LLC",
+    "city": "BOSTON",
+    "state": "MA",
+    "aum": 128000
+  },
+  {
+    "crd_number": 344,
+    "legal_name": "FORM WEALTH ADVISORS, LLC",
+    "city": "LAKE GENEVA",
+    "state": "WI",
+    "aum": 2697000
+  },
+  {
+    "crd_number": 345,
+    "legal_name": "FOURTH SAIL CAPITAL US LP",
+    "city": "AVENTURA",
+    "state": "FL",
+    "aum": 6000
+  },
+  {
+    "crd_number": 346,
+    "legal_name": "COLTER LEWIS INVESTMENT PARTNERS, LLC",
+    "city": "GREENWICH",
+    "state": "CT",
+    "aum": 93000
+  },
+  {
+    "crd_number": 347,
+    "legal_name": "LESLIE MARIE GIORDANO",
+    "city": "GARDEN CITY",
+    "state": "NY",
+    "aum": 327000
+  },
+  {
+    "crd_number": 348,
+    "legal_name": "GLOBAL RETIREMENT PARTNERS LLC",
+    "city": "SAN RAFAEL",
+    "state": "CA",
+    "aum": 28908000
+  },
+  {
+    "crd_number": 349,
+    "legal_name": "HILLTOP SECURITIES ASSET MANAGEMENT, LLC",
+    "city": "DALLAS",
+    "state": "TX",
+    "aum": 51000
+  },
+  {
+    "crd_number": 350,
+    "legal_name": "GFG SOLUTIONS",
+    "city": "ORLANDO",
+    "state": "FL",
+    "aum": 429000
+  },
+  {
+    "crd_number": 351,
+    "legal_name": "PACIFIC INVESTMENT MANAGEMENT COMPANY LLC",
+    "city": "NEWPORT BEACH",
+    "state": "CA",
+    "aum": 2811000
+  },
+  {
+    "crd_number": 352,
+    "legal_name": "FORM WEALTH ADVISORS, LLC",
+    "city": "LAKE GENEVA",
+    "state": "WI",
+    "aum": 2697000
+  },
+  {
+    "crd_number": 353,
+    "legal_name": "DWS ALTERNATIVES GLOBAL LIMITED",
+    "city": "LONDON",
+    "state": null,
+    "aum": 54000
+  },
+  {
+    "crd_number": 354,
+    "legal_name": "IDR INVESTMENT MANAGEMENT, LLC",
+    "city": "INDEPENDENCE",
+    "state": "OH",
+    "aum": 6000
+  },
+  {
+    "crd_number": 355,
+    "legal_name": "WILLNER & HELLER LLC",
+    "city": "ENCINO",
+    "state": "CA",
+    "aum": 385000
+  },
+  {
+    "crd_number": 356,
+    "legal_name": "IBN ASSET MANAGEMENT, LLC",
+    "city": "THOUSAND OAKS",
+    "state": "CA",
+    "aum": 44000
+  },
+  {
+    "crd_number": 357,
+    "legal_name": "OZE CAPITAL LLC",
+    "city": "FLORHAM PARK",
+    "state": "NJ",
+    "aum": 10000
+  },
+  {
+    "crd_number": 358,
+    "legal_name": "TRANSAMERICA FINANCIAL ADVISORS, INC.",
+    "city": "ST PETERSBURG",
+    "state": "FL",
+    "aum": 45001000
+  },
+  {
+    "crd_number": 359,
+    "legal_name": "LIGHTHOUSE INVESTMENT PARTNERS, LLC",
+    "city": "PALM BEACH GARDENS",
+    "state": "FL",
+    "aum": 151000
+  },
+  {
+    "crd_number": 360,
+    "legal_name": "PROVIDENCE WEALTH ADVISORS, LLC",
+    "city": "FRANKFORT",
+    "state": "IL",
+    "aum": 1253000
+  },
+  {
+    "crd_number": 361,
+    "legal_name": "MODERN CAPITAL GROUP LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 45000
+  },
+  {
+    "crd_number": 362,
+    "legal_name": "MARBLE BAR ASSET MANAGEMENT LLP",
+    "city": "LONDON",
+    "state": null,
+    "aum": 30000
+  },
+  {
+    "crd_number": 363,
+    "legal_name": "MANNA WEALTH MANAGEMENT",
+    "city": "MIAMI BEACH",
+    "state": "FL",
+    "aum": 0
+  },
+  {
+    "crd_number": 364,
+    "legal_name": "THE INSTITUTE OF FINANCIAL WELLNESS, LLC",
+    "city": "FORT LAUDERDALE",
+    "state": "FL",
+    "aum": 0
+  },
+  {
+    "crd_number": 365,
+    "legal_name": "NEW AMSTERDAM WEALTH PLANNING",
+    "city": "LONG BRANCH",
+    "state": "NJ",
+    "aum": 92000
+  },
+  {
+    "crd_number": 366,
+    "legal_name": "PIPER SANDLER & CO.",
+    "city": "MINNEAPOLIS",
+    "state": "MN",
+    "aum": 1000
+  },
+  {
+    "crd_number": 367,
+    "legal_name": "TIAA-CREF TUITION FINANCING, INC.",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 7000
+  },
+  {
+    "crd_number": 368,
+    "legal_name": "RFG ADVISORY, LLC",
+    "city": "VESTAVIA HILLS",
+    "state": "AL",
+    "aum": 17871000
+  },
+  {
+    "crd_number": 369,
+    "legal_name": "TRUEHAVEN CAPITAL",
+    "city": "ST PETERSBURG",
+    "state": "FL",
+    "aum": 86000
+  },
+  {
+    "crd_number": 370,
+    "legal_name": "FALCON WEALTH PLANNING, INC.",
+    "city": "ONTARIO",
+    "state": "CA",
+    "aum": 5425000
+  },
+  {
+    "crd_number": 371,
+    "legal_name": "WEALTHSPAN INVESTMENT MANAGEMENT, LLC",
+    "city": "GRAND RAPIDS",
+    "state": "MI",
+    "aum": 39000
+  },
+  {
+    "crd_number": 372,
+    "legal_name": "HIGHROAD WEALTH ADVISORS, LLC",
+    "city": "COOS BAY",
+    "state": "OR",
+    "aum": 212000
+  },
+  {
+    "crd_number": 374,
+    "legal_name": "DMK ADVISOR GROUP, INC.",
+    "city": "LUTZ",
+    "state": "FL",
+    "aum": 462000
+  },
+  {
+    "crd_number": 375,
+    "legal_name": "HARVEST GLOBAL INVESTMENTS LIMITED",
+    "city": "HONG KONG",
+    "state": null,
+    "aum": 28000
+  },
+  {
+    "crd_number": 376,
+    "legal_name": "NEW INSIGHT WEALTH ADVISORS",
+    "city": "SAN RAMON",
+    "state": "CA",
+    "aum": 331000
+  },
+  {
+    "crd_number": 377,
+    "legal_name": "CHENAVARI INVESTMENT MANAGERS",
+    "city": "LONDON",
+    "state": null,
+    "aum": 32000
+  },
+  {
+    "crd_number": 378,
+    "legal_name": "WESTBRIDGE CAPITAL US ADVISORS, LP",
+    "city": "SAN MATEO",
+    "state": "CA",
+    "aum": 7000
+  },
+  {
+    "crd_number": 379,
+    "legal_name": "BRAMBLE WEALTH PLANNING",
+    "city": "CINCINNATI",
+    "state": "OH",
+    "aum": 0
+  },
+  {
+    "crd_number": 380,
+    "legal_name": "GRAHAM, BORDELON, GOLSON & GILBERT, INC.",
+    "city": "MONROE",
+    "state": "LA",
+    "aum": 290000
+  },
+  {
+    "crd_number": 381,
+    "legal_name": "P. SCHOENFELD ASSET MANAGEMENT LP",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 15000
+  },
+  {
+    "crd_number": 382,
+    "legal_name": "4J WEALTH MANAGEMENT, LLC",
+    "city": "ALEXANDRIA",
+    "state": "VA",
+    "aum": 612000
+  },
+  {
+    "crd_number": 383,
+    "legal_name": "ENTRUST INVESTMENT MANAGEMENT LLC",
+    "city": "MONROE",
+    "state": "LA",
+    "aum": 20000
+  },
+  {
+    "crd_number": 384,
+    "legal_name": "BROOKSTONE CAPITAL MANAGEMENT LLC",
+    "city": "WHEATON",
+    "state": "IL",
+    "aum": 68500000
+  },
+  {
+    "crd_number": 385,
+    "legal_name": "TREMBLANT CAPITAL GROUP",
+    "city": "WEST PALM BEACH",
+    "state": "FL",
+    "aum": 13000
+  },
+  {
+    "crd_number": 386,
+    "legal_name": "BASSAM WEALTH MANAGEMENT, LLC",
+    "city": "PALM BEACH",
+    "state": "FL",
+    "aum": 0
+  },
+  {
+    "crd_number": 387,
+    "legal_name": "THE FIDUCIARY ALLIANCE",
+    "city": "GREENVILLE",
+    "state": "SC",
+    "aum": 16591000
+  },
+  {
+    "crd_number": 388,
+    "legal_name": "THE FIDUCIARY ALLIANCE",
+    "city": "GREENVILLE",
+    "state": "SC",
+    "aum": 16591000
+  },
+  {
+    "crd_number": 389,
+    "legal_name": "AMERITAS ADVISORY SERVICES, LLC",
+    "city": "LINCOLN",
+    "state": "NE",
+    "aum": 39033000
+  },
+  {
+    "crd_number": 390,
+    "legal_name": "QP WEALTH MANAGEMENT, LLC",
+    "city": "BOCA RATON",
+    "state": "FL",
+    "aum": 547000
+  },
+  {
+    "crd_number": 391,
+    "legal_name": "ARCADIA INVESTMENT PARTNERS",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 107000
+  },
+  {
+    "crd_number": 392,
+    "legal_name": "ARES CAPITAL MANAGEMENT II LLC",
+    "city": "LOS ANGELES",
+    "state": "CA",
+    "aum": 16000
+  },
+  {
+    "crd_number": 393,
+    "legal_name": "ARES CAPITAL MANAGEMENT LLC",
+    "city": "LOS ANGELES",
+    "state": "CA",
+    "aum": 44000
+  },
+  {
+    "crd_number": 394,
+    "legal_name": "ARES MANAGEMENT LLC",
+    "city": "LOS ANGELES",
+    "state": "CA",
+    "aum": 535000
+  },
+  {
+    "crd_number": 395,
+    "legal_name": "INFINITY CREDIT ADVISORY, LLC",
+    "city": "ATLANTA",
+    "state": "GA",
+    "aum": 0
+  },
+  {
+    "crd_number": 396,
+    "legal_name": "SACKETT WEALTH ADVISORS, INC.",
+    "city": "BREA",
+    "state": "CA",
+    "aum": 417000
+  },
+  {
+    "crd_number": 397,
+    "legal_name": "CUMBERLAND HILL CAPITAL MANAGEMENT LLC",
+    "city": "DALLAS",
+    "state": "TX",
+    "aum": 3000
+  },
+  {
+    "crd_number": 398,
+    "legal_name": "PRINCIPAL ASSET MANAGEMENT",
+    "city": "DES MOINES",
+    "state": "IA",
+    "aum": 6824000
+  },
+  {
+    "crd_number": 399,
+    "legal_name": "VALIANT WEALTH, LLC",
+    "city": "WEST DES MOINES",
+    "state": "IA",
+    "aum": 574000
+  },
+  {
+    "crd_number": 400,
+    "legal_name": "AVENUE EUROPE INTERNATIONAL MANAGEMENT, L.P.",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 23000
+  },
+  {
+    "crd_number": 401,
+    "legal_name": "FORTHRIGHT WEALTH MANAGEMENT, LLC",
+    "city": "ALPHARETTA",
+    "state": "GA",
+    "aum": 1648000
+  },
+  {
+    "crd_number": 402,
+    "legal_name": "INVESTMENT CONSULTING SERVICES, LLC",
+    "city": "OAK BROOK",
+    "state": "IL",
+    "aum": 0
+  },
+  {
+    "crd_number": 403,
+    "legal_name": "MSD PARTNERS, L.P.",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 65000
+  },
+  {
+    "crd_number": 404,
+    "legal_name": "ALLEN CAPITAL MANAGEMENT, LLC",
+    "city": "VANCOUVER",
+    "state": "WA",
+    "aum": 268000
+  },
+  {
+    "crd_number": 405,
+    "legal_name": "ALLEN CAPITAL MANAGEMENT, LLC",
+    "city": "VANCOUVER",
+    "state": "WA",
+    "aum": 268000
+  },
+  {
+    "crd_number": 406,
+    "legal_name": "INCOME RESEARCH + MANAGEMENT",
+    "city": "BOSTON",
+    "state": "MA",
+    "aum": 922000
+  },
+  {
+    "crd_number": 407,
+    "legal_name": "VAQUITA SUN, INC.",
+    "city": "FORT LAUDERDALE",
+    "state": "FL",
+    "aum": 0
+  },
+  {
+    "crd_number": 408,
+    "legal_name": "TD PRIVATE CLIENT WEALTH LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 16422000
+  },
+  {
+    "crd_number": 409,
+    "legal_name": "PALISADE INFRASTRUCTURE",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 2000
+  },
+  {
+    "crd_number": 410,
+    "legal_name": "MOMENTUM WEALTH PLANNING",
+    "city": "APEX",
+    "state": "NC",
+    "aum": 0
+  },
+  {
+    "crd_number": 411,
+    "legal_name": "TALLVINE PARTNERS MANAGEMENT LP",
+    "city": "CORAL GABLES",
+    "state": "FL",
+    "aum": 2000
+  },
+  {
+    "crd_number": 412,
+    "legal_name": "SVOF/MM, LLC",
+    "city": "SANTA MONICA",
+    "state": "CA",
+    "aum": 1000
+  },
+  {
+    "crd_number": 413,
+    "legal_name": "AVENUE ASIA CAPITAL MANAGEMENT, L.P.",
+    "city": "NEW YORK CITY",
+    "state": "NY",
+    "aum": 14000
+  },
+  {
+    "crd_number": 414,
+    "legal_name": "GRANITE CAPITAL",
+    "city": "OAKLAND",
+    "state": "CA",
+    "aum": 236000
+  },
+  {
+    "crd_number": 415,
+    "legal_name": "GRANITE CAPITAL",
+    "city": "OAKLAND",
+    "state": "CA",
+    "aum": 236000
+  },
+  {
+    "crd_number": 416,
+    "legal_name": "FIRST SENTIER INVESTORS",
+    "city": "BARANGAROO NSW",
+    "state": null,
+    "aum": 2000
+  },
+  {
+    "crd_number": 417,
+    "legal_name": "FIRST SENTIER INVESTORS",
+    "city": "BARANGAROO, NSW",
+    "state": null,
+    "aum": 30000
+  },
+  {
+    "crd_number": 418,
+    "legal_name": "FIRST SENTIER INVESTORS",
+    "city": "BARANGAROO, NSW",
+    "state": null,
+    "aum": 173000
+  },
+  {
+    "crd_number": 419,
+    "legal_name": "ARCH OTC LLC",
+    "city": "FORT LAUDERDALE",
+    "state": "FL",
+    "aum": 0
+  },
+  {
+    "crd_number": 420,
+    "legal_name": "TRINITY STREET ASSET MANAGEMENT LLP",
+    "city": "LONDON",
+    "state": null,
+    "aum": 29000
+  },
+  {
+    "crd_number": 421,
+    "legal_name": "STEIGERWALD, GORDON & KOCH - WEALTH ADVISORS",
+    "city": "LEESBURG",
+    "state": "VA",
+    "aum": 2018000
+  },
+  {
+    "crd_number": 422,
+    "legal_name": "LPL FINANCIAL LLC",
+    "city": "FORT MILL",
+    "state": "SC",
+    "aum": 1910545000
+  },
+  {
+    "crd_number": 423,
+    "legal_name": "STIFEL, NICOLAUS & COMPANY, INCORPORATED",
+    "city": "ST LOUIS",
+    "state": "MO",
+    "aum": 54000000000
+  },
+  {
+    "crd_number": 424,
+    "legal_name": "SOOTCHY SECURITIES, LLC",
+    "city": "LOS ANGELES",
+    "state": "CA",
+    "aum": 0
+  },
+  {
+    "crd_number": 425,
+    "legal_name": "O'KEEFE STEVENS ADVISORY, INC.",
+    "city": "ROCHESTER",
+    "state": "NY",
+    "aum": 755000
+  },
+  {
+    "crd_number": 426,
+    "legal_name": "O'NEIL GLOBAL ADVISORS, INC.",
+    "city": "LOS ANGELES",
+    "state": "CA",
+    "aum": 50000
+  },
+  {
+    "crd_number": 427,
+    "legal_name": "ALPSTONE CAPITAL (SUISSE) S.A.",
+    "city": "GENEVE",
+    "state": null,
+    "aum": 5000
+  },
+  {
+    "crd_number": 428,
+    "legal_name": "AON SECURITIES LLC",
+    "city": "CHICAGO",
+    "state": "IL",
+    "aum": 0
+  },
+  {
+    "crd_number": 429,
+    "legal_name": "HARBOUR INVESTMENTS, INC.",
+    "city": "MADISON",
+    "state": "WI",
+    "aum": 33564000
+  },
+  {
+    "crd_number": 430,
+    "legal_name": "BOSTON STANDARD WEALTH MANAGEMENT, LLC",
+    "city": "WINCHESTER",
+    "state": "MA",
+    "aum": 1567000
+  },
+  {
+    "crd_number": 431,
+    "legal_name": "BALENTINE",
+    "city": "ATLANTA",
+    "state": "GA",
+    "aum": 3512000
+  },
+  {
+    "crd_number": 432,
+    "legal_name": "CENTENNIAL WEALTH ADVISORY, LLC",
+    "city": "TRAVERSE CITY",
+    "state": "MI",
+    "aum": 2397000
+  },
+  {
+    "crd_number": 433,
+    "legal_name": "OVERLOCK CAPITAL LLC",
+    "city": "WASHINGTON",
+    "state": "DC",
+    "aum": 1000
+  },
+  {
+    "crd_number": 434,
+    "legal_name": "AMERAUDI ASSET MANAGEMENT, INC.",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 1152000
+  },
+  {
+    "crd_number": 435,
+    "legal_name": "SC&H WEALTH",
+    "city": "SPARKS",
+    "state": "MD",
+    "aum": 1760000
+  },
+  {
+    "crd_number": 436,
+    "legal_name": "FOUNDATION CAPITAL MANAGEMENT, LLC",
+    "city": "EAST NORRITON",
+    "state": "PA",
+    "aum": 491000
+  },
+  {
+    "crd_number": 437,
+    "legal_name": "APOLLO CAPITAL MANAGEMENT, L.P.",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 842000
+  },
+  {
+    "crd_number": 438,
+    "legal_name": "DEDORA CAPITAL, INC.",
+    "city": "NAPA",
+    "state": "CA",
+    "aum": 1260000
+  },
+  {
+    "crd_number": 439,
+    "legal_name": "HARLAN CAPITAL PARTNERS LLC",
+    "city": "PALM BEACH",
+    "state": "FL",
+    "aum": 8000
+  },
+  {
+    "crd_number": 440,
+    "legal_name": "M HOLDINGS SECURITIES, INC.",
+    "city": "PORTLAND",
+    "state": "OR",
+    "aum": 9871000
+  },
+  {
+    "crd_number": 441,
+    "legal_name": "PARK SQUARE FINANCIAL GROUP LLC",
+    "city": "ROSWELL",
+    "state": "GA",
+    "aum": 0
+  },
+  {
+    "crd_number": 442,
+    "legal_name": "IONIC CAPITAL MANAGEMENT LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 14000
+  },
+  {
+    "crd_number": 443,
+    "legal_name": "PARTNERS CAPITAL INVESTMENT GROUP, LLP",
+    "city": "BOSTON",
+    "state": "MA",
+    "aum": 793000
+  },
+  {
+    "crd_number": 444,
+    "legal_name": "KELLY FINANCIAL SERVICES LLC",
+    "city": "BRAINTREE",
+    "state": "MA",
+    "aum": 2891000
+  },
+  {
+    "crd_number": 445,
+    "legal_name": "OMNIA FAMILY WEALTH, LLC",
+    "city": "AVENTURA",
+    "state": "FL",
+    "aum": 1015000
+  },
+  {
+    "crd_number": 446,
+    "legal_name": "BMO DIRECT INVEST INC.",
+    "city": "CHICAGO",
+    "state": "IL",
+    "aum": 154000
+  },
+  {
+    "crd_number": 447,
+    "legal_name": "TIGER PACIFIC CAPITAL LP",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 3000
+  },
+  {
+    "crd_number": 448,
+    "legal_name": "BINGHAM PRIVATE WEALTH, LLC",
+    "city": "SAN FRANCISCO",
+    "state": "CA",
+    "aum": 435000
+  },
+  {
+    "crd_number": 449,
+    "legal_name": "MILLENNIUM INVESTMENT AND RETIREMENT ADVISORS, LLC",
+    "city": "CHARLOTTE",
+    "state": "NC",
+    "aum": 703000
+  },
+  {
+    "crd_number": 450,
+    "legal_name": "UNIQUE WEALTH, LLC",
+    "city": "CLEARWATER",
+    "state": "FL",
+    "aum": 2063000
+  },
+  {
+    "crd_number": 451,
+    "legal_name": "ALTAROCK PARTNERS LP",
+    "city": "WEST PALM BEACH",
+    "state": "FL",
+    "aum": 2000
+  },
+  {
+    "crd_number": 452,
+    "legal_name": "TURN8 PRIVATE WEALTH INC.",
+    "city": "POINTE CLAIRE",
+    "state": null,
+    "aum": 1143000
+  },
+  {
+    "crd_number": 453,
+    "legal_name": "ARROYO ENERGY INVESTMENT PARTNERS LLC",
+    "city": "SPRING",
+    "state": "TX",
+    "aum": 11000
+  },
+  {
+    "crd_number": 454,
+    "legal_name": "BRAVE EAGLE WEALTH MANAGEMENT",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 74000
+  },
+  {
+    "crd_number": 455,
+    "legal_name": "MONTAG",
+    "city": "ATLANTA",
+    "state": "GA",
+    "aum": 1234000
+  },
+  {
+    "crd_number": 456,
+    "legal_name": "AVENTINE CAPITAL MANAGEMENT LLC",
+    "city": "CHICAGO",
+    "state": "IL",
+    "aum": 0
+  },
+  {
+    "crd_number": 458,
+    "legal_name": "OCCIDENTAL ASSET MANAGEMENT, LLC",
+    "city": "BURLINGAME",
+    "state": "CA",
+    "aum": 1455000
+  },
+  {
+    "crd_number": 459,
+    "legal_name": "CARBON DIRECT CAPITAL MANAGEMENT LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 5000
+  },
+  {
+    "crd_number": 460,
+    "legal_name": "HILLMAN CAPITAL MANAGEMENT INC",
+    "city": "BETHESDA",
+    "state": "MD",
+    "aum": 178000
+  },
+  {
+    "crd_number": 461,
+    "legal_name": "MANNA WEALTH MANAGEMENT",
+    "city": "MIAMI BEACH",
+    "state": "FL",
+    "aum": 0
+  },
+  {
+    "crd_number": 462,
+    "legal_name": "TRUIST ADVISORY SERVICES, INC.",
+    "city": "ATLANTA",
+    "state": "GA",
+    "aum": 124201000
+  },
+  {
+    "crd_number": 463,
+    "legal_name": "OBRA CAPITAL MANAGEMENT, LLC.",
+    "city": "AUSTIN",
+    "state": "TX",
+    "aum": 49000
+  },
+  {
+    "crd_number": 464,
+    "legal_name": "RICH DEWITT WEALTH MANAGEMENT LLC",
+    "city": "CHATTANOOGA",
+    "state": "TN",
+    "aum": 0
+  },
+  {
+    "crd_number": 465,
+    "legal_name": "WELLINGTON WEALTH STRATEGIES, LLC",
+    "city": "INDIANAPOLIS",
+    "state": "IN",
+    "aum": 1199000
+  },
+  {
+    "crd_number": 467,
+    "legal_name": "LARSON FINANCIAL GROUP, LLC",
+    "city": "SAINT LOUIS",
+    "state": "MO",
+    "aum": 21684000
+  },
+  {
+    "crd_number": 468,
+    "legal_name": "PHASE LINE CAPITAL, LLC",
+    "city": "ATLANTA",
+    "state": "GA",
+    "aum": 345000
+  },
+  {
+    "crd_number": 469,
+    "legal_name": "EXPRESSIVE WEALTH LLC",
+    "city": "CHICAGO",
+    "state": "IL",
+    "aum": 109000
+  },
+  {
+    "crd_number": 470,
+    "legal_name": "ACCELERATED WEALTH ADVISORS LLC",
+    "city": "COLORADO SPRINGS",
+    "state": "CO",
+    "aum": 2234000
+  },
+  {
+    "crd_number": 471,
+    "legal_name": "X CAPITAL ADVISORS LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 0
+  },
+  {
+    "crd_number": 472,
+    "legal_name": "BAM CREDIT AND INSURANCE SOLUTIONS ADVISOR LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 9000
+  },
+  {
+    "crd_number": 473,
+    "legal_name": "WELLTH ADVISORY SERVICES, LLC",
+    "city": "SHOREWOOD",
+    "state": "IL",
+    "aum": 3051000
+  },
+  {
+    "crd_number": 474,
+    "legal_name": "BISON WEALTH, LLC",
+    "city": "ATLANTA",
+    "state": "GA",
+    "aum": 4347000
+  },
+  {
+    "crd_number": 475,
+    "legal_name": "WEALTHUNITE ADVISORS, LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 59000
+  },
+  {
+    "crd_number": 476,
+    "legal_name": "TORONADO PARTNERS LLC",
+    "city": "SAN FRANCISCO",
+    "state": "CA",
+    "aum": 2000
+  },
+  {
+    "crd_number": 477,
+    "legal_name": "ADVANTAGE INVESTMENT MANAGEMENT",
+    "city": "LOUISVILLE",
+    "state": "KY",
+    "aum": 372000
+  },
+  {
+    "crd_number": 478,
+    "legal_name": "PINKERTON RETIREMENT SPECIALISTS, LLC",
+    "city": "COEUR D'ALENE",
+    "state": "ID",
+    "aum": 4141000
+  },
+  {
+    "crd_number": 479,
+    "legal_name": "ASSET STRATEGY ADVISORS, LLC",
+    "city": "NATICK",
+    "state": "MA",
+    "aum": 539000
+  },
+  {
+    "crd_number": 480,
+    "legal_name": "JANNEY MONTGOMERY SCOTT LLC",
+    "city": "PHILADELPHIA",
+    "state": "PA",
+    "aum": 226034000
+  },
+  {
+    "crd_number": 481,
+    "legal_name": "PROSPERITY WEALTH PLANNING LLC",
+    "city": "IRVINE",
+    "state": "CA",
+    "aum": 552000
+  },
+  {
+    "crd_number": 482,
+    "legal_name": "BURLING WEALTH PARTNERS",
+    "city": "CHICAGO",
+    "state": "IL",
+    "aum": 0
+  },
+  {
+    "crd_number": 483,
+    "legal_name": "ALTIORA FINANCIAL GROUP, LLC",
+    "city": "LEBANON",
+    "state": "OH",
+    "aum": 571000
+  },
+  {
+    "crd_number": 484,
+    "legal_name": "CONSTANT",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 0
+  },
+  {
+    "crd_number": 485,
+    "legal_name": "HELMSTAR WEALTH MANAGEMENT",
+    "city": "BOISE",
+    "state": "ID",
+    "aum": 1530000
+  },
+  {
+    "crd_number": 486,
+    "legal_name": "ENCOMPASS MORE ASSET MANAGEMENT LLC",
+    "city": "DANVILLE",
+    "state": "CA",
+    "aum": 2835000
+  },
+  {
+    "crd_number": 487,
+    "legal_name": "RICHARD P. SLAUGHTER ASSOCIATES, INC.",
+    "city": "AUSTIN",
+    "state": "TX",
+    "aum": 1616000
+  },
+  {
+    "crd_number": 488,
+    "legal_name": "AM INVESTMENT STRATEGIES, LLC",
+    "city": "CHATTANOOGA",
+    "state": "TN",
+    "aum": 1293000
+  },
+  {
+    "crd_number": 489,
+    "legal_name": "REALTA INVESTMENT ADVISORS, INC",
+    "city": "WILMINGTON",
+    "state": "DE",
+    "aum": 3529000
+  },
+  {
+    "crd_number": 490,
+    "legal_name": "MATTERN CAPITAL MANAGEMENT, LLC",
+    "city": "LAKEWOOD",
+    "state": "CO",
+    "aum": 1151000
+  },
+  {
+    "crd_number": 491,
+    "legal_name": "THE INSTITUTE",
+    "city": "DENVER",
+    "state": "CO",
+    "aum": 1787000
+  },
+  {
+    "crd_number": 492,
+    "legal_name": "COMPOUND PLANNING",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 7391000
+  },
+  {
+    "crd_number": 493,
+    "legal_name": "RHL GROUP, LLC",
+    "city": "HOLLY",
+    "state": "MI",
+    "aum": 0
+  },
+  {
+    "crd_number": 494,
+    "legal_name": "ACORNS",
+    "city": "IRVINE",
+    "state": "CA",
+    "aum": 5763237000
+  },
+  {
+    "crd_number": 495,
+    "legal_name": "EASTSOUND CAPITAL ADVISORS, LLC",
+    "city": "EASTSOUND",
+    "state": "WA",
+    "aum": 401000
+  },
+  {
+    "crd_number": 496,
+    "legal_name": "PORTFOLIO STRATEGIES INC NY",
+    "city": "MONTVALE",
+    "state": "NJ",
+    "aum": 3039000
+  },
+  {
+    "crd_number": 497,
+    "legal_name": "HANTZ FINANCIAL SERVICES, INC.",
+    "city": "SOUTHFIELD",
+    "state": "MI",
+    "aum": 112547000
+  },
+  {
+    "crd_number": 498,
+    "legal_name": "MORRIS FINANCIAL CONCEPTS, INC.",
+    "city": "MOUNT PLEASANT",
+    "state": "SC",
+    "aum": 910000
+  },
+  {
+    "crd_number": 499,
+    "legal_name": "DDO ADVISORY SERVICES, LLC",
+    "city": "RHINEBECK",
+    "state": "NY",
+    "aum": 44000
+  },
+  {
+    "crd_number": 500,
+    "legal_name": "NICHOLAS HOFFMAN & COMPANY, LLC",
+    "city": "ATLANTA",
+    "state": "GA",
+    "aum": 2124000
+  },
+  {
+    "crd_number": 501,
+    "legal_name": "SOUND POINT LUNA LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 37000
+  },
+  {
+    "crd_number": 502,
+    "legal_name": "NEW HARBOR CAPITAL",
+    "city": "CHICAGO",
+    "state": "IL",
+    "aum": 9000
+  },
+  {
+    "crd_number": 503,
+    "legal_name": "SOUND POINT MERIDIAN MANAGEMENT COMPANY LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 1000
+  },
+  {
+    "crd_number": 504,
+    "legal_name": "CACHE ADVISORS LLC",
+    "city": "SAN FRANCISCO",
+    "state": "CA",
+    "aum": 1000
+  },
+  {
+    "crd_number": 505,
+    "legal_name": "TILIA FIDUCIARY PARTNERS, INC.",
+    "city": "WILMINGTON",
+    "state": "NC",
+    "aum": 807000
+  },
+  {
+    "crd_number": 506,
+    "legal_name": "AMUNI FINANCIAL, INC.",
+    "city": "ST PETERSBURG",
+    "state": "FL",
+    "aum": 368000
+  },
+  {
+    "crd_number": 507,
+    "legal_name": "MAN SOLUTIONS LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 9000
+  },
+  {
+    "crd_number": 508,
+    "legal_name": "LIG CAPITAL MANAGEMENT, LLC",
+    "city": "OKLAHOMA CITY",
+    "state": "OK",
+    "aum": 625000
+  },
+  {
+    "crd_number": 509,
+    "legal_name": "ALBOURNE AMERICA LLC",
+    "city": "SAN FRANCISCO",
+    "state": "CA",
+    "aum": 0
+  },
+  {
+    "crd_number": 510,
+    "legal_name": "NATWEALTH MANAGEMENT",
+    "city": "MONTREAL",
+    "state": null,
+    "aum": 75000
+  },
+  {
+    "crd_number": 511,
+    "legal_name": "RCM ROBINSON CAPITAL MANAGEMENT LLC",
+    "city": "MILL VALLEY",
+    "state": "CA",
+    "aum": 10000
+  },
+  {
+    "crd_number": 512,
+    "legal_name": "BESPOKE ADVISORY",
+    "city": "EVERGREEN",
+    "state": "CO",
+    "aum": 7000
+  },
+  {
+    "crd_number": 513,
+    "legal_name": "THE PATRIOT FINANCIAL GROUP, LLC",
+    "city": "WALPOLE",
+    "state": "MA",
+    "aum": 6607000
+  },
+  {
+    "crd_number": 514,
+    "legal_name": "BLUESPRUCE",
+    "city": "CHICAGO",
+    "state": "IL",
+    "aum": 7000
+  },
+  {
+    "crd_number": 515,
+    "legal_name": "FREC",
+    "city": "SAN FRANCISCO",
+    "state": "CA",
+    "aum": 93000
+  },
+  {
+    "crd_number": 516,
+    "legal_name": "FPLF MANAGEMENT LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 0
+  },
+  {
+    "crd_number": 517,
+    "legal_name": "GOLDMAN SACHS HEDGE FUND STRATEGIES LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 118000
+  },
+  {
+    "crd_number": 518,
+    "legal_name": "PERSONAL CHOICE FINANCIAL ADVISORS, LLC",
+    "city": "CINCINNATI",
+    "state": "OH",
+    "aum": 494000
+  },
+  {
+    "crd_number": 519,
+    "legal_name": "J.J. BURNS & COMPANY",
+    "city": "MELVILLE",
+    "state": "NY",
+    "aum": 1755000
+  },
+  {
+    "crd_number": 520,
+    "legal_name": "STONE TEMPLE PARTNERS LLC",
+    "city": "BEDFORD",
+    "state": "NY",
+    "aum": 0
+  },
+  {
+    "crd_number": 521,
+    "legal_name": "LEGEND FINANCIAL ADVISORS INC",
+    "city": "PITTSBURGH",
+    "state": "PA",
+    "aum": 1076000
+  },
+  {
+    "crd_number": 522,
+    "legal_name": "VESTOR CAPITAL, LLC",
+    "city": "CHICAGO",
+    "state": "IL",
+    "aum": 3134000
+  },
+  {
+    "crd_number": 523,
+    "legal_name": "SALVUS WEALTH MANAGEMENT, LLC",
+    "city": "RED BANK",
+    "state": "NJ",
+    "aum": 713000
+  },
+  {
+    "crd_number": 524,
+    "legal_name": "ABOUND WEALTH MANAGEMENT, LLC",
+    "city": "FRANKLIN",
+    "state": "TN",
+    "aum": 3513000
+  },
+  {
+    "crd_number": 525,
+    "legal_name": "BIG INVESTMENT SERVICES",
+    "city": "DOVER",
+    "state": "DE",
+    "aum": 1209000
+  },
+  {
+    "crd_number": 526,
+    "legal_name": "USA FINANCIAL SECURITIES CORPORATION",
+    "city": "ADA",
+    "state": "MI",
+    "aum": 1395000
+  },
+  {
+    "crd_number": 527,
+    "legal_name": "WILIAN SECURITIES, LLC",
+    "city": "VADNAIS HEIGHTS",
+    "state": "MN",
+    "aum": 661000
+  },
+  {
+    "crd_number": 528,
+    "legal_name": "NORTHSTAR FIDUCIARY PARTNERS, LLC",
+    "city": "EAST BRUNSWICK",
+    "state": "NJ",
+    "aum": 104000
+  },
+  {
+    "crd_number": 529,
+    "legal_name": "DISCIPLINE WEALTH SOLUTIONS, INC.",
+    "city": "GREENVILLE",
+    "state": "SC",
+    "aum": 820000
+  },
+  {
+    "crd_number": 530,
+    "legal_name": "PARK SQUARE FINANCIAL GROUP LLC",
+    "city": "ROSWELL",
+    "state": "GA",
+    "aum": 0
+  },
+  {
+    "crd_number": 531,
+    "legal_name": "PAX FINANCIAL GROUP",
+    "city": "SAN ANTONIO",
+    "state": "TX",
+    "aum": 4098000
+  },
+  {
+    "crd_number": 532,
+    "legal_name": "EFG ASSET MANAGEMENT (AMERICAS) CORP.",
+    "city": "MIAMI",
+    "state": "FL",
+    "aum": 714000
+  },
+  {
+    "crd_number": 533,
+    "legal_name": "LUBERT-ADLER MANAGEMENT COMPANY, L.P.",
+    "city": "PHILADELPHIA",
+    "state": "PA",
+    "aum": 22000
+  },
+  {
+    "crd_number": 534,
+    "legal_name": "HUB INVESTMENT PARTNERS, LLC",
+    "city": "AUSTIN",
+    "state": "TX",
+    "aum": 2202000
+  },
+  {
+    "crd_number": 535,
+    "legal_name": "VEST FINANCIAL LLC",
+    "city": "MCLEAN",
+    "state": "VA",
+    "aum": 94000
+  },
+  {
+    "crd_number": 536,
+    "legal_name": "HERITAGE FINANCIAL LLC",
+    "city": "GAINESVILLE",
+    "state": "VA",
+    "aum": 1286000
+  },
+  {
+    "crd_number": 537,
+    "legal_name": "IRONSIDES ASSET ADVISORS, LLC",
+    "city": "ROCKY MOUNT",
+    "state": "NC",
+    "aum": 704000
+  },
+  {
+    "crd_number": 538,
+    "legal_name": "SWISS RE INSURANCE-LINKED INVESTMENT ADVISORS CORPORATION",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 1000
+  },
+  {
+    "crd_number": 539,
+    "legal_name": "RBC CAPITAL MARKETS, LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 451404000
+  },
+  {
+    "crd_number": 540,
+    "legal_name": "POLUS CAPITAL MANAGEMENT (US) INC.",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 1000
+  },
+  {
+    "crd_number": 541,
+    "legal_name": "WORTH ADVISORS",
+    "city": "CHARLOTTE",
+    "state": "NC",
+    "aum": 1210000
+  },
+  {
+    "crd_number": 542,
+    "legal_name": "EMERGENT CAPITAL ADVISORS, LLC",
+    "city": "HOUSTON",
+    "state": "TX",
+    "aum": 1000
+  },
+  {
+    "crd_number": 543,
+    "legal_name": "HILL INVESTMENT GROUP",
+    "city": "ST. LOUIS",
+    "state": "MO",
+    "aum": 1475000
+  },
+  {
+    "crd_number": 544,
+    "legal_name": "TREMBLANT CAPITAL GROUP",
+    "city": "WEST PALM BEACH",
+    "state": "FL",
+    "aum": 0
+  },
+  {
+    "crd_number": 545,
+    "legal_name": "BALBOA WEALTH PARTNERS, INC.",
+    "city": "SCOTTSDALE",
+    "state": "AZ",
+    "aum": 2005000
+  },
+  {
+    "crd_number": 546,
+    "legal_name": "CLARITY CAPITAL ADVISORS, LLC",
+    "city": "LAKEWOOD RANCH",
+    "state": "FL",
+    "aum": 266000
+  },
+  {
+    "crd_number": 547,
+    "legal_name": "MEKETA CAPITAL, LLC",
+    "city": "DENVER",
+    "state": "CO",
+    "aum": 1000
+  },
+  {
+    "crd_number": 548,
+    "legal_name": "GLYNN CAPITAL MANAGEMENT, LLC",
+    "city": "MENLO PARK",
+    "state": "CA",
+    "aum": 16000
+  },
+  {
+    "crd_number": 549,
+    "legal_name": "HOFFMAN & ASSOCIATES FINANCIAL & ESTATE ADVISORS, INC.",
+    "city": "VENTURA",
+    "state": "CA",
+    "aum": 48000
+  },
+  {
+    "crd_number": 550,
+    "legal_name": "THE PITTI GROUP WEALTH MANAGEMENT, LLC",
+    "city": "VICTOR",
+    "state": "NY",
+    "aum": 1206000
+  },
+  {
+    "crd_number": 551,
+    "legal_name": "OSAIC FA, INC.",
+    "city": "FORT WAYNE",
+    "state": "IN",
+    "aum": 103063000
+  },
+  {
+    "crd_number": 552,
+    "legal_name": "MAG ADVISORS LLC",
+    "city": "COLLEYVILLE",
+    "state": "TX",
+    "aum": 0
+  },
+  {
+    "crd_number": 553,
+    "legal_name": "WHITWELL ADVISORS",
+    "city": "AUSTIN",
+    "state": "TX",
+    "aum": 184000
+  },
+  {
+    "crd_number": 554,
+    "legal_name": "CORA CAPITAL ADVISORS",
+    "city": "MARLTON",
+    "state": "NJ",
+    "aum": 1642000
+  },
+  {
+    "crd_number": 555,
+    "legal_name": "TRUEHAVEN CAPITAL",
+    "city": "ST PETERSBURG",
+    "state": "FL",
+    "aum": 86000
+  },
+  {
+    "crd_number": 556,
+    "legal_name": "STRATEGIC BLUEPRINT, LLC",
+    "city": "ATLANTA",
+    "state": "GA",
+    "aum": 8013000
+  },
+  {
+    "crd_number": 557,
+    "legal_name": "SEELAUS ASSET MANAGEMENT, LLC",
+    "city": "CHATHAM",
+    "state": "NJ",
+    "aum": 499000
+  },
+  {
+    "crd_number": 558,
+    "legal_name": "KEYSTONE NATIONAL GROUP, LLC",
+    "city": "SALT LAKE CITY",
+    "state": "UT",
+    "aum": 15000
+  },
+  {
+    "crd_number": 559,
+    "legal_name": "COLARION",
+    "city": "BIRMINGHAM",
+    "state": "AL",
+    "aum": 173
+  },
+  {
+    "crd_number": 560,
+    "legal_name": "MARCO INVESTMENT MANAGEMENT LLC",
+    "city": "ATLANTA",
+    "state": "GA",
+    "aum": 619
+  },
+  {
+    "crd_number": 561,
+    "legal_name": "A.G. CAMPBELL ADVISORY, LLC",
+    "city": "BALTIMORE",
+    "state": "MD",
+    "aum": 68
+  },
+  {
+    "crd_number": 562,
+    "legal_name": "FLOWSTONE PARTNERS, LLC",
+    "city": "AVON",
+    "state": "CT",
+    "aum": 1
+  },
+  {
+    "crd_number": 563,
+    "legal_name": "E&E ADVISORS L.P.",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 19
+  },
+  {
+    "crd_number": 564,
+    "legal_name": "THOMPSON CAPITAL MANAGEMENT, LLC",
+    "city": "INDIAN HEAD PARK",
+    "state": "IL",
+    "aum": 309
+  },
+  {
+    "crd_number": 565,
+    "legal_name": "IRONSIDES ASSET ADVISORS, LLC",
+    "city": "ROCKY MOUNT",
+    "state": "NC",
+    "aum": 704
+  },
+  {
+    "crd_number": 566,
+    "legal_name": "KRANE CAPITAL MANAGEMENT, LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 2
+  },
+  {
+    "crd_number": 567,
+    "legal_name": "ELSER FINANCIAL PLANNING, INC.",
+    "city": "INDIANAPOLIS",
+    "state": "IN",
+    "aum": 1412
+  },
+  {
+    "crd_number": 568,
+    "legal_name": "STONE WALL FINANCIAL GROUP LLC",
+    "city": "SAN ANTONIO",
+    "state": "TX",
+    "aum": 0
+  },
+  {
+    "crd_number": 569,
+    "legal_name": "TOTAL WEALTH PLANNING AND MANAGEMENT, INC.",
+    "city": "PONTE VEDRA",
+    "state": "FL",
+    "aum": 1207
+  },
+  {
+    "crd_number": 570,
+    "legal_name": "FLAMEBACK CAPITAL USA, INC",
+    "city": "BENGALURU, KARNATAKA",
+    "state": null,
+    "aum": 0
+  },
+  {
+    "crd_number": 572,
+    "legal_name": "ARCHER PORTFOLIO MANAGEMENT INC.",
+    "city": "MONTREAL, QUEBEC",
+    "state": null,
+    "aum": 1300
+  },
+  {
+    "crd_number": 573,
+    "legal_name": "STEWARDSHIP ADVISORS, LLC",
+    "city": "MOUNT JOY",
+    "state": "PA",
+    "aum": 1509
+  },
+  {
+    "crd_number": 574,
+    "legal_name": "TEMA ETFS LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 0
+  },
+  {
+    "crd_number": 575,
+    "legal_name": "MANCHESTER FINANCIAL INC",
+    "city": "WESTLAKE VILLAGE",
+    "state": "CA",
+    "aum": 2304
+  },
+  {
+    "crd_number": 576,
+    "legal_name": "THE RETIREMENT PLANNING GROUP, LLC",
+    "city": "LEAWOOD",
+    "state": "KS",
+    "aum": 8276
+  },
+  {
+    "crd_number": 577,
+    "legal_name": "CINCTIVE CAPITAL MANAGEMENT LP",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 8
+  },
+  {
+    "crd_number": 578,
+    "legal_name": "INTEGRATED WEALTH CONCEPTS LLC",
+    "city": "WALTHAM",
+    "state": "MA",
+    "aum": 22706
+  },
+  {
+    "crd_number": 579,
+    "legal_name": "KEUDELL MORRISON WEALTH MANAGEMENT, LLC",
+    "city": "SALEM",
+    "state": "OR",
+    "aum": 1862
+  },
+  {
+    "crd_number": 580,
+    "legal_name": "FORT WASHINGTON INVESTMENT ADVISORS INC",
+    "city": "CINCINNATI",
+    "state": "OH",
+    "aum": 1444
+  },
+  {
+    "crd_number": 581,
+    "legal_name": "ALLSTATE FINANCIAL ADVISORS, LLC",
+    "city": "LINCOLN",
+    "state": "NE",
+    "aum": 189
+  },
+  {
+    "crd_number": 582,
+    "legal_name": "E2P",
+    "city": "CHICAGO",
+    "state": "IL",
+    "aum": 7
+  },
+  {
+    "crd_number": 583,
+    "legal_name": "KENT LAKE CAPITAL LLC",
+    "city": "ANASCO",
+    "state": "PR",
+    "aum": 1
+  },
+  {
+    "crd_number": 584,
+    "legal_name": "GATEPASS CAPITAL, LLC",
+    "city": "INDEPENDENCE",
+    "state": "OH",
+    "aum": 116
+  },
+  {
+    "crd_number": 585,
+    "legal_name": "OSAIC FA, INC.",
+    "city": "FORT WAYNE",
+    "state": "IN",
+    "aum": 103063
+  },
+  {
+    "crd_number": 586,
+    "legal_name": "SLW MANAGEMENT COMPANY",
+    "city": "SAN FRANCISCO",
+    "state": "CA",
+    "aum": 5
+  },
+  {
+    "crd_number": 587,
+    "legal_name": "OASIS CAPITAL PARTNERS (TEXAS) INC.",
+    "city": "AUSTIN",
+    "state": "TX",
+    "aum": 12
+  },
+  {
+    "crd_number": 588,
+    "legal_name": "WAYPOINTS FINANCIAL",
+    "city": "SEBRING",
+    "state": "FL",
+    "aum": 614
+  },
+  {
+    "crd_number": 589,
+    "legal_name": "NOBSCOT INVESTMENT MANAGEMENT LLC",
+    "city": "WELLESLEY",
+    "state": "MA",
+    "aum": 34
+  },
+  {
+    "crd_number": 590,
+    "legal_name": "MURPHY CLARKE WILLIAMS & STONE LLC",
+    "city": "CORAL GABLES",
+    "state": "FL",
+    "aum": 1
+  },
+  {
+    "crd_number": 591,
+    "legal_name": "NAVIGATION WEALTH MANAGEMENT",
+    "city": "FORT COLLINS",
+    "state": "CO",
+    "aum": 1427
+  },
+  {
+    "crd_number": 592,
+    "legal_name": "BRIDGEPOINT LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 38
+  },
+  {
+    "crd_number": 593,
+    "legal_name": "ALTERA PRIVATE ACCESS, LLC",
+    "city": "ATLANTA",
+    "state": "GA",
+    "aum": 51
+  },
+  {
+    "crd_number": 594,
+    "legal_name": "MARKLE FINANCIAL LLC",
+    "city": "LARAMIE",
+    "state": "WY",
+    "aum": 505
+  },
+  {
+    "crd_number": 595,
+    "legal_name": "SECURE RETIREMENT FINANCIAL & INSURANCE SERVICES CORP.",
+    "city": "SAN RAMON",
+    "state": "CA",
+    "aum": 546
+  },
+  {
+    "crd_number": 596,
+    "legal_name": "PARK SQUARE FINANCIAL GROUP LLC",
+    "city": "ROSWELL",
+    "state": "GA",
+    "aum": 0
+  },
+  {
+    "crd_number": 597,
+    "legal_name": "SOCIAL LEVERAGE ADVISORS, LLC",
+    "city": "SCOTTSDALE",
+    "state": "AZ",
+    "aum": 10
+  },
+  {
+    "crd_number": 598,
+    "legal_name": "HEMMING& WEALTH MANAGEMENT, INC.",
+    "city": "TRAVERSE CITY",
+    "state": "MI",
+    "aum": 1418
+  },
+  {
+    "crd_number": 599,
+    "legal_name": "NEWEDGE ADVISORS",
+    "city": "NEW ORLEANS",
+    "state": "LA",
+    "aum": 62249
+  },
+  {
+    "crd_number": 600,
+    "legal_name": "JOURNEY ADVISORY GROUP, LLC",
+    "city": "COVINGTON",
+    "state": "KY",
+    "aum": 1692
+  },
+  {
+    "crd_number": 601,
+    "legal_name": "LUMINA WEALTH MANAGEMENT, LLC",
+    "city": "WILMINGTON",
+    "state": "NC",
+    "aum": 157
+  },
+  {
+    "crd_number": 602,
+    "legal_name": "GRAYSCALE ADVISORS",
+    "city": "STAMFORD",
+    "state": "CT",
+    "aum": 2
+  },
+  {
+    "crd_number": 603,
+    "legal_name": "NEW REPUBLIC PARTNERS",
+    "city": "CHARLOTTE",
+    "state": "NC",
+    "aum": 87
+  },
+  {
+    "crd_number": 604,
+    "legal_name": "U.S. BANCORP INVESTMENTS, INC.",
+    "city": "SAINT PAUL",
+    "state": "MN",
+    "aum": 60028
+  },
+  {
+    "crd_number": 605,
+    "legal_name": "MOMENTUM INDEPENDENT NETWORK INC.",
+    "city": "DALLAS",
+    "state": "TX",
+    "aum": 3528
+  },
+  {
+    "crd_number": 606,
+    "legal_name": "BULL HARBOR CAPITAL LLC.",
+    "city": "BETHESDA",
+    "state": "MD",
+    "aum": 876
+  },
+  {
+    "crd_number": 607,
+    "legal_name": "X ADVISORS, LLC",
+    "city": "SANTA MARIA",
+    "state": "CA",
+    "aum": 475
+  },
+  {
+    "crd_number": 608,
+    "legal_name": "BERGEN PARK CAPITAL MANAGEMENT, LLC",
+    "city": "BIGFORK",
+    "state": "MT",
+    "aum": 8
+  },
+  {
+    "crd_number": 609,
+    "legal_name": "NAUTA CAPITAL LLC",
+    "city": "LAFAYETTE",
+    "state": "CA",
+    "aum": 0
+  },
+  {
+    "crd_number": 610,
+    "legal_name": "THL MANAGERS VII, LLC",
+    "city": "BOSTON",
+    "state": "MA",
+    "aum": 20
+  },
+  {
+    "crd_number": 611,
+    "legal_name": "CHENAVARI INVESTMENT MANAGERS",
+    "city": "LONDON",
+    "state": null,
+    "aum": 32
+  },
+  {
+    "crd_number": 612,
+    "legal_name": "SEQUEL HOLDINGS, L.P.",
+    "city": "DALLAS",
+    "state": "TX",
+    "aum": 9
+  },
+  {
+    "crd_number": 613,
+    "legal_name": "AQUA CAPITAL ADVISORS",
+    "city": "LOS ANGELES",
+    "state": "CA",
+    "aum": 160
+  },
+  {
+    "crd_number": 614,
+    "legal_name": "PORTFOLIO DESIGN LABS, LLC",
+    "city": "ENCINO",
+    "state": "CA",
+    "aum": 329
+  },
+  {
+    "crd_number": 615,
+    "legal_name": "MCNAUGHTON WEALTH MANAGEMENT, LLC",
+    "city": "SAN DIEGO",
+    "state": "CA",
+    "aum": 824
+  },
+  {
+    "crd_number": 616,
+    "legal_name": "EMPIRIC INSTITUTIONAL",
+    "city": "AUSTIN",
+    "state": "TX",
+    "aum": 3
+  },
+  {
+    "crd_number": 617,
+    "legal_name": "PROXY INTERNATIONAL",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 33
+  },
+  {
+    "crd_number": 618,
+    "legal_name": "CORNERSTONE ADVISORS LLC",
+    "city": "FAYETTEVILLE",
+    "state": "AR",
+    "aum": 163
+  },
+  {
+    "crd_number": 619,
+    "legal_name": "WESTEND CAPITAL MANAGEMENT, LLC.",
+    "city": "SAUSALITO",
+    "state": "CA",
+    "aum": 331
+  },
+  {
+    "crd_number": 620,
+    "legal_name": "AE WEALTH MANAGEMENT, LLC",
+    "city": "TOPEKA",
+    "state": "KS",
+    "aum": 277294
+  },
+  {
+    "crd_number": 621,
+    "legal_name": "SYGNUS CAPITAL PR LLC",
+    "city": "GUAYNABO",
+    "state": "PR",
+    "aum": 7
+  },
+  {
+    "crd_number": 622,
+    "legal_name": "NORTHSTAR FIDUCIARY PARTNERS, LLC",
+    "city": "EAST BRUNSWICK",
+    "state": "NJ",
+    "aum": 104
+  },
+  {
+    "crd_number": 623,
+    "legal_name": "PARTHENON LLC",
+    "city": "LOUISVILLE",
+    "state": "KY",
+    "aum": 451
+  },
+  {
+    "crd_number": 624,
+    "legal_name": "JOURNEY STRATEGIC WEALTH LLC",
+    "city": "SUMMIT",
+    "state": "NJ",
+    "aum": 1898
+  },
+  {
+    "crd_number": 625,
+    "legal_name": "HARBORFRONT FINANCIAL GROUP",
+    "city": "LUDINGTON",
+    "state": "MI",
+    "aum": 0
+  },
+  {
+    "crd_number": 626,
+    "legal_name": "LETSON INVESTMENT MANAGEMENT, INC.",
+    "city": "ATLANTA",
+    "state": "GA",
+    "aum": 99
+  },
+  {
+    "crd_number": 627,
+    "legal_name": "KISSLING FINANCIAL SERVICES, LLC",
+    "city": "NEW CASTLE",
+    "state": "PA",
+    "aum": 909
+  },
+  {
+    "crd_number": 628,
+    "legal_name": "STEWARD PARTNERS INVESTMENT ADVISORY, LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 45203
+  },
+  {
+    "crd_number": 629,
+    "legal_name": "CALLAHAN CAPITAL MANAGEMENT",
+    "city": "STEAMBOAT SPRINGS",
+    "state": "CO",
+    "aum": 363
+  },
+  {
+    "crd_number": 630,
+    "legal_name": "TWIN PEAKS WEALTH ADVISORS",
+    "city": "SAN FRANCISCO",
+    "state": "CA",
+    "aum": 1402
+  },
+  {
+    "crd_number": 631,
+    "legal_name": "HULL STREET ENERGY",
+    "city": "BETHESDA",
+    "state": "MD",
+    "aum": 9
+  },
+  {
+    "crd_number": 632,
+    "legal_name": "CORVUS WEALTH ADVISORS LLC",
+    "city": "TEMPLETON",
+    "state": "CA",
+    "aum": 1207
+  },
+  {
+    "crd_number": 633,
+    "legal_name": "CRESSET ASSET MANAGEMENT, LLC",
+    "city": "CHICAGO",
+    "state": "IL",
+    "aum": 3961
+  },
+  {
+    "crd_number": 634,
+    "legal_name": "BLACKROCK FINANCIAL MANAGEMENT, INC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 2184
+  },
+  {
+    "crd_number": 635,
+    "legal_name": "ARCADIA INVESTMENT PARTNERS",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 107
+  },
+  {
+    "crd_number": 636,
+    "legal_name": "INVESTMENT CONSULTING SERVICES, LLC",
+    "city": "OAK BROOK",
+    "state": "IL",
+    "aum": 0
+  },
+  {
+    "crd_number": 637,
+    "legal_name": "PERSPECTIVE WEALTH ADVISORS",
+    "city": "LOVELAND",
+    "state": "CO",
+    "aum": 0
+  },
+  {
+    "crd_number": 638,
+    "legal_name": "BP CAPITAL ENERGY ADVISORS, LLC",
+    "city": "DALLAS",
+    "state": "TX",
+    "aum": 4
+  },
+  {
+    "crd_number": 639,
+    "legal_name": "PORTFOLIO MEDICS, LLC",
+    "city": "BONITA SPRINGS",
+    "state": "FL",
+    "aum": 2499
+  },
+  {
+    "crd_number": 640,
+    "legal_name": "NEON MONEY IA, LLC",
+    "city": "LONG ISLAND CITY",
+    "state": "NY",
+    "aum": 0
+  },
+  {
+    "crd_number": 641,
+    "legal_name": "NORTHWALL CAPITAL LLP",
+    "city": "LONDON",
+    "state": null,
+    "aum": 19
+  },
+  {
+    "crd_number": 642,
+    "legal_name": "HIGHROAD WEALTH ADVISORS, LLC",
+    "city": "COOS BAY",
+    "state": "OR",
+    "aum": 0
+  },
+  {
+    "crd_number": 643,
+    "legal_name": "HIGHLAND ASSOCIATES INC",
+    "city": "BIRMINGHAM",
+    "state": "AL",
+    "aum": 61
+  },
+  {
+    "crd_number": 644,
+    "legal_name": "MCA CROSS BORDER ADVISORS INC.",
+    "city": "MONTREAL",
+    "state": null,
+    "aum": 24
+  },
+  {
+    "crd_number": 645,
+    "legal_name": "CORUNDUM GROUP, INC.",
+    "city": "COLORADO SPRINGS",
+    "state": "CO",
+    "aum": 427
+  },
+  {
+    "crd_number": 646,
+    "legal_name": "BRIDGEWEALTH ADVISORY GROUP, LLC",
+    "city": "FRESNO",
+    "state": "CA",
+    "aum": 1376
+  },
+  {
+    "crd_number": 647,
+    "legal_name": "SAGEVIEW ADVISORY GROUP, LLC",
+    "city": "NEWPORT BEACH",
+    "state": "CA",
+    "aum": 34543
+  },
+  {
+    "crd_number": 648,
+    "legal_name": "TENNENBAUM CAPITAL PARTNERS, LLC",
+    "city": "SANTA MONICA",
+    "state": "CA",
+    "aum": 30
+  },
+  {
+    "crd_number": 649,
+    "legal_name": "BLACKROCK ASSET MANAGEMENT NORTH ASIA LIMITED",
+    "city": "HONG KONG",
+    "state": null,
+    "aum": 177
+  },
+  {
+    "crd_number": 650,
+    "legal_name": "BROWNING CAPITAL MANAGEMENT LLC",
+    "city": "SISTERS",
+    "state": "OR",
+    "aum": 97
+  },
+  {
+    "crd_number": 651,
+    "legal_name": "CAVU WEALTH MANAGEMENT",
+    "city": "LAKESIDE",
+    "state": "CA",
+    "aum": 909
+  },
+  {
+    "crd_number": 652,
+    "legal_name": "PARR MCKNIGHT WEALTH MANAGEMENT GROUP",
+    "city": "MINNEAPOLIS",
+    "state": "MN",
+    "aum": 0
+  },
+  {
+    "crd_number": 653,
+    "legal_name": "SIGNALPOINT ASSET MANAGEMENT LLC",
+    "city": "SPRINGFIELD",
+    "state": "MO",
+    "aum": 1512
+  },
+  {
+    "crd_number": 654,
+    "legal_name": "TWO SIGMA REAL ESTATE, LP",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 0
+  },
+  {
+    "crd_number": 655,
+    "legal_name": "PLEASANT STREET WEALTH ADVISORS, LLC",
+    "city": "WHITE PLAINS",
+    "state": "NY",
+    "aum": 196
+  },
+  {
+    "crd_number": 656,
+    "legal_name": "DST WEALTH MANAGEMENT LLC",
+    "city": "INDIAN WELLS",
+    "state": "CA",
+    "aum": 664
+  },
+  {
+    "crd_number": 657,
+    "legal_name": "BOYD FINANCIAL STRATEGIES, INC.",
+    "city": "AUBURN",
+    "state": "MA",
+    "aum": 164
+  },
+  {
+    "crd_number": 658,
+    "legal_name": "D. E. SHAW & CO., L.P.",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 31
+  },
+  {
+    "crd_number": 659,
+    "legal_name": "HALL CAPITAL MANAGEMENT COMPANY, INC.",
+    "city": "BARRINGTON",
+    "state": "RI",
+    "aum": 493
+  },
+  {
+    "crd_number": 660,
+    "legal_name": "BLACKSTON FINANCIAL ADVISORY GROUP, LLC",
+    "city": "THE VILLAGES",
+    "state": "FL",
+    "aum": 2040
+  },
+  {
+    "crd_number": 661,
+    "legal_name": "SHADE TREE ADVISORS LLC",
+    "city": "SARATOGA SPRINGS",
+    "state": "NY",
+    "aum": 105
+  },
+  {
+    "crd_number": 662,
+    "legal_name": "BLACKROCK CAPITAL MANAGEMENT, INC.",
+    "city": "WILMINGTON",
+    "state": "DE",
+    "aum": 39
+  },
+  {
+    "crd_number": 663,
+    "legal_name": "EIDE BAILLY ADVISORS, LLC",
+    "city": "FARGO",
+    "state": "ND",
+    "aum": 2529
+  },
+  {
+    "crd_number": 664,
+    "legal_name": "BLACKROCK (SINGAPORE) LIMITED",
+    "city": "SINGAPORE",
+    "state": null,
+    "aum": 118
+  },
+  {
+    "crd_number": 665,
+    "legal_name": "CAPSTONE TRITON FINANCIAL GROUP LLC",
+    "city": "OKLAHOMA CITY",
+    "state": "OK",
+    "aum": 811
+  },
+  {
+    "crd_number": 666,
+    "legal_name": "LIBERTY ONE INVESTMENT MANAGEMENT",
+    "city": "LIBERTYVILLE",
+    "state": "IL",
+    "aum": 14692
+  },
+  {
+    "crd_number": 667,
+    "legal_name": "MANULIFE INVESTMENT MANAGEMENT (NORTH AMERICA) LIMITED",
+    "city": "TORONTO, ON",
+    "state": null,
+    "aum": 22
+  },
+  {
+    "crd_number": 668,
+    "legal_name": "THREE BELL CAPITAL LLC",
+    "city": "DALLAS",
+    "state": "TX",
+    "aum": 552
+  },
+  {
+    "crd_number": 669,
+    "legal_name": "DENVER WEALTH MANAGEMENT, INC.",
+    "city": "GREENWOOD VILLAGE",
+    "state": "CO",
+    "aum": 2125
+  },
+  {
+    "crd_number": 670,
+    "legal_name": "SAFEGUARD WEALTH MANAGEMENT",
+    "city": "MINOCQUA",
+    "state": "WI",
+    "aum": 906
+  },
+  {
+    "crd_number": 671,
+    "legal_name": "SC&H WEALTH",
+    "city": "SPARKS",
+    "state": "MD",
+    "aum": 1760
+  },
+  {
+    "crd_number": 672,
+    "legal_name": "NOVAPOINT CAPITAL LLC",
+    "city": "ATLANTA",
+    "state": "GA",
+    "aum": 704
+  },
+  {
+    "crd_number": 673,
+    "legal_name": "LPL FINANCIAL LLC",
+    "city": "FORT MILL",
+    "state": "SC",
+    "aum": 1910545
+  },
+  {
+    "crd_number": 674,
+    "legal_name": "CASSADAY & COMPANY, INC.",
+    "city": "MCLEAN",
+    "state": "VA",
+    "aum": 2822
+  },
+  {
+    "crd_number": 675,
+    "legal_name": "COOPER MCMANUS",
+    "city": "IRVINE",
+    "state": "CA",
+    "aum": 4577
+  },
+  {
+    "crd_number": 676,
+    "legal_name": "SCHMIDT FINANCIAL MANAGEMENT",
+    "city": "KIRKLAND",
+    "state": "WA",
+    "aum": 699
+  },
+  {
+    "crd_number": 677,
+    "legal_name": "ADAMS FINANCIAL CONCEPTS, LLC",
+    "city": "SEATTLE",
+    "state": "WA",
+    "aum": 170
+  },
+  {
+    "crd_number": 678,
+    "legal_name": "MAC ALPHA CAPITAL MANAGEMENT, LP",
+    "city": "TAMPA",
+    "state": "FL",
+    "aum": 9
+  },
+  {
+    "crd_number": 679,
+    "legal_name": "FLAVIN FINANCIAL SERVICES, INC.",
+    "city": "MELBOURNE",
+    "state": "FL",
+    "aum": 376
+  },
+  {
+    "crd_number": 680,
+    "legal_name": "PRISM PLANNING PARTNERS",
+    "city": "LIBERTYVILLE",
+    "state": "IL",
+    "aum": 292
+  },
+  {
+    "crd_number": 681,
+    "legal_name": "DIGNITARY FINANCIAL L.L.C.",
+    "city": "WASHINGTON",
+    "state": "DC",
+    "aum": 0
+  },
+  {
+    "crd_number": 682,
+    "legal_name": "LIBERTY ASSET MANAGEMENT, INC.",
+    "city": "WOODRIDGE",
+    "state": "IL",
+    "aum": 479
+  },
+  {
+    "crd_number": 683,
+    "legal_name": "BROADWOOD CAPITAL, INC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 1
+  },
+  {
+    "crd_number": 684,
+    "legal_name": "WEITZ INVESTMENT MANAGEMENT, INC.",
+    "city": "OMAHA",
+    "state": "NE",
+    "aum": 20
+  },
+  {
+    "crd_number": 685,
+    "legal_name": "DURATION CAPITAL PARTNERS LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 13
+  },
+  {
+    "crd_number": 686,
+    "legal_name": "BELLWETHER WEALTH",
+    "city": "LINCOLN",
+    "state": "NE",
+    "aum": 1119
+  },
+  {
+    "crd_number": 687,
+    "legal_name": "AXXES ADVSORS I LLC",
+    "city": "CORAL GABLE",
+    "state": "FL",
+    "aum": 0
+  },
+  {
+    "crd_number": 688,
+    "legal_name": "WEST MICHIGAN ADVISORS, LLC",
+    "city": "HOLLAND",
+    "state": "MI",
+    "aum": 3079
+  },
+  {
+    "crd_number": 689,
+    "legal_name": "KONZA GLOBAL WEALTH GROUP",
+    "city": "OVERLAND PARK",
+    "state": "KS",
+    "aum": 0
+  },
+  {
+    "crd_number": 690,
+    "legal_name": "SEQUOIA WEALTH MANAGEMENT GROUP",
+    "city": "GARDNERVILLE",
+    "state": "NV",
+    "aum": 342
+  },
+  {
+    "crd_number": 691,
+    "legal_name": "STEWARD PARTNERS INVESTMENT ADVISORY, LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 45203
+  },
+  {
+    "crd_number": 692,
+    "legal_name": "PRESTON WEALTH ADVISORS, LLC.",
+    "city": "RESTON",
+    "state": "VA",
+    "aum": 1043
+  },
+  {
+    "crd_number": 693,
+    "legal_name": "RANDOLPH CO INC",
+    "city": "CINCINNATI",
+    "state": "OH",
+    "aum": 160
+  },
+  {
+    "crd_number": 694,
+    "legal_name": "NIOBRARA CAPITAL PARTNERS",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 0
+  },
+  {
+    "crd_number": 695,
+    "legal_name": "FUNDIFY ADVISORS LLC",
+    "city": "AUSTIN",
+    "state": "TX",
+    "aum": 0
+  },
+  {
+    "crd_number": 696,
+    "legal_name": "CAPITAL INNOVATIONS, LLC",
+    "city": "WAUKESHA",
+    "state": "WI",
+    "aum": 9
+  },
+  {
+    "crd_number": 697,
+    "legal_name": "GREAT VALLEY ADVISOR GROUP, INC.",
+    "city": "WILMINGTON",
+    "state": "DE",
+    "aum": 24276
+  },
+  {
+    "crd_number": 698,
+    "legal_name": "VIRTUS WEALTH SOLUTIONS",
+    "city": "CRANFORD",
+    "state": "NJ",
+    "aum": 0
+  },
+  {
+    "crd_number": 699,
+    "legal_name": "RAYMOND JAMES FINANCIAL SERVICES ADVISORS, INC",
+    "city": "SAINT PETERSBURG",
+    "state": "FL",
+    "aum": 985117
+  },
+  {
+    "crd_number": 700,
+    "legal_name": "AACP INVESTMENTS, LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 4
+  },
+  {
+    "crd_number": 701,
+    "legal_name": "TRG INVESTMENT ADVISORS, LLC",
+    "city": "BRATTLEBORO",
+    "state": "VT",
+    "aum": 519
+  },
+  {
+    "crd_number": 702,
+    "legal_name": "CALPA ADVISORS LLC",
+    "city": "KIRKLAND",
+    "state": "WA",
+    "aum": 0
+  },
+  {
+    "crd_number": 703,
+    "legal_name": "LIFT ASSET MANAGEMENT",
+    "city": "ENGLEWOOD",
+    "state": "CO",
+    "aum": 0
+  },
+  {
+    "crd_number": 704,
+    "legal_name": "SAFEGUARD INVESTMENT ADVISORY GROUP, LLC",
+    "city": "CORONA",
+    "state": "CA",
+    "aum": 2388
+  },
+  {
+    "crd_number": 705,
+    "legal_name": "BIRCH WEALTH MANAGEMENT",
+    "city": "ROME",
+    "state": "NY",
+    "aum": 352
+  },
+  {
+    "crd_number": 706,
+    "legal_name": "OAKWOOD REAL ESTATE PARTNERS, LLC",
+    "city": "DENVER",
+    "state": "CO",
+    "aum": 18
+  },
+  {
+    "crd_number": 707,
+    "legal_name": "INVESTMENT CONSULTING SERVICES, LLC",
+    "city": "OAK BROOK",
+    "state": "IL",
+    "aum": 0
+  },
+  {
+    "crd_number": 708,
+    "legal_name": "CORIENT IA LLC",
+    "city": "MIAMI",
+    "state": "FL",
+    "aum": 84
+  },
+  {
+    "crd_number": 709,
+    "legal_name": "LANIER ASSET MANAGEMENT, LLC",
+    "city": "LOUISVILLE",
+    "state": "KY",
+    "aum": 238
+  },
+  {
+    "crd_number": 710,
+    "legal_name": "OLD WELL PARTNERS, LLC",
+    "city": "CHARLOTTE",
+    "state": "NC",
+    "aum": 12
+  },
+  {
+    "crd_number": 711,
+    "legal_name": "VIGIL WEALTH MANAGEMENT, LLC",
+    "city": "PONTE VEDRA BEACH",
+    "state": "FL",
+    "aum": 392
+  },
+  {
+    "crd_number": 712,
+    "legal_name": "DV CAPITAL ADVISORS, LLC",
+    "city": "CHICAGO",
+    "state": "IL",
+    "aum": 5
+  },
+  {
+    "crd_number": 713,
+    "legal_name": "SOPHRON CAPITAL MANAGEMENT",
+    "city": "SUMMIT",
+    "state": "NJ",
+    "aum": 1
+  },
+  {
+    "crd_number": 714,
+    "legal_name": "CUTLER INVESTMENT GROUP",
+    "city": "JACKSONVILLE",
+    "state": "OR",
+    "aum": 2056
+  },
+  {
+    "crd_number": 715,
+    "legal_name": "NAVI INTL-ADMINISTRADORA E GESTORA DE RECURSOS FINANCEIROS LTDA.",
+    "city": "SAO PAULO",
+    "state": null,
+    "aum": 3
+  },
+  {
+    "crd_number": 716,
+    "legal_name": "TWIN PEAKS WEALTH ADVISORS",
+    "city": "SAN FRANCISCO",
+    "state": "CA",
+    "aum": 1402
+  },
+  {
+    "crd_number": 717,
+    "legal_name": "IAS WEALTH MANAGEMENT, INC.",
+    "city": "THE WOODLANDS",
+    "state": "TX",
+    "aum": 781
+  },
+  {
+    "crd_number": 718,
+    "legal_name": "REMBERT PENDLETON JACKSON",
+    "city": "VIENNA",
+    "state": "VA",
+    "aum": 4775
+  },
+  {
+    "crd_number": 719,
+    "legal_name": "GRATICULE ASIA MACRO ADVISORS LLC",
+    "city": "SINGAPORE",
+    "state": null,
+    "aum": 6
+  },
+  {
+    "crd_number": 720,
+    "legal_name": "ADDIS & HILL, INCORPORATED",
+    "city": "WAYNE",
+    "state": "PA",
+    "aum": 355
+  },
+  {
+    "crd_number": 721,
+    "legal_name": "ALLIANCEBERNSTEIN CORPORATION",
+    "city": "NASHVILLE",
+    "state": "TN",
+    "aum": 0
+  },
+  {
+    "crd_number": 722,
+    "legal_name": "FARROW FINANCIAL INC",
+    "city": "RANDOLPH",
+    "state": "VT",
+    "aum": 525
+  },
+  {
+    "crd_number": 723,
+    "legal_name": "BUCK WEALTH STRATEGIES, LLC",
+    "city": "DENVER",
+    "state": "CO",
+    "aum": 1979
+  },
+  {
+    "crd_number": 724,
+    "legal_name": "ONE WEALTH CAPITAL MANAGEMENT, LLC",
+    "city": "SCOTTSDALE",
+    "state": "AZ",
+    "aum": 498
+  },
+  {
+    "crd_number": 725,
+    "legal_name": "FALCON WEALTH PLANNING, INC.",
+    "city": "ONTARIO",
+    "state": "CA",
+    "aum": 5425
+  },
+  {
+    "crd_number": 726,
+    "legal_name": "SIMPLIFY ASSET MANAGEMENT INC.",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 28
+  },
+  {
+    "crd_number": 727,
+    "legal_name": "INVESTOLOGY INC.",
+    "city": "RESTON",
+    "state": "VA",
+    "aum": 400
+  },
+  {
+    "crd_number": 728,
+    "legal_name": "PBMARES WEALTH MANAGEMENT LLC",
+    "city": "WILLIAMSBURG",
+    "state": "VA",
+    "aum": 2421
+  },
+  {
+    "crd_number": 729,
+    "legal_name": "CURA WEALTH ADVISORS, LLC",
+    "city": "CHICAGO",
+    "state": "IL",
+    "aum": 0
+  },
+  {
+    "crd_number": 730,
+    "legal_name": "NICHOLAS HOFFMAN & COMPANY, LLC",
+    "city": "ATLANTA",
+    "state": "GA",
+    "aum": 2124
+  },
+  {
+    "crd_number": 731,
+    "legal_name": "CURA WEALTH ADVISORS, LLC",
+    "city": "CHICAGO",
+    "state": "IL",
+    "aum": 0
+  },
+  {
+    "crd_number": 732,
+    "legal_name": "JOCELYN INVESTMENT MANAGEMENT, LLC",
+    "city": "SAN RAFAEL",
+    "state": "CA",
+    "aum": 226
+  },
+  {
+    "crd_number": 733,
+    "legal_name": "HAUSSMANN1864 CAPITAL MANAGEMENT, LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 0
+  },
+  {
+    "crd_number": 734,
+    "legal_name": "CHURCHILL MANAGEMENT GROUP",
+    "city": "LOS ANGELES",
+    "state": "CA",
+    "aum": 19450
+  },
+  {
+    "crd_number": 735,
+    "legal_name": "APS ASSET MANAGEMENT PTE LTD",
+    "city": "SINGAPORE",
+    "state": null,
+    "aum": 7
+  },
+  {
+    "crd_number": 736,
+    "legal_name": "PMG FAMILY OFFICE, LLC",
+    "city": "PLANO",
+    "state": "TX",
+    "aum": 236
+  },
+  {
+    "crd_number": 737,
+    "legal_name": "GREAT VALLEY ADVISOR GROUP, INC.",
+    "city": "WILMINGTON",
+    "state": "DE",
+    "aum": 24276
+  },
+  {
+    "crd_number": 738,
+    "legal_name": "MARSH WEALTH MANAGEMENT, LLC",
+    "city": "KNOXVILLE",
+    "state": "TN",
+    "aum": 531
+  },
+  {
+    "crd_number": 739,
+    "legal_name": "MDT ADVISERS, A DIVISION OF FEDERATED MDTA LLC",
+    "city": "BOSTON",
+    "state": "MA",
+    "aum": 954
+  },
+  {
+    "crd_number": 740,
+    "legal_name": "INVESTOLOGY INC.",
+    "city": "RESTON",
+    "state": "VA",
+    "aum": 400
+  },
+  {
+    "crd_number": 741,
+    "legal_name": "AMERICAN CENTURY INVESTMENT MANAGEMENT INC",
+    "city": "KANSAS CITY",
+    "state": "MO",
+    "aum": 647
+  },
+  {
+    "crd_number": 742,
+    "legal_name": "SILVER OAK SECURITIES, INC.",
+    "city": "JACKSON",
+    "state": "TN",
+    "aum": 10311
+  },
+  {
+    "crd_number": 743,
+    "legal_name": "PORTFOLIO MEDICS, LLC",
+    "city": "BONITA SPRINGS",
+    "state": "FL",
+    "aum": 2499
+  },
+  {
+    "crd_number": 744,
+    "legal_name": "TCP ASSET MANAGEMENT, LLC",
+    "city": "COLUMBUS",
+    "state": "OH",
+    "aum": 3634
+  },
+  {
+    "crd_number": 745,
+    "legal_name": "COMMONWEALTH FINANCIAL SERVICES",
+    "city": "PARKERSBURG",
+    "state": "WV",
+    "aum": 2148
+  },
+  {
+    "crd_number": 746,
+    "legal_name": "BYRON FINANCIAL, LLC",
+    "city": "CHARLOTTE",
+    "state": "NC",
+    "aum": 476
+  },
+  {
+    "crd_number": 747,
+    "legal_name": "FORTUNE WEALTH MANAGEMENT, LLC",
+    "city": "DALLAS",
+    "state": "TX",
+    "aum": 191
+  },
+  {
+    "crd_number": 748,
+    "legal_name": "EAGLE WEALTH MANAGEMENT GROUP INC.",
+    "city": "VALENCIA",
+    "state": "CA",
+    "aum": 432
+  },
+  {
+    "crd_number": 749,
+    "legal_name": "FORT PITT CAPITAL GROUP, LLC",
+    "city": "PITTSBURGH",
+    "state": "PA",
+    "aum": 9164
+  },
+  {
+    "crd_number": 750,
+    "legal_name": "GELLER ADVISORS LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 797
+  },
+  {
+    "crd_number": 751,
+    "legal_name": "EAGLE STRATEGIES LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 95287
+  },
+  {
+    "crd_number": 752,
+    "legal_name": "CONTINUUM WEALTH ADVISORS, LLC",
+    "city": "SARATOGA SPRINGS",
+    "state": "NY",
+    "aum": 744
+  },
+  {
+    "crd_number": 753,
+    "legal_name": "HOLLAND ADVISORY SERVICES, INC.",
+    "city": "ORMOND BEACH",
+    "state": "FL",
+    "aum": 990
+  },
+  {
+    "crd_number": 754,
+    "legal_name": "WILLIAM O'NEIL + COMPANY",
+    "city": "LOS ANGELES",
+    "state": "CA",
+    "aum": 0
+  },
+  {
+    "crd_number": 755,
+    "legal_name": "BLACKROCK FUND ADVISORS",
+    "city": "SAN FRANCISCO",
+    "state": "CA",
+    "aum": 522
+  },
+  {
+    "crd_number": 756,
+    "legal_name": "LOCUST WOOD CAPITAL ADVISERS, LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 14
+  },
+  {
+    "crd_number": 757,
+    "legal_name": "NERDWALLET ADVISORY",
+    "city": "SAN FRANCISCO",
+    "state": "CA",
+    "aum": 0
+  },
+  {
+    "crd_number": 758,
+    "legal_name": "PARADOXIOM CAPITAL",
+    "city": "STAMFORD",
+    "state": "CT",
+    "aum": 1
+  },
+  {
+    "crd_number": 759,
+    "legal_name": "VENTURE INVESTMENT ASSOCIATES",
+    "city": "PEAPACK",
+    "state": "NJ",
+    "aum": 16
+  },
+  {
+    "crd_number": 760,
+    "legal_name": "AVENUE CAPITAL MANAGEMENT II, L.P.",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 45
+  },
+  {
+    "crd_number": 761,
+    "legal_name": "FIN-CORP",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 0
+  },
+  {
+    "crd_number": 762,
+    "legal_name": "HEIRLOOM WEALTH MANAGEMENT LLC",
+    "city": "GREENWOOD VILLAGE",
+    "state": "CO",
+    "aum": 1611
+  },
+  {
+    "crd_number": 763,
+    "legal_name": "SAGEVIEW PRIVATE CLIENT GROUP, LLC",
+    "city": "NEWPORT BEACH",
+    "state": "CA",
+    "aum": 0
+  },
+  {
+    "crd_number": 764,
+    "legal_name": "ROSEN GROUP PRIVATE WEALTH MANAGEMENT, LLC",
+    "city": "POINTE-CLAIRE. QC",
+    "state": null,
+    "aum": 0
+  },
+  {
+    "crd_number": 765,
+    "legal_name": "NAVISTA WEALTH MANAGEMENT, INC.",
+    "city": "MINNEAPOLIS",
+    "state": "MN",
+    "aum": 0
+  },
+  {
+    "crd_number": 766,
+    "legal_name": "SAGEVIEW PRIVATE CLIENT GROUP, LLC",
+    "city": "NEWPORT BEACH",
+    "state": "CA",
+    "aum": 0
+  },
+  {
+    "crd_number": 767,
+    "legal_name": "BUCK WEALTH STRATEGIES, LLC",
+    "city": "DENVER",
+    "state": "CO",
+    "aum": 1979
+  },
+  {
+    "crd_number": 768,
+    "legal_name": "SERENGETI ASSET MANAGEMENT LP",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 50
+  },
+  {
+    "crd_number": 769,
+    "legal_name": "ALPINVEST US HOLDINGS, LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 105
+  },
+  {
+    "crd_number": 770,
+    "legal_name": "TRILL IMPACT ADVISORY INC.",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 2
+  },
+  {
+    "crd_number": 771,
+    "legal_name": "HUDSON BAY CAPITAL MANAGEMENT LP",
+    "city": "GREENWICH",
+    "state": "CT",
+    "aum": 7
+  },
+  {
+    "crd_number": 772,
+    "legal_name": "FOGARTY WEALTH MANAGEMENT, INC.",
+    "city": "MISSOURI CITY",
+    "state": "TX",
+    "aum": 360
+  },
+  {
+    "crd_number": 773,
+    "legal_name": "WEALTHSPAN INVESTMENT MANAGEMENT, LLC",
+    "city": "GRAND RAPIDS",
+    "state": "MI",
+    "aum": 39
+  },
+  {
+    "crd_number": 774,
+    "legal_name": "VOYA ALTERNATIVE ASSET MANAGEMENT LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 52
+  },
+  {
+    "crd_number": 775,
+    "legal_name": "VOYA INVESTMENT MANAGEMENT LLC",
+    "city": "ATLANTA",
+    "state": "GA",
+    "aum": 39
+  },
+  {
+    "crd_number": 776,
+    "legal_name": "TWO SIGMA INVESTMENTS, LP",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 17
+  },
+  {
+    "crd_number": 777,
+    "legal_name": "VOISARD ASSET MANAGEMENT GROUP",
+    "city": "GRAND RAPIDS",
+    "state": "MI",
+    "aum": 1281
+  },
+  {
+    "crd_number": 778,
+    "legal_name": "OMNIA WEALTH MANAGEMENT LLC",
+    "city": "SCOTTSDALE",
+    "state": "AZ",
+    "aum": 122
+  },
+  {
+    "crd_number": 779,
+    "legal_name": "VERUS FINANCIAL GROUP",
+    "city": "HOUSTON",
+    "state": "TX",
+    "aum": 599
+  },
+  {
+    "crd_number": 780,
+    "legal_name": "BROWNLEE WEALTH MANAGEMENT",
+    "city": "THE WOODLANDS",
+    "state": "TX",
+    "aum": 218
+  },
+  {
+    "crd_number": 781,
+    "legal_name": "ADVISORS CAPITAL MANAGEMENT, LLC",
+    "city": "RIDGEWOOD",
+    "state": "NJ",
+    "aum": 12646
+  },
+  {
+    "crd_number": 782,
+    "legal_name": "THE FIDUCIARY GROUP",
+    "city": "SAVANNAH",
+    "state": "GA",
+    "aum": 1566
+  },
+  {
+    "crd_number": 783,
+    "legal_name": "FOUNTAINHEAD MULTI-FAMILY OFFICE, LLC",
+    "city": "NEW CANAAN",
+    "state": "CT",
+    "aum": 0
+  },
+  {
+    "crd_number": 784,
+    "legal_name": "HIGHTOWER ADVISORS, LLC",
+    "city": "CHICAGO",
+    "state": "IL",
+    "aum": 178256
+  },
+  {
+    "crd_number": 785,
+    "legal_name": "NORTHWEST ASSET MANAGEMENT",
+    "city": "MERCER ISLAND",
+    "state": "WA",
+    "aum": 8878
+  },
+  {
+    "crd_number": 786,
+    "legal_name": "SPRENG CAPITAL MANAGEMENT, INC.",
+    "city": "BUCYRUS",
+    "state": "OH",
+    "aum": 1541
+  },
+  {
+    "crd_number": 787,
+    "legal_name": "QUANTBASE",
+    "city": "NEW YORK CITY",
+    "state": "NY",
+    "aum": 2500
+  },
+  {
+    "crd_number": 788,
+    "legal_name": "SOLLINDA CAPITAL MANAGEMENT LLC",
+    "city": "MIAMI",
+    "state": "FL",
+    "aum": 1159
+  },
+  {
+    "crd_number": 789,
+    "legal_name": "KINNEY ASSET MANAGEMENT, LLC.",
+    "city": "CHICAGO",
+    "state": "IL",
+    "aum": 5
+  },
+  {
+    "crd_number": 790,
+    "legal_name": "EMBREE FINANCIAL GROUP",
+    "city": "CHICAGO",
+    "state": "IL",
+    "aum": 798
+  },
+  {
+    "crd_number": 791,
+    "legal_name": "SERAPHIM CAPITAL MANAGEMENT, LLC",
+    "city": "BLAUVELT",
+    "state": "NY",
+    "aum": 168
+  },
+  {
+    "crd_number": 792,
+    "legal_name": "HARVEST FINANCIAL CORPORATION",
+    "city": "FORT MILL",
+    "state": "SC",
+    "aum": 0
+  },
+  {
+    "crd_number": 793,
+    "legal_name": null,
+    "city": null,
+    "state": null,
+    "aum": null
+  },
+  {
+    "crd_number": 794,
+    "legal_name": "DMK ADVISOR GROUP, INC.",
+    "city": "LUTZ",
+    "state": "FL",
+    "aum": 462
+  },
+  {
+    "crd_number": 795,
+    "legal_name": "PAVE INVESTMENT ADVISORS, LLC.",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 408
+  },
+  {
+    "crd_number": 796,
+    "legal_name": "ROSENBLUM SILVERMAN SUTTON SF INC",
+    "city": "SAN FRANCISCO",
+    "state": "CA",
+    "aum": 155
+  },
+  {
+    "crd_number": 797,
+    "legal_name": "POLAR ASSET MANAGEMENT PARTNERS INC.",
+    "city": "TORONTO",
+    "state": null,
+    "aum": 17
+  },
+  {
+    "crd_number": 798,
+    "legal_name": "TRITON PACIFIC HEALTHCARE PARTNERS, LLC",
+    "city": "SAN JUAN CAPISTRANO",
+    "state": "CA",
+    "aum": 5
+  },
+  {
+    "crd_number": 799,
+    "legal_name": "FINANCIAL SYNERGIES",
+    "city": "HOUSTON",
+    "state": "TX",
+    "aum": 789
+  },
+  {
+    "crd_number": 800,
+    "legal_name": "FLYING POINT FINANCIAL, INC.",
+    "city": "NORTH ANDOVER",
+    "state": "MA",
+    "aum": 591
+  },
+  {
+    "crd_number": 801,
+    "legal_name": "KASTEL CAPITAL ADVISORS, LLC",
+    "city": "WELLESLEY",
+    "state": "MA",
+    "aum": 222
+  },
+  {
+    "crd_number": 802,
+    "legal_name": "HIDDEN COVE WEALTH MANAGEMENT",
+    "city": "BAINBRIDGE ISLAND",
+    "state": "WA",
+    "aum": 839
+  },
+  {
+    "crd_number": 803,
+    "legal_name": "INMAN JAGER WEALTH MANAGEMENT",
+    "city": "HATTIESBURG",
+    "state": "MS",
+    "aum": 639
+  },
+  {
+    "crd_number": 804,
+    "legal_name": "INVESTMENT MANAGEMENT ASSOCIATES",
+    "city": "GREENWOOD VILLAGE",
+    "state": "CO",
+    "aum": 547
+  },
+  {
+    "crd_number": 805,
+    "legal_name": "BREVAN HOWARD US INVESTMENT MANAGEMENT LP",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 13
+  },
+  {
+    "crd_number": 806,
+    "legal_name": "TRADEWAY",
+    "city": "MEXIA",
+    "state": "TX",
+    "aum": 677
+  },
+  {
+    "crd_number": 807,
+    "legal_name": "MANTEIO SCALABLE TECHNOLOGIES LLC",
+    "city": "JERSEY CITY",
+    "state": "NJ",
+    "aum": 0
+  },
+  {
+    "crd_number": 808,
+    "legal_name": "CHURCHILL MANAGEMENT GROUP",
+    "city": "LOS ANGELES",
+    "state": "CA",
+    "aum": 19450
+  },
+  {
+    "crd_number": 809,
+    "legal_name": "H&H RETIREMENT DESIGN AND MANAGEMENT INC",
+    "city": "LAS VEGAS",
+    "state": "NV",
+    "aum": 555
+  },
+  {
+    "crd_number": 810,
+    "legal_name": "RETURN ADVISORS INC",
+    "city": "MIAMI",
+    "state": "FL",
+    "aum": 9
+  },
+  {
+    "crd_number": 811,
+    "legal_name": "CQS (US), LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 17
+  },
+  {
+    "crd_number": 812,
+    "legal_name": "CQS (US), LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 17
+  },
+  {
+    "crd_number": 813,
+    "legal_name": "NEXA EQUITY LLC",
+    "city": "SAN FRANCISCO",
+    "state": "CA",
+    "aum": 7
+  },
+  {
+    "crd_number": 814,
+    "legal_name": "ACME JACK WEALTH MANAGEMENT",
+    "city": "HUDSON",
+    "state": "OH",
+    "aum": 372
+  },
+  {
+    "crd_number": 815,
+    "legal_name": "STEEL TOWER INVESTMENTS",
+    "city": "PITTSBURGH",
+    "state": "PA",
+    "aum": 122
+  },
+  {
+    "crd_number": 816,
+    "legal_name": "INDEPENDENT ADVISOR ALLIANCE, LLC",
+    "city": "CHARLOTTE",
+    "state": "NC",
+    "aum": 52309
+  },
+  {
+    "crd_number": 817,
+    "legal_name": "DWS INTERNATIONAL GMBH",
+    "city": "FRANKFURT AM MAIN",
+    "state": null,
+    "aum": 116
+  },
+  {
+    "crd_number": 818,
+    "legal_name": "TD PRIVATE CLIENT WEALTH LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 16422
+  },
+  {
+    "crd_number": 819,
+    "legal_name": "CYNDEO WEALTH PARTNERS",
+    "city": "ST. PETERSBURG",
+    "state": "FL",
+    "aum": 3924
+  },
+  {
+    "crd_number": 820,
+    "legal_name": "ALPHA LEONIS PARTNERS, LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 2
+  },
+  {
+    "crd_number": 821,
+    "legal_name": "ALIGNE WEALTH ADVISORS INVESTMENT MANAGEMENT (AWAIM)",
+    "city": "LOS ANGELES",
+    "state": "CA",
+    "aum": 307
+  },
+  {
+    "crd_number": 822,
+    "legal_name": "PANTERA CAPITAL",
+    "city": "SAN FRANCISCO",
+    "state": "CA",
+    "aum": 18
+  },
+  {
+    "crd_number": 823,
+    "legal_name": "OXFORD CAPITAL MANAGEMENT",
+    "city": "RICHM0ND",
+    "state": "VA",
+    "aum": 119
+  },
+  {
+    "crd_number": 824,
+    "legal_name": "COLTON GROOME FINANCIAL ADVISORS, LLC",
+    "city": "ASHEVILLE",
+    "state": "NC",
+    "aum": 843
+  },
+  {
+    "crd_number": 825,
+    "legal_name": "HEMMING& WEALTH MANAGEMENT, INC.",
+    "city": "TRAVERSE CITY",
+    "state": "MI",
+    "aum": 1418
+  },
+  {
+    "crd_number": 826,
+    "legal_name": "CYNDEO WEALTH PARTNERS",
+    "city": "ST. PETERSBURG",
+    "state": "FL",
+    "aum": 3924
+  },
+  {
+    "crd_number": 827,
+    "legal_name": "EPIQ CAPITAL GROUP, LLC",
+    "city": "SAN FRANCISCO",
+    "state": "CA",
+    "aum": 896
+  },
+  {
+    "crd_number": 828,
+    "legal_name": "YANDELL INVESTMENTS, LLC",
+    "city": "ORLANDO",
+    "state": "FL",
+    "aum": 0
+  },
+  {
+    "crd_number": 829,
+    "legal_name": "EATON FINANCIAL GROUP",
+    "city": "CORAL SPRINGS",
+    "state": "FL",
+    "aum": 1953
+  },
+  {
+    "crd_number": 830,
+    "legal_name": "ALPINE HILL ADVISORS LLC",
+    "city": "WESTPORT",
+    "state": "CT",
+    "aum": 106
+  },
+  {
+    "crd_number": 831,
+    "legal_name": "FALCON WEALTH PLANNING, INC.",
+    "city": "ONTARIO",
+    "state": "CA",
+    "aum": 5425
+  },
+  {
+    "crd_number": 832,
+    "legal_name": "5AM VENTURES",
+    "city": "SAN FRANCISCO",
+    "state": "CA",
+    "aum": 11
+  },
+  {
+    "crd_number": 833,
+    "legal_name": "CURRAN FINANCIAL PARTNERS, LLC",
+    "city": "DANIEL ISLAND",
+    "state": "SC",
+    "aum": 3230
+  },
+  {
+    "crd_number": 834,
+    "legal_name": "REVELSTOKE CAPITAL PARTNERS",
+    "city": "DENVER",
+    "state": "CO",
+    "aum": 21
+  },
+  {
+    "crd_number": 835,
+    "legal_name": "ANCHOR INVESTMENT MANAGEMENT",
+    "city": "COLUMBIA",
+    "state": "SC",
+    "aum": 1922
+  },
+  {
+    "crd_number": 836,
+    "legal_name": "SHARPVUE CAPITAL, LLC",
+    "city": "RALEIGH",
+    "state": "NC",
+    "aum": 11
+  },
+  {
+    "crd_number": 837,
+    "legal_name": "E6 PORTFOLIOS",
+    "city": "MIDVALE",
+    "state": "UT",
+    "aum": 102
+  },
+  {
+    "crd_number": 838,
+    "legal_name": "PROSPERA FINANCIAL SERVICES, INC.",
+    "city": "DALLAS",
+    "state": "TX",
+    "aum": 20915
+  },
+  {
+    "crd_number": 839,
+    "legal_name": "KEELEY-TETON ADVISORS, LLC",
+    "city": "CHICAGO",
+    "state": "IL",
+    "aum": 454
+  },
+  {
+    "crd_number": 840,
+    "legal_name": "FIVESPAN PARTNERS, LP",
+    "city": "SAN FRANCISCO",
+    "state": "CA",
+    "aum": 0
+  },
+  {
+    "crd_number": 841,
+    "legal_name": "PARK SQUARE FINANCIAL GROUP LLC",
+    "city": "ROSWELL",
+    "state": "GA",
+    "aum": 0
+  },
+  {
+    "crd_number": 842,
+    "legal_name": "&PARTNERS",
+    "city": "NASHVILLE",
+    "state": "TN",
+    "aum": 3051
+  },
+  {
+    "crd_number": 843,
+    "legal_name": "NEXA EQUITY LLC",
+    "city": "SAN FRANCISCO",
+    "state": "CA",
+    "aum": 7
+  },
+  {
+    "crd_number": 844,
+    "legal_name": "BASSAM WEALTH MANAGEMENT, LLC",
+    "city": "PALM BEACH",
+    "state": "FL",
+    "aum": 0
+  },
+  {
+    "crd_number": 845,
+    "legal_name": "VIDENT ASSET MANAGEMENT",
+    "city": "ALPHARETTA",
+    "state": "GA",
+    "aum": 938
+  },
+  {
+    "crd_number": 846,
+    "legal_name": "LEWIS ASSET MANAGEMENT",
+    "city": "LAFAYETTE",
+    "state": "CA",
+    "aum": 239
+  },
+  {
+    "crd_number": 847,
+    "legal_name": "RVK, INC.",
+    "city": "PORTLAND",
+    "state": "OR",
+    "aum": 34
+  },
+  {
+    "crd_number": 848,
+    "legal_name": "ROBERT STEPHEN CAPITAL MANAGEMENT LLC",
+    "city": "TULSA",
+    "state": "OK",
+    "aum": 265
+  },
+  {
+    "crd_number": 849,
+    "legal_name": "HIVEMIND CAPITAL PARTNERS LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 7
+  },
+  {
+    "crd_number": 850,
+    "legal_name": "FOURTH SAIL CAPITAL US LP",
+    "city": "AVENTURA",
+    "state": "FL",
+    "aum": 6
+  },
+  {
+    "crd_number": 851,
+    "legal_name": "MUTUAL OF AMERICA LIFE INSURANCE COMPANY",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 29
+  },
+  {
+    "crd_number": 852,
+    "legal_name": "COLTER LEWIS INVESTMENT PARTNERS, LLC",
+    "city": "GREENWICH",
+    "state": "CT",
+    "aum": 93
+  },
+  {
+    "crd_number": 853,
+    "legal_name": "MUTUAL OF AMERICA CAPITAL MANAGEMENT LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 61
+  },
+  {
+    "crd_number": 854,
+    "legal_name": "HILLTOP SECURITIES INC.",
+    "city": "DALLAS",
+    "state": "TX",
+    "aum": 4546
+  },
+  {
+    "crd_number": 855,
+    "legal_name": "BRICKWOOD ASSET MANAGEMENT",
+    "city": "LONDON",
+    "state": null,
+    "aum": 0
+  },
+  {
+    "crd_number": 856,
+    "legal_name": "PMB ADVISORS",
+    "city": "LARKSPUR",
+    "state": "CA",
+    "aum": 224
+  },
+  {
+    "crd_number": 857,
+    "legal_name": "PREMIUM 72 CAPITAL",
+    "city": "HOUSTON",
+    "state": "TX",
+    "aum": 15
+  },
+  {
+    "crd_number": 858,
+    "legal_name": "QUAD INVESTMENT MANAGEMENT CORP.",
+    "city": "SEOUL, YEONGDEUNGPO-GU",
+    "state": null,
+    "aum": 50
+  },
+  {
+    "crd_number": 859,
+    "legal_name": "ROSENBLUM SILVERMAN SUTTON SF INC",
+    "city": "SAN FRANCISCO",
+    "state": "CA",
+    "aum": 155
+  },
+  {
+    "crd_number": 860,
+    "legal_name": "BOW RIVER CREDIT ADVISERS, LLC.",
+    "city": "DENVER",
+    "state": "CO",
+    "aum": 0
+  },
+  {
+    "crd_number": 861,
+    "legal_name": "LIBERTY ASSET MANAGEMENT, INC.",
+    "city": "WOODRIDGE",
+    "state": "IL",
+    "aum": 479
+  },
+  {
+    "crd_number": 862,
+    "legal_name": "THRIVENT ADVISOR NETWORK, LLC",
+    "city": "MINNEAPOLIS",
+    "state": "MN",
+    "aum": 28513
+  },
+  {
+    "crd_number": 863,
+    "legal_name": "COLLABORATIVE PORTFOLIO MANAGEMENT",
+    "city": "OVERLAND PARK",
+    "state": "KS",
+    "aum": 467
+  },
+  {
+    "crd_number": 864,
+    "legal_name": "PIANO WEALTH MANAGEMENT",
+    "city": "VICTOR",
+    "state": "NY",
+    "aum": 81
+  },
+  {
+    "crd_number": 865,
+    "legal_name": "EAGAN CAPITAL MANAGEMENT, LLC",
+    "city": "FAYETTEVILLE",
+    "state": "NY",
+    "aum": 384
+  },
+  {
+    "crd_number": 866,
+    "legal_name": "WEALTHSPAN INVESTMENT MANAGEMENT, LLC",
+    "city": "GRAND RAPIDS",
+    "state": "MI",
+    "aum": 39
+  },
+  {
+    "crd_number": 867,
+    "legal_name": "SAXONY CAPITAL MANAGEMENT, LLC",
+    "city": "SAINT LOUIS",
+    "state": "MO",
+    "aum": 1192
+  },
+  {
+    "crd_number": 868,
+    "legal_name": "26NORTH DIRECT LENDING",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 1
+  },
+  {
+    "crd_number": 869,
+    "legal_name": "DJA CAPITAL MANAGEMENT, LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 1
+  },
+  {
+    "crd_number": 870,
+    "legal_name": "RPD FUND MANAGEMENT LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 5
+  },
+  {
+    "crd_number": 871,
+    "legal_name": "STURMAN WEALTH ADVISORS",
+    "city": "CHARLOTTESVILLE",
+    "state": "VA",
+    "aum": 0
+  },
+  {
+    "crd_number": 872,
+    "legal_name": "BEAUMONT FINANCIAL PARTNERS",
+    "city": "NEEDHAM",
+    "state": "MA",
+    "aum": 3968
+  },
+  {
+    "crd_number": 873,
+    "legal_name": "EMPOWER CAPITAL MANAGEMENT, LLC",
+    "city": "GREENWOOD  VILLAGE",
+    "state": "CO",
+    "aum": 154
+  },
+  {
+    "crd_number": 874,
+    "legal_name": "HARBORVIEW ASSET MANAGEMENT LLC",
+    "city": "GIG HARBOR",
+    "state": "WA",
+    "aum": 0
+  },
+  {
+    "crd_number": 875,
+    "legal_name": "POWER ASSET MANAGEMENT LLC",
+    "city": "LOS ANGELES",
+    "state": "CA",
+    "aum": 42
+  },
+  {
+    "crd_number": 876,
+    "legal_name": "STOCKBRIDGE CAPITAL GROUP, LLC",
+    "city": "SAN FRANCISCO",
+    "state": "CA",
+    "aum": 28
+  },
+  {
+    "crd_number": 877,
+    "legal_name": "HARVEST GLOBAL INVESTMENTS LIMITED",
+    "city": "HONG KONG",
+    "state": null,
+    "aum": 28
+  },
+  {
+    "crd_number": 878,
+    "legal_name": "MANNA WEALTH MANAGEMENT",
+    "city": "MIAMI BEACH",
+    "state": "FL",
+    "aum": 0
+  },
+  {
+    "crd_number": 879,
+    "legal_name": "INVESTOLOGY INC.",
+    "city": "RESTON",
+    "state": "VA",
+    "aum": 400
+  },
+  {
+    "crd_number": 880,
+    "legal_name": "DECHENG CAPITAL LLC",
+    "city": "MENLO PARK",
+    "state": "CA",
+    "aum": 7
+  },
+  {
+    "crd_number": 881,
+    "legal_name": "THE NORDEN GROUP LLC",
+    "city": "PROVO",
+    "state": "UT",
+    "aum": 2546
+  },
+  {
+    "crd_number": 882,
+    "legal_name": "FOCUSED WEALTH MANAGEMENT, INC.",
+    "city": "NEWBURGH",
+    "state": "NY",
+    "aum": 1980
+  },
+  {
+    "crd_number": 883,
+    "legal_name": "BARR FINANCIAL SERVICES, LLC",
+    "city": "WINTER PARK",
+    "state": "FL",
+    "aum": 671
+  },
+  {
+    "crd_number": 884,
+    "legal_name": "HARBOUR INVESTMENTS, INC.",
+    "city": "MADISON",
+    "state": "WI",
+    "aum": 33564
+  },
+  {
+    "crd_number": 885,
+    "legal_name": "GOANNA CAPITAL MANAGEMENT LLC",
+    "city": "WEST PALM BEACH",
+    "state": "FL",
+    "aum": 33
+  },
+  {
+    "crd_number": 886,
+    "legal_name": "DB & C ADVISORS, LLC",
+    "city": "HOLLAND",
+    "state": "MI",
+    "aum": 874
+  },
+  {
+    "crd_number": 887,
+    "legal_name": "BRASADA CAPITAL MANAGEMENT, LP",
+    "city": "HOUSTON",
+    "state": "TX",
+    "aum": 933
+  },
+  {
+    "crd_number": 888,
+    "legal_name": "ALPHA CUBED INVESTMENTS, LLC",
+    "city": "IRVINE",
+    "state": "CA",
+    "aum": 4537
+  },
+  {
+    "crd_number": 889,
+    "legal_name": "SPHINX INVESTMENTS LLC",
+    "city": "RICHMOND",
+    "state": "VA",
+    "aum": 50
+  },
+  {
+    "crd_number": 890,
+    "legal_name": "J M BROWN FINANCIAL PARTNERS",
+    "city": "TULSA",
+    "state": "OK",
+    "aum": 716
+  },
+  {
+    "crd_number": 891,
+    "legal_name": "NEXT WORLD CAPITAL LLC",
+    "city": "MENLO PARK",
+    "state": "CA",
+    "aum": 2
+  },
+  {
+    "crd_number": 892,
+    "legal_name": "ARVEST WEALTH MANAGEMENT",
+    "city": "ROGERS",
+    "state": "AR",
+    "aum": 7674
+  },
+  {
+    "crd_number": 893,
+    "legal_name": "OSAIC WEALTH, INC.",
+    "city": "SCOTTSDALE",
+    "state": "AZ",
+    "aum": 437201
+  },
+  {
+    "crd_number": 894,
+    "legal_name": "STENHAM ASSET MANAGEMENT LIMITED",
+    "city": "ST. PETER PORT",
+    "state": null,
+    "aum": 206
+  },
+  {
+    "crd_number": 895,
+    "legal_name": "INVESTMENT MANAGEMENT GROUP",
+    "city": "BILLINGS",
+    "state": "MT",
+    "aum": 2303
+  },
+  {
+    "crd_number": 896,
+    "legal_name": "BLACKROCK FINANCIAL MANAGEMENT, INC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 2184
+  },
+  {
+    "crd_number": 897,
+    "legal_name": "MSP SPORTS CAPITAL",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 2
+  },
+  {
+    "crd_number": 898,
+    "legal_name": "GEORGIA WEALTH PARTNERS, LLC",
+    "city": "GRIFFIN",
+    "state": "GA",
+    "aum": 658
+  },
+  {
+    "crd_number": 899,
+    "legal_name": "ALBION FINANCIAL GROUP",
+    "city": "SALT LAKE CITY",
+    "state": "UT",
+    "aum": 2292
+  },
+  {
+    "crd_number": 900,
+    "legal_name": "THE KOCEN FINANCIAL GROUP, INC.",
+    "city": "RANCHO MIRAGE",
+    "state": "CA",
+    "aum": 725
+  },
+  {
+    "crd_number": 901,
+    "legal_name": "BEARING POINT CAPITAL",
+    "city": "BLOOMINGTON",
+    "state": "MN",
+    "aum": 0
+  },
+  {
+    "crd_number": 902,
+    "legal_name": "HOFFMAN & ASSOCIATES FINANCIAL & ESTATE ADVISORS, INC.",
+    "city": "VENTURA",
+    "state": "CA",
+    "aum": 48
+  },
+  {
+    "crd_number": 903,
+    "legal_name": "KINGS PATH PARTNERS LLC",
+    "city": "SUGAR LAND",
+    "state": "TX",
+    "aum": 453
+  },
+  {
+    "crd_number": 904,
+    "legal_name": "ALLSPRING GLOBAL INVESTMENTS, LLC",
+    "city": "CHARLOTTE",
+    "state": "NC",
+    "aum": 9416
+  },
+  {
+    "crd_number": 905,
+    "legal_name": "PARSONS CAPITAL MANAGEMENT INC",
+    "city": "PROVIDENCE",
+    "state": "RI",
+    "aum": 1833
+  },
+  {
+    "crd_number": 906,
+    "legal_name": "ABLE FINANCIAL GROUP, LLC",
+    "city": "SCOTTSDALE",
+    "state": "AZ",
+    "aum": 1357
+  },
+  {
+    "crd_number": 907,
+    "legal_name": "THRIVENT INVESTMENT MANAGEMENT INC.",
+    "city": "MINNEAPOLIS",
+    "state": "MN",
+    "aum": 42439
+  },
+  {
+    "crd_number": 908,
+    "legal_name": "INTEGRAL WEALTH MANAGEMENT",
+    "city": "TURLOCK",
+    "state": "CA",
+    "aum": 913
+  },
+  {
+    "crd_number": 909,
+    "legal_name": "RICE PARK CAPITAL",
+    "city": "PLYMOUTH",
+    "state": "MN",
+    "aum": 4
+  },
+  {
+    "crd_number": 910,
+    "legal_name": "BEST INVEST",
+    "city": "SAN ANTONIO",
+    "state": "TX",
+    "aum": 1276
+  },
+  {
+    "crd_number": 911,
+    "legal_name": "GLASSY MOUNTAIN ADVISORS, INC.",
+    "city": "BETHESDA",
+    "state": "MD",
+    "aum": 305
+  },
+  {
+    "crd_number": 912,
+    "legal_name": "RICE PARK CAPITAL",
+    "city": "PLYMOUTH",
+    "state": "MN",
+    "aum": 4
+  },
+  {
+    "crd_number": 913,
+    "legal_name": "GFP WEALTH MANAGEMENT",
+    "city": "THOUSAND OAKS",
+    "state": "CA",
+    "aum": 172
+  },
+  {
+    "crd_number": 914,
+    "legal_name": "WPA FAMILY OFFICE, LLC",
+    "city": "DALLAS",
+    "state": "TX",
+    "aum": 171
+  },
+  {
+    "crd_number": 915,
+    "legal_name": "PRIVATE PORTFOLIO PARTNERS, LLC",
+    "city": "PARAMUS",
+    "state": "NJ",
+    "aum": 2238
+  },
+  {
+    "crd_number": 916,
+    "legal_name": "ADAMS FINANCIAL CONCEPTS, LLC",
+    "city": "SEATTLE",
+    "state": "WA",
+    "aum": 170
+  },
+  {
+    "crd_number": 917,
+    "legal_name": "ADAMS FINANCIAL CONCEPTS, LLC",
+    "city": "SEATTLE",
+    "state": "WA",
+    "aum": 170
+  },
+  {
+    "crd_number": 918,
+    "legal_name": "CAPITAL FINANCIAL GROUP, INC.",
+    "city": "GREENWOOD VILLAGE",
+    "state": "CO",
+    "aum": 656
+  },
+  {
+    "crd_number": 919,
+    "legal_name": "CLG LLC",
+    "city": "LONG BEACH",
+    "state": "CA",
+    "aum": 2282
+  },
+  {
+    "crd_number": 920,
+    "legal_name": "NOVI WEALTH PARTNERS",
+    "city": "PRINCETON",
+    "state": "NJ",
+    "aum": 822
+  },
+  {
+    "crd_number": 921,
+    "legal_name": "CAMDEN ASSET MANAGEMENT",
+    "city": "LOS ANGELES",
+    "state": "CA",
+    "aum": 18
+  },
+  {
+    "crd_number": 922,
+    "legal_name": "PYA WALTMAN CAPITAL, LLC",
+    "city": "KNOXVILLE",
+    "state": "TN",
+    "aum": 1222
+  },
+  {
+    "crd_number": 923,
+    "legal_name": "P. SCHOENFELD ASSET MANAGEMENT LP",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 15
+  },
+  {
+    "crd_number": 924,
+    "legal_name": "FIERA CAPITAL INC.",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 5203
+  },
+  {
+    "crd_number": 925,
+    "legal_name": "PHASE LINE CAPITAL, LLC",
+    "city": "ATLANTA",
+    "state": "GA",
+    "aum": 345
+  },
+  {
+    "crd_number": 926,
+    "legal_name": "SPEECE THORSON CAPITAL GROUP INC",
+    "city": "MINNETONKA",
+    "state": "MN",
+    "aum": 40
+  },
+  {
+    "crd_number": 927,
+    "legal_name": "MAIN STREET FINANCIAL",
+    "city": "HARRISON",
+    "state": "NY",
+    "aum": 257
+  },
+  {
+    "crd_number": 928,
+    "legal_name": "SMITH PARTNERS WEALTH MANAGEMENT, LLC",
+    "city": "GREENSBORO",
+    "state": "NC",
+    "aum": 470
+  },
+  {
+    "crd_number": 929,
+    "legal_name": "NORTHWESTERN MUTUAL INVESTMENT SERVICES,LLC",
+    "city": "MILWAUKEE",
+    "state": "WI",
+    "aum": 0
+  },
+  {
+    "crd_number": 930,
+    "legal_name": "GOODSTEIN WEALTH MANAGEMENT LLC",
+    "city": "ENCINO",
+    "state": "CA",
+    "aum": 420
+  },
+  {
+    "crd_number": 931,
+    "legal_name": "SWMG, LLC",
+    "city": "FORT WORTH",
+    "state": "TX",
+    "aum": 1174
+  },
+  {
+    "crd_number": 932,
+    "legal_name": "THREADGILL FINANCIAL, LLC",
+    "city": "SPRING",
+    "state": "TX",
+    "aum": 861
+  },
+  {
+    "crd_number": 933,
+    "legal_name": "ADVISORY SERVICES NETWORK",
+    "city": "ATLANTA",
+    "state": "GA",
+    "aum": 24286
+  },
+  {
+    "crd_number": 934,
+    "legal_name": "REZNY WEALTH MANAGEMENT, INC.",
+    "city": "FORT MYERS",
+    "state": "FL",
+    "aum": 721
+  },
+  {
+    "crd_number": 935,
+    "legal_name": "CYPRESS CAPITAL MANAGEMENT, LLC",
+    "city": "SHERIDAN",
+    "state": "WY",
+    "aum": 364
+  },
+  {
+    "crd_number": 936,
+    "legal_name": "TRANSCEND CAPITAL ADVISORS, LLC",
+    "city": "MADISON",
+    "state": "NJ",
+    "aum": 4468
+  },
+  {
+    "crd_number": 937,
+    "legal_name": "FINANCIAL PARTNERS, LLC",
+    "city": "SANTA FE",
+    "state": "NM",
+    "aum": 391
+  },
+  {
+    "crd_number": 938,
+    "legal_name": "RCM ROBINSON CAPITAL MANAGEMENT LLC",
+    "city": "MILL VALLEY",
+    "state": "CA",
+    "aum": 10
+  },
+  {
+    "crd_number": 939,
+    "legal_name": "FBB CAPITAL PARTNERS",
+    "city": "BETHESDA",
+    "state": "MD",
+    "aum": 2917
+  },
+  {
+    "crd_number": 940,
+    "legal_name": "HARBOUR INVESTMENTS, INC.",
+    "city": "MADISON",
+    "state": "WI",
+    "aum": 33564
+  },
+  {
+    "crd_number": 941,
+    "legal_name": "CRESTA ADVISORS",
+    "city": "LAREDO",
+    "state": "TX",
+    "aum": 531
+  },
+  {
+    "crd_number": 942,
+    "legal_name": "NERDWALLET ADVISORY",
+    "city": "SAN FRANCISCO",
+    "state": "CA",
+    "aum": 0
+  },
+  {
+    "crd_number": 943,
+    "legal_name": "THIRD POINT PRIVATE CAPITAL LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 0
+  },
+  {
+    "crd_number": 944,
+    "legal_name": "BROADWOOD CAPITAL, INC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 1
+  },
+  {
+    "crd_number": 945,
+    "legal_name": "MODERN WEALTH MANAGEMENT, LLC",
+    "city": "LENEXA",
+    "state": "KS",
+    "aum": 13592
+  },
+  {
+    "crd_number": 946,
+    "legal_name": "CLARITY CAPITAL ADVISORS, LLC",
+    "city": "LAKEWOOD RANCH",
+    "state": "FL",
+    "aum": 266
+  },
+  {
+    "crd_number": 947,
+    "legal_name": "ELMWOOD WEALTH MANAGEMENT",
+    "city": "BERKELEY",
+    "state": "CA",
+    "aum": 638
+  },
+  {
+    "crd_number": 948,
+    "legal_name": "STRAIGHTLINE",
+    "city": "TROY",
+    "state": "MI",
+    "aum": 5644
+  },
+  {
+    "crd_number": 949,
+    "legal_name": "SEELAUS ASSET MANAGEMENT, LLC",
+    "city": "CHATHAM",
+    "state": "NJ",
+    "aum": 499
+  },
+  {
+    "crd_number": 950,
+    "legal_name": "Q CAPITAL SOLUTIONS",
+    "city": "NAPLES",
+    "state": "FL",
+    "aum": 255
+  },
+  {
+    "crd_number": 951,
+    "legal_name": "WAGNER WEALTH MANAGEMENT, CORP.",
+    "city": "SUGARLOAF",
+    "state": "PA",
+    "aum": 647
+  },
+  {
+    "crd_number": 952,
+    "legal_name": "COMPOSITION CAPITAL LP",
+    "city": "LOS ANGELES",
+    "state": "CA",
+    "aum": 0
+  },
+  {
+    "crd_number": 953,
+    "legal_name": "RIDGEWOOD INFRASTRUCTURE",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 11
+  },
+  {
+    "crd_number": 954,
+    "legal_name": "THE PLANNING GROUP",
+    "city": "NORTHFIELD",
+    "state": "IL",
+    "aum": 706
+  },
+  {
+    "crd_number": 955,
+    "legal_name": "CGN ADVISORS, LLC",
+    "city": "MANHATTAN",
+    "state": "KS",
+    "aum": 3627
+  },
+  {
+    "crd_number": 956,
+    "legal_name": "FINE CAPITAL PARTNERS, L.P.",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 2
+  },
+  {
+    "crd_number": 957,
+    "legal_name": "OUTFITTER FINANCIAL",
+    "city": "BRUNSWICK",
+    "state": "ME",
+    "aum": 147
+  },
+  {
+    "crd_number": 958,
+    "legal_name": "XY INVESTMENTS",
+    "city": "HONG KONG",
+    "state": null,
+    "aum": 3
+  },
+  {
+    "crd_number": 959,
+    "legal_name": "KILTEARN PARTNERS",
+    "city": "EDINBURGH",
+    "state": null,
+    "aum": 3
+  },
+  {
+    "crd_number": 960,
+    "legal_name": "FULCRUM ASSET MANAGEMENT LLP",
+    "city": "LONDON",
+    "state": null,
+    "aum": 28
+  },
+  {
+    "crd_number": 961,
+    "legal_name": "ROYAL FUND MANAGEMENT, LLC",
+    "city": "LADY LAKE",
+    "state": "FL",
+    "aum": 11583
+  },
+  {
+    "crd_number": 962,
+    "legal_name": "HARBOUR INVESTMENTS, INC.",
+    "city": "MADISON",
+    "state": "WI",
+    "aum": 33564
+  },
+  {
+    "crd_number": 963,
+    "legal_name": "TOTAL WEALTH PLANNING AND MANAGEMENT, INC.",
+    "city": "PONTE VEDRA",
+    "state": "FL",
+    "aum": 1207
+  },
+  {
+    "crd_number": 964,
+    "legal_name": "GRANT PRIVATE WEALTH MANAGEMENT",
+    "city": "PLEASANTON",
+    "state": "CA",
+    "aum": 379
+  },
+  {
+    "crd_number": 965,
+    "legal_name": "AUDENT GLOBAL ASSET MANAGEMENT, LLC",
+    "city": "WEST HOLLYWOOD",
+    "state": "CA",
+    "aum": 435
+  },
+  {
+    "crd_number": 966,
+    "legal_name": "CALLAN CAPITAL, LLC",
+    "city": "LA JOLLA",
+    "state": "CA",
+    "aum": 1288
+  },
+  {
+    "crd_number": 967,
+    "legal_name": "SENTINUS, LLC",
+    "city": "OAKBROOK",
+    "state": "IL",
+    "aum": 2755
+  },
+  {
+    "crd_number": 968,
+    "legal_name": "ENDOWMENT WEALTH MANAGEMENT, INC.",
+    "city": "APPLETON",
+    "state": "WI",
+    "aum": 2076
+  },
+  {
+    "crd_number": 969,
+    "legal_name": "SOVRAN ADVISORS, LLC",
+    "city": "SAN DIEGO",
+    "state": "CA",
+    "aum": 3480
+  },
+  {
+    "crd_number": 970,
+    "legal_name": "HULL WEALTH MANAGEMENT",
+    "city": "MURFREESBORO",
+    "state": "TN",
+    "aum": 705
+  },
+  {
+    "crd_number": 971,
+    "legal_name": "DYNASTY EQUITY PARTNERS MANAGEMENT, LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 5
+  },
+  {
+    "crd_number": 972,
+    "legal_name": "INFINIUM INVESTMENT ADVISORS, LLC",
+    "city": "DENVER",
+    "state": "CO",
+    "aum": 388
+  },
+  {
+    "crd_number": 973,
+    "legal_name": "BOULAY FINANCIAL ADVISORS, LLC",
+    "city": "EDEN PRAIRIE",
+    "state": "MN",
+    "aum": 3878
+  },
+  {
+    "crd_number": 974,
+    "legal_name": "RECORD CURRENCY MANAGEMENT INC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 6
+  },
+  {
+    "crd_number": 975,
+    "legal_name": "WINTON CAPITAL MANAGEMENT LTD.",
+    "city": "LONDON",
+    "state": null,
+    "aum": 27
+  },
+  {
+    "crd_number": 976,
+    "legal_name": "TURNER CAPITAL INVESTMENTS, LLC",
+    "city": "AUSTIN",
+    "state": "TX",
+    "aum": 638
+  },
+  {
+    "crd_number": 977,
+    "legal_name": "RITTER DANIHER FINANCIAL ADVISORY LLC",
+    "city": "CINCINNATI",
+    "state": "OH",
+    "aum": 1298
+  },
+  {
+    "crd_number": 978,
+    "legal_name": "SB ADVISORY, LLC",
+    "city": "ATLANTA",
+    "state": "GA",
+    "aum": 1045
+  },
+  {
+    "crd_number": 979,
+    "legal_name": "DBX ADVISORS LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 1
+  },
+  {
+    "crd_number": 980,
+    "legal_name": "J. SAFRA ASSET MANAGEMENT CORPORATION",
+    "city": "NEW YORK CITY",
+    "state": "NY",
+    "aum": 2575
+  },
+  {
+    "crd_number": 981,
+    "legal_name": "ACCOUNT MANAGEMENT, LLC",
+    "city": "BOXFORD",
+    "state": "MA",
+    "aum": 29
+  },
+  {
+    "crd_number": 982,
+    "legal_name": "REDBUD ADVISORS",
+    "city": "AUSTIN",
+    "state": "TX",
+    "aum": 271
+  },
+  {
+    "crd_number": 983,
+    "legal_name": "SAGEVIEW ADVISORY GROUP, LLC",
+    "city": "NEWPORT BEACH",
+    "state": "CA",
+    "aum": 34543
+  },
+  {
+    "crd_number": 984,
+    "legal_name": "NINE MASTS CAPITAL ADVISERS LLC",
+    "city": "HONG KONG",
+    "state": null,
+    "aum": 1
+  },
+  {
+    "crd_number": 985,
+    "legal_name": "NEW WAVE WEALTH ADVISORS",
+    "city": "SPRINGDALE",
+    "state": "AR",
+    "aum": 890
+  },
+  {
+    "crd_number": 986,
+    "legal_name": "CLINTON INVESTMENT MANAGEMENT, LLC",
+    "city": "STAMFORD",
+    "state": "CT",
+    "aum": 1402
+  },
+  {
+    "crd_number": 987,
+    "legal_name": "ANSON ANALYTICS",
+    "city": "TYRONE",
+    "state": "GA",
+    "aum": 441
+  },
+  {
+    "crd_number": 988,
+    "legal_name": "RIA GLOBAL RESEARCH, LLC",
+    "city": "HOUSTON",
+    "state": "TX",
+    "aum": 0
+  },
+  {
+    "crd_number": 989,
+    "legal_name": "BUTTONWOOD FINANCIAL GROUP, LLC",
+    "city": "KANSAS CITY",
+    "state": "MO",
+    "aum": 2005
+  },
+  {
+    "crd_number": 990,
+    "legal_name": "MILITIA INVESTMENTS, LLC",
+    "city": "AUSTIN",
+    "state": "TX",
+    "aum": 0
+  },
+  {
+    "crd_number": 991,
+    "legal_name": "ARCADIA WEALTH MANAGEMENT, LLC",
+    "city": "MANCHESTER",
+    "state": "NH",
+    "aum": 2283
+  },
+  {
+    "crd_number": 992,
+    "legal_name": "ALLARD PARTNERS LIMITED",
+    "city": "CENTRAL",
+    "state": null,
+    "aum": 3
+  },
+  {
+    "crd_number": 993,
+    "legal_name": "ALIGNE WEALTH ADVISORS INVESTMENT MANAGEMENT (AWAIM)",
+    "city": "LOS ANGELES",
+    "state": "CA",
+    "aum": 307
+  },
+  {
+    "crd_number": 994,
+    "legal_name": "STONEHURST MANAGEMENT, LLC",
+    "city": "NEW YORK",
+    "state": "NY",
+    "aum": 64
+  },
+  {
+    "crd_number": 995,
+    "legal_name": "PRINCIPAL ASSET MANAGEMENT",
+    "city": "DES MOINES",
+    "state": "IA",
+    "aum": 6824
+  },
+  {
+    "crd_number": 996,
+    "legal_name": "HENRICKSON NAUTA WEALTH ADVISORS, INC.",
+    "city": "BELMONT",
+    "state": "MI",
+    "aum": 1723
+  },
+  {
+    "crd_number": 997,
+    "legal_name": "WYZE WEALTH ADVISORS, LLC",
+    "city": "CANONSBURG",
+    "state": "PA",
+    "aum": 330
+  },
+  {
+    "crd_number": 998,
+    "legal_name": "N1 ADVISORS",
+    "city": "NEWARK",
+    "state": "DE",
+    "aum": 450
+  },
+  {
+    "crd_number": 999,
+    "legal_name": "MERIDIAN WEALTH ADVISORS, LLC",
+    "city": "AUSTIN",
+    "state": "TX",
+    "aum": 1279
+  },
+  {
+    "crd_number": 1000,
+    "legal_name": "FUNDIFY ADVISORS LLC",
+    "city": "AUSTIN",
+    "state": "TX",
+    "aum": 0
+  }
+]

@@ -1,13 +1,14 @@
 // app/_backend/api/balance/route.ts
 export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 import { NextRequest, NextResponse } from 'next/server';
-import { randomUUID } from 'node:crypto';
 import { createHmac } from 'node:crypto';
-import { ensureAccount, getBalance } from '@/lib/credits';
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
-const WELCOME = Number(process.env.WELCOME_CREDITS ?? 15);
+const WELCOME_CREDITS = Number(process.env.WELCOME_CREDITS ?? 15);
 const CREDITS_SECRET = process.env.CREDITS_SECRET;
 
 // Utility functions for the cookie ledger
@@ -70,90 +71,106 @@ function createCreditsCookie(uid: string, credits: number) {
 }
 
 export async function GET(req: NextRequest) {
-  let uid = req.cookies.get('uid')?.value || null;
-  let minted = false;
-  if (!uid) { uid = randomUUID(); minted = true; }
-
+  // Get auth client
+  const supabaseAuth = createRouteHandlerClient({ cookies });
+  
+  // Try to get the authenticated user's email
+  const { data: { user } } = await supabaseAuth.auth.getUser();
+  const userEmail = user?.email;
+  
+  if (!userEmail) {
+    console.log('[balance] No authenticated user, falling back to cookie');
+    return handleCookieFallback(req);
+  }
+  
   try {
-    // Try to get user info from database
-    await ensureAccount(uid);
-    
-    // Get user credits from database
-    const balance = await getBalance(uid);
-    
-    if (balance === null || balance === undefined) {
-      throw new Error('balance_null');
-    }
-    
-    // Check if user is a subscriber
-    const { data: userData, error: userError } = await supabaseAdmin
+    // Try to find user account by email
+    const { data: userAccount, error } = await supabaseAdmin
       .from('user_accounts')
-      .select('is_subscriber, subscription_status')
-      .eq('user_id', uid)
+      .select('id, is_pro')
+      .eq('email', userEmail)
       .maybeSingle();
     
-    // Default to false if error or no data
-    const isSubscriber = userData?.is_subscriber || 
-      (userData?.subscription_status === 'active' || userData?.subscription_status === 'trialing');
-    
-    // Create standardized response with both balance and credits fields
-    const res = NextResponse.json({ 
-      balance, 
-      credits: balance, 
-      isSubscriber: Boolean(isSubscriber),
-      source: 'db'
-    });
-
-    if (minted) {
-      res.cookies.set({
-        name: 'uid',
-        value: uid,
-        httpOnly: true,
-        secure: true,
-        sameSite: 'lax',
-        path: '/',
-        domain: '.ria-hunter.app',
-        maxAge: 60 * 60 * 24 * 365,
-      });
+    if (error) {
+      // Check if error is "relation does not exist"
+      if (error.code === '42P01') {
+        console.log('[balance] Table user_accounts does not exist, falling back to cookie');
+        return handleCookieFallback(req, userEmail);
+      }
+      throw error;
     }
-    return res;
-  } catch (err: any) {
-    // Fall back to cookie ledger
-    const msg = String(err?.message || 'unknown');
-    console.error('[credits] falling back to cookie ledger:', msg);
-
-    // Get or initialize cookie-based credits
-    const creditsCookie = req.cookies.get('rh_credits')?.value;
-    const { valid, credits: existingCredits } = verifyCookieLedger(creditsCookie, uid);
     
-    // Use existing credits or initialize with welcome credits
-    const credits = valid ? existingCredits : WELCOME;
-    console.log('[credits] using cookie ledger, credits:', credits);
+    if (!userAccount) {
+      console.log('[balance] User account not found, falling back to cookie');
+      return handleCookieFallback(req, userEmail);
+    }
     
-    // Create standardized response with both balance and credits fields
-    const res = NextResponse.json({ 
-      balance: credits, 
-      credits, 
-      isSubscriber: false,
-      source: 'cookie'
-    });
-    
-    // Set/refresh the cookie
-    res.cookies.set(createCreditsCookie(uid, credits));
-    
-    if (minted) {
-      res.cookies.set({
-        name: 'uid',
-        value: uid!,
-        httpOnly: true,
-        secure: true,
-        sameSite: 'lax',
-        path: '/',
-        domain: '.ria-hunter.app',
-        maxAge: 60 * 60 * 24 * 365,
+    // If user is a subscriber, return unlimited credits
+    if (userAccount.is_pro) {
+      return NextResponse.json({ 
+        credits: null, 
+        balance: null, 
+        isSubscriber: true, 
+        source: 'db' 
       });
     }
     
-    return res;
+    // Try to get credits from the database
+    try {
+      // Get user credits from credit_transactions
+      const { data: result, error: creditsError } = await supabaseAdmin.rpc(
+        'get_credits_balance',
+        { p_user_id: userAccount.id }
+      );
+      
+      if (creditsError) {
+        // If function doesn't exist, fall back to cookie
+        if (creditsError.code === '42883') {
+          console.log('[balance] Function get_credits_balance does not exist, falling back to cookie');
+          return handleCookieFallback(req, userEmail);
+        }
+        throw creditsError;
+      }
+      
+      const credits = result || 0;
+      
+      return NextResponse.json({ 
+        credits, 
+        balance: credits, 
+        isSubscriber: false, 
+        source: 'db' 
+      });
+    } catch (creditsErr) {
+      console.error('[balance] Error getting credits:', creditsErr);
+      return handleCookieFallback(req, userEmail);
+    }
+  } catch (err) {
+    console.error('[balance] Error:', err);
+    return handleCookieFallback(req, userEmail);
   }
+}
+
+function handleCookieFallback(req: NextRequest, email?: string): NextResponse {
+  const uid = email || req.cookies.get('uid')?.value || 'anonymous';
+  
+  // Get or initialize cookie-based credits
+  const creditsCookie = req.cookies.get('rh_credits')?.value;
+  const { valid, credits: existingCredits } = verifyCookieLedger(creditsCookie, uid);
+  
+  // Use existing credits or initialize with welcome credits
+  const credits = valid ? existingCredits : WELCOME_CREDITS;
+  console.log('[credits] using cookie ledger, credits:', credits);
+  
+  // Create standardized response with both balance and credits fields
+  const res = NextResponse.json({ 
+    balance: credits, 
+    credits, 
+    isSubscriber: false,
+    source: 'cookie'
+  });
+  
+  // Set/refresh the cookie
+  res.cookies.set(createCreditsCookie(uid, credits));
+  
+  return res;
 }
