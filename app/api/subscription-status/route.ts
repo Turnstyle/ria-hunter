@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import Stripe from 'stripe';
 import { CREDITS_CONFIG } from '@/app/config/credits';
+import { corsHeaders, handleOptionsRequest, addCorsHeaders, corsError } from '@/lib/cors';
 
 /**
  * Get current subscription status for the authenticated user
@@ -13,10 +14,7 @@ export async function GET(req: NextRequest) {
     const userId = req.headers.get('x-user-id');
 
     if (!userId) {
-      return NextResponse.json(
-        { error: 'User authentication required' },
-        { status: 401 }
-      );
+      return corsError(req, 'User authentication required', 401);
     }
 
     // Get subscription status
@@ -28,10 +26,7 @@ export async function GET(req: NextRequest) {
 
     if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
       console.error('Error fetching subscription:', error);
-      return NextResponse.json(
-        { error: 'Failed to fetch subscription status' },
-        { status: 500 }
-      );
+      return corsError(req, 'Failed to fetch subscription status', 500);
     }
 
     const isSubscriber = subscription && ['trialing', 'active'].includes(subscription.status);
@@ -109,38 +104,38 @@ export async function GET(req: NextRequest) {
       };
     }
 
-    return NextResponse.json({
-      isSubscriber,
-      subscription: subscription ? {
-        status: subscription.status,
-        currentPeriodEnd: subscription.current_period_end,
-        trialEnd,
-        planName,
-        latestInvoiceStatus,
-        stripeCustomerId: subscription.stripe_customer_id,
-        stripeSubscriptionId: subscription.stripe_subscription_id
-      } : null,
-      usage,
-      unlimited: isSubscriber
-    });
+    // Create response with proper CORS headers
+    return new Response(
+      JSON.stringify({
+        isSubscriber,
+        subscription: subscription ? {
+          status: subscription.status,
+          currentPeriodEnd: subscription.current_period_end,
+          trialEnd,
+          planName,
+          latestInvoiceStatus,
+          stripeCustomerId: subscription.stripe_customer_id,
+          stripeSubscriptionId: subscription.stripe_subscription_id
+        } : null,
+        usage,
+        unlimited: isSubscriber
+      }),
+      { 
+        status: 200, 
+        headers: {
+          ...corsHeaders(req),
+          'Content-Type': 'application/json'
+        } 
+      }
+    );
 
   } catch (error: any) {
     console.error('Subscription status error:', error);
-    return NextResponse.json(
-      { error: 'Failed to get subscription status' },
-      { status: 500 }
-    );
+    return corsError(req, 'Failed to get subscription status', 500);
   }
 }
 
-// Handle preflight requests
-export async function OPTIONS() {
-  return new Response(null, { 
-    status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    }
-  });
+// Handle preflight requests with proper CORS headers
+export async function OPTIONS(req: NextRequest) {
+  return handleOptionsRequest(req);
 }

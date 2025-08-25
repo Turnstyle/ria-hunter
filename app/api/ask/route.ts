@@ -4,48 +4,12 @@ import { callLLMToDecomposeQuery } from './planner'
 import { executeEnhancedQuery } from './retriever'
 import { buildAnswerContext } from './context-builder'
 import { generateNaturalLanguageAnswer } from './generator'
+import { CREDITS_CONFIG } from '@/app/config/credits'
+import { corsHeaders, handleOptionsRequest, addCorsHeaders, corsError } from '@/lib/cors'
 
-const DEFAULT_ALLOWED_ORIGINS = [
- 'https://www.ria-hunter.app',
- 'https://ria-hunter.app',
- 'https://ria-hunter-app.vercel.app',
-]
-const ALLOWED_ORIGINS = (process.env.CORS_ORIGINS || '')
-	.split(',')
-	.map((s) => s.trim())
-	.filter(Boolean)
-const EFFECTIVE_ALLOWED_ORIGINS = ALLOWED_ORIGINS.length > 0 ? ALLOWED_ORIGINS : DEFAULT_ALLOWED_ORIGINS
-
-function isAllowedPreviewOrigin(origin: string): boolean {
-	try {
-		const url = new URL(origin)
-		const host = url.hostname
-		return host.endsWith('.vercel.app') && (host.startsWith('ria-hunter-') || host.startsWith('ria-hunter-app-'))
-	} catch {
-		return false
-	}
-}
-
-function getAllowedOriginFromRequest(req: NextRequest): string | undefined {
-	const origin = req.headers.get('origin') || undefined
-	if (origin && (EFFECTIVE_ALLOWED_ORIGINS.includes(origin) || isAllowedPreviewOrigin(origin))) return origin
-	return undefined
-}
-
-function corsify(req: NextRequest, res: Response, preflight = false): Response {
-	const headers = new Headers(res.headers)
-	const origin = getAllowedOriginFromRequest(req) || EFFECTIVE_ALLOWED_ORIGINS[0]
-	headers.set('Access-Control-Allow-Origin', origin)
-	headers.set('Vary', 'Origin')
-	headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-	headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-	if (preflight) headers.set('Access-Control-Max-Age', '86400')
-
-	return new Response(res.body, { status: res.status, statusText: res.statusText, headers })
-}
-
+// Use the centralized CORS implementation for OPTIONS
 export function OPTIONS(req: NextRequest) {
-	return corsify(req, new Response(null, { status: 204 }), true)
+	return handleOptionsRequest(req)
 }
 
 export async function POST(request: NextRequest) {
@@ -55,7 +19,7 @@ export async function POST(request: NextRequest) {
 		const body = await request.json().catch(() => ({} as any))
 		const query = typeof body?.query === 'string' ? body.query : ''
 		if (!query) {
-			return corsify(request, NextResponse.json({ error: 'Query is required' }, { status: 400 }))
+			return corsError(request, 'Query is required', 400)
 		}
 
 		// Credits enforcement (subscriber/unlimited or free-tier)
@@ -64,38 +28,44 @@ export async function POST(request: NextRequest) {
 		if (userId) {
 			const limit = await checkQueryLimit(userId)
 			if (!limit.allowed) {
-				return corsify(
-					request,
-					NextResponse.json(
-						{
-							error: limit.isSubscriber
-								? 'Subscription expired. Please renew your subscription to continue.'
-								: 'Free query limit reached. Upgrade to continue.',
-							code: 'PAYMENT_REQUIRED',
-							remaining: limit.remaining,
-							isSubscriber: limit.isSubscriber,
-							upgradeRequired: true,
-						},
-						{ status: 402 },
-					),
+				return new Response(
+					JSON.stringify({
+						error: limit.isSubscriber
+							? 'Subscription expired. Please renew your subscription to continue.'
+							: 'Free query limit reached. Upgrade to continue.',
+						code: 'PAYMENT_REQUIRED',
+						remaining: limit.remaining,
+						isSubscriber: limit.isSubscriber,
+						upgradeRequired: true,
+					}),
+					{ 
+						status: 402, 
+						headers: {
+							...corsHeaders(request),
+							'Content-Type': 'application/json'
+						} 
+					}
 				)
 			}
 		} else {
 			const anon = parseAnonCookie(request)
 			anonCount = anon.count
-			if (anonCount >= 2) {
-				return corsify(
-					request,
-					NextResponse.json(
-						{
-							error: 'Free query limit reached. Create an account for more searches.',
-							code: 'PAYMENT_REQUIRED',
-							remaining: 0,
-							isSubscriber: false,
-							upgradeRequired: true,
-						},
-						{ status: 402 },
-					),
+			if (anonCount >= CREDITS_CONFIG.ANONYMOUS_FREE_CREDITS) {
+				return new Response(
+					JSON.stringify({
+						error: CREDITS_CONFIG.MESSAGES.CREDITS_EXHAUSTED_ANONYMOUS,
+						code: 'PAYMENT_REQUIRED',
+						remaining: 0,
+						isSubscriber: false,
+						upgradeRequired: true,
+					}),
+					{ 
+						status: 402, 
+						headers: {
+							...corsHeaders(request),
+							'Content-Type': 'application/json'
+						} 
+					}
 				)
 			}
 			needsCookieUpdate = true
@@ -151,20 +121,24 @@ export async function POST(request: NextRequest) {
 			await logQueryUsage(userId)
 		}
 
-		let response = corsify(
-			request,
-			NextResponse.json({
+		// Create response with proper CORS headers
+		const headers = corsHeaders(request);
+		headers.set('Content-Type', 'application/json');
+		
+		let response = new Response(
+			JSON.stringify({
 				answer,
 				sources: structuredData,
 				insufficient_data: !structuredData || (Array.isArray(structuredData) && structuredData.length === 0),
 				metadata: {
 					plan: decomposedPlan,
 					debug: { provider: process.env.AI_PROVIDER || 'openai', openaiKeyPresent: !!process.env.OPENAI_API_KEY },
-					remaining: userId ? -1 : Math.max(0, 2 - (anonCount + 1)),
+					remaining: userId ? -1 : Math.max(0, CREDITS_CONFIG.ANONYMOUS_FREE_CREDITS - (anonCount + 1)),
 					relaxed: relaxationLevel !== null,
 					relaxationLevel,
 				},
 			}),
+			{ status: 200, headers }
 		)
 		if (!userId && needsCookieUpdate) {
 			response = withAnonCookie(response, anonCount + 1)
@@ -172,9 +146,18 @@ export async function POST(request: NextRequest) {
 		return response
 	} catch (error) {
 		console.error('Error in /api/ask:', error)
-		return corsify(
-			request,
-			NextResponse.json({ error: 'An internal error occurred.', debug: { message: (error as any)?.message || String(error) } }, { status: 500 }),
+		return new Response(
+			JSON.stringify({ 
+				error: 'An internal error occurred.', 
+				debug: { message: (error as any)?.message || String(error) } 
+			}),
+			{ 
+				status: 500, 
+				headers: {
+					...corsHeaders(request),
+					'Content-Type': 'application/json'
+				} 
+			}
 		)
 	}
 }
@@ -219,7 +202,7 @@ async function checkQueryLimit(userId: string): Promise<{ allowed: boolean; rema
 				.eq('user_id', userId)
 				.gte('shared_at', startOfMonth.toISOString()),
 		])
-		const allowedQueries = 2 + Math.min(shareCount || 0, 1)
+		const allowedQueries = CREDITS_CONFIG.FREE_USER_MONTHLY_CREDITS + Math.min(shareCount || 0, CREDITS_CONFIG.FREE_USER_SHARE_BONUS_MAX)
 		const currentQueries = queryCount || 0
 		const remaining = Math.max(0, allowedQueries - currentQueries)
 		return { allowed: currentQueries < allowedQueries, remaining, isSubscriber: false }
