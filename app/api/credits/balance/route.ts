@@ -1,3 +1,1 @@
-import { GET, OPTIONS } from '../../balance/route';
-
-export { GET, OPTIONS };
+export { GET, runtime } from '../../balance/route';

@@ -1,14 +1,15 @@
+export const runtime = 'nodejs';
+
 import { NextRequest, NextResponse } from 'next/server';
+import { randomUUID } from 'node:crypto';
 import { ensureAccount, getBalance, grantCredits } from '@/lib/credits';
-import { addCorsHeaders, corsError, handleOptionsRequest } from '@/lib/cors';
 
 const WELCOME = Number(process.env.WELCOME_CREDITS ?? 15);
 
 export async function GET(req: NextRequest) {
-  const uid = req.cookies.get('uid')?.value || null;
-  if (!uid) {
-    return corsError(req, 'missing uid', 400);
-  }
+  let uid = req.cookies.get('uid')?.value || null;
+  let minted = false;
+  if (!uid) { uid = randomUUID(); minted = true; }
 
   try {
     await ensureAccount(uid);
@@ -25,13 +26,42 @@ export async function GET(req: NextRequest) {
     }
 
     const balance = await getBalance(uid);
-    const response = NextResponse.json({ balance });
-    return addCorsHeaders(req, response);
-  } catch (error) {
-    console.error('Error in balance API:', error);
-    return corsError(req, 'Failed to process credits operation', 500);
+    const res = NextResponse.json({ balance });
+
+    if (minted) {
+      res.cookies.set({
+        name: 'uid',
+        value: uid,
+        httpOnly: true,
+        secure: true,
+        sameSite: 'lax',
+        path: '/',
+        domain: '.ria-hunter.app',
+        maxAge: 60 * 60 * 24 * 365,
+      });
+    }
+    return res;
+  } catch (err: any) {
+    // TEMPORARY: never block UI; log for diagnosis.
+    const msg = String(err?.message || 'unknown');
+    console.error('[balance] credits error', { msg, stack: err?.stack });
+
+    const res = NextResponse.json({ balance: null, error: 'credits_unavailable' }, { status: 200 });
+    res.headers.set('x-credits-error', msg);
+    res.headers.set('x-credits-mode', 'fallback');
+
+    if (minted) {
+      res.cookies.set({
+        name: 'uid',
+        value: uid!,
+        httpOnly: true,
+        secure: true,
+        sameSite: 'lax',
+        path: '/',
+        domain: '.ria-hunter.app',
+        maxAge: 60 * 60 * 24 * 365,
+      });
+    }
+    return res;
   }
 }
-
-// Handle CORS preflight requests
-export const OPTIONS = handleOptionsRequest;
