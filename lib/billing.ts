@@ -4,6 +4,40 @@ import { supabaseAdmin } from './supabaseAdmin';
 
 const ACTIVE_STATUSES = new Set<Stripe.Subscription.Status>(['active', 'trialing']);
 
+/**
+ * Records a processed Stripe event to prevent duplicate processing
+ * @param eventId The Stripe event ID to record
+ * @returns true if the event was already processed, false if it's new
+ */
+export async function recordProcessedEvent(eventId: string): Promise<boolean> {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('stripe_events_processed')
+      .insert({ event_id: eventId })
+      .select()
+      .single();
+      
+    if (error && error.code === '23505') { // Unique violation (already exists)
+      return true;
+    }
+    
+    if (error) {
+      console.error('stripe_event_record_error', { 
+        message: error.message,
+        eventId
+      });
+    }
+    
+    return false;
+  } catch (err) {
+    console.error('stripe_event_record_exception', { 
+      message: (err as Error).message,
+      eventId
+    });
+    return false; // Assume not processed before in case of error
+  }
+}
+
 export async function upsertCustomerLink(opts: {
   userId?: string | null;
   email?: string | null;
@@ -74,6 +108,115 @@ export async function setSubscriberByCustomerId(stripeCustomerId: string, isSubs
 
 export function isSubscriptionActive(sub: Stripe.Subscription) {
   return ACTIVE_STATUSES.has(sub.status);
+}
+
+/**
+ * Process a Stripe webhook event to update subscription state
+ * @param event The Stripe event object
+ */
+export async function upsertSubscriptionFromEvent(event: Stripe.Event): Promise<void> {
+  try {
+    // Extract relevant data based on event type
+    let customerId: string | undefined;
+    let isSubscriber = false;
+    let planName: string | null = null;
+    let periodEnd: string | null = null;
+    let status: string | null = null;
+    let userId: string | undefined;
+    
+    if (event.type.startsWith('customer.subscription')) {
+      const subscription = event.data.object as Stripe.Subscription;
+      customerId = typeof subscription.customer === 'string' ? 
+        subscription.customer : subscription.customer?.id;
+      
+      isSubscriber = isSubscriptionActive(subscription);
+      status = subscription.status;
+      
+      // Extract plan details if available
+      if (subscription.items?.data?.[0]?.price?.product) {
+        const product = subscription.items.data[0].price.product;
+        planName = typeof product === 'string' ? product : product.name;
+      }
+      
+      // Current period end
+      periodEnd = subscription.current_period_end ? 
+        new Date(subscription.current_period_end * 1000).toISOString() : null;
+        
+      // Try to get user ID from metadata
+      userId = subscription.metadata?.user_id;
+    } else if (event.type === 'invoice.paid' || event.type === 'invoice.payment_failed') {
+      const invoice = event.data.object as Stripe.Invoice;
+      customerId = typeof invoice.customer === 'string' ? 
+        invoice.customer : invoice.customer?.id;
+        
+      // Get subscription details if available
+      if (invoice.subscription) {
+        const subId = typeof invoice.subscription === 'string' ? 
+          invoice.subscription : invoice.subscription.id;
+          
+        // For invoice.paid, we could add credits here if using a credit system
+        if (event.type === 'invoice.paid' && process.env.WELCOME_CREDITS) {
+          // This would be implemented if using a credit system
+        }
+      }
+      
+      // Try to get user ID from metadata
+      userId = invoice.metadata?.user_id;
+    }
+    
+    if (!customerId) {
+      console.warn('stripe_webhook_no_customer', { 
+        eventType: event.type,
+        eventId: event.id
+      });
+      return;
+    }
+    
+    // Find the user by stripe_customer_id
+    const { data: user } = await supabaseAdmin
+      .from('user_accounts')
+      .select('id')
+      .eq('stripe_customer_id', customerId)
+      .maybeSingle();
+      
+    // If not found by stripe_customer_id, try to find by user_id from metadata
+    if (!user && userId) {
+      await supabaseAdmin
+        .from('user_accounts')
+        .update({ stripe_customer_id: customerId })
+        .eq('id', userId);
+    }
+    
+    // Update subscription state
+    if (customerId) {
+      const updates: Record<string, any> = {
+        is_subscriber: isSubscriber
+      };
+      
+      if (status !== null) {
+        updates.subscription_status = status;
+      }
+      
+      if (planName !== null) {
+        updates.plan = planName;
+      }
+      
+      if (periodEnd !== null) {
+        updates.current_period_end = periodEnd;
+      }
+      
+      await supabaseAdmin
+        .from('user_accounts')
+        .update(updates)
+        .eq('stripe_customer_id', customerId);
+    }
+  } catch (err) {
+    console.error('stripe_webhook_processing_error', {
+      eventType: event.type,
+      eventId: event.id,
+      error: String(err)
+    });
+  }
 }
 
 // Keeping the legacy functions for compatibility
