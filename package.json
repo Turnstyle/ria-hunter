@@ -13,11 +13,13 @@
     "test": "jest"
   },
   "dependencies": {
+    "@azure/openai": "^2.0.0",
     "@google-cloud/aiplatform": "^5.1.0",
-    "@google-cloud/documentai": "^9.3.0",
+    "@google-cloud/documentai": "^9.4.0",
     "@google-cloud/storage": "^7.7.0",
     "@google-cloud/vertexai": "^1.10.0",
     "@google/generative-ai": "^0.24.1",
+    "@prisma/client": "^6.14.0",
     "@radix-ui/react-accordion": "^1.1.2",
     "@radix-ui/react-alert-dialog": "^1.0.5",
     "@radix-ui/react-avatar": "^1.0.4",
@@ -57,6 +59,7 @@
     "next-themes": "^0.2.1",
     "openai": "^5.11.0",
     "pgvector": "^0.2.1",
+    "prisma": "^6.14.0",
     "react": "^18",
     "react-chartjs-2": "^5.2.0",
     "react-day-picker": "^8.10.0",
