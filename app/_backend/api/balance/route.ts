@@ -70,15 +70,59 @@ function createCreditsCookie(uid: string, credits: number) {
   };
 }
 
+/**
+ * Gets a user's credit balance using the appropriate database function
+ * @param userId The user ID to get credits for
+ * @returns The user's credit balance, or null if an error occurs
+ */
+async function getUserCredits(userId: string): Promise<number | null> {
+  try {
+    // First try using public_get_credits_balance (per requirements)
+    const { data: result, error } = await supabaseAdmin.rpc(
+      'public_get_credits_balance',
+      { p_user_id: userId }
+    );
+    
+    if (!error) {
+      return result || 0;
+    }
+    
+    // If public_get_credits_balance fails with "function does not exist", try get_credits_balance
+    if (error.code === '42883') {
+      console.log('[balance] Function public_get_credits_balance not found, trying get_credits_balance');
+      
+      const { data: fallbackResult, error: fallbackError } = await supabaseAdmin.rpc(
+        'get_credits_balance',
+        { p_user_id: userId }
+      );
+      
+      if (!fallbackError) {
+        return fallbackResult || 0;
+      }
+      
+      // If get_credits_balance also fails, log the error
+      console.error('[balance] Failed to get credits from get_credits_balance:', fallbackError);
+    } else {
+      console.error('[balance] Failed to get credits from public_get_credits_balance:', error);
+    }
+    
+    return null;
+  } catch (err) {
+    console.error('[balance] Error getting credits:', err);
+    return null;
+  }
+}
+
 export async function GET(req: NextRequest) {
   // Get auth client
   const supabaseAuth = createRouteHandlerClient({ cookies });
   
-  // Try to get the authenticated user's email
+  // Try to get the authenticated user
   const { data: { user } } = await supabaseAuth.auth.getUser();
+  const userId = user?.id;
   const userEmail = user?.email;
   
-  if (!userEmail) {
+  if (!userId || !userEmail) {
     console.log('[balance] No authenticated user, falling back to cookie');
     return handleCookieFallback(req);
   }
@@ -105,7 +149,7 @@ export async function GET(req: NextRequest) {
       return handleCookieFallback(req, userEmail);
     }
     
-    // If user is a subscriber, return unlimited credits
+    // If user is a subscriber, return unlimited credits (isSubscriber: true)
     if (userAccount.is_pro) {
       return NextResponse.json({ 
         credits: null, 
@@ -115,35 +159,22 @@ export async function GET(req: NextRequest) {
       });
     }
     
-    // Try to get credits from the database
-    try {
-      // Get user credits from credit_transactions
-      const { data: result, error: creditsError } = await supabaseAdmin.rpc(
-        'get_credits_balance',
-        { p_user_id: userAccount.id }
-      );
-      
-      if (creditsError) {
-        // If function doesn't exist, fall back to cookie
-        if (creditsError.code === '42883') {
-          console.log('[balance] Function get_credits_balance does not exist, falling back to cookie');
-          return handleCookieFallback(req, userEmail);
-        }
-        throw creditsError;
-      }
-      
-      const credits = result || 0;
-      
-      return NextResponse.json({ 
-        credits, 
-        balance: credits, 
-        isSubscriber: false, 
-        source: 'db' 
-      });
-    } catch (creditsErr) {
-      console.error('[balance] Error getting credits:', creditsErr);
+    // Get credits from the database using the appropriate function
+    const credits = await getUserCredits(userAccount.id);
+    
+    // If credits couldn't be retrieved, fall back to cookie
+    if (credits === null) {
+      console.log('[balance] Could not get credits from database, falling back to cookie');
       return handleCookieFallback(req, userEmail);
     }
+    
+    // Return successful response with credits, balance, and isSubscriber status
+    return NextResponse.json({ 
+      credits, 
+      balance: credits, // For legacy compatibility
+      isSubscriber: false, 
+      source: 'db' 
+    });
   } catch (err) {
     console.error('[balance] Error:', err);
     return handleCookieFallback(req, userEmail);
