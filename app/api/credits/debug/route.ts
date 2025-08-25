@@ -10,8 +10,8 @@ export async function GET() {
     const tables = await prisma.$queryRawUnsafe<any[]>(`
       select tablename from pg_tables where schemaname='public';
     `);
-    const hasAccount = tables.some(t => t.tablename ilike '%creditsaccount%');
-    const hasLedger = tables.some(t => t.tablename ilike '%creditsledger%');
+    const hasAccount = tables.some(t => t.tablename.toLowerCase().includes('creditsaccount'));
+    const hasLedger = tables.some(t => t.tablename.toLowerCase().includes('creditsledger'));
 
     return NextResponse.json({
       ok: true,
