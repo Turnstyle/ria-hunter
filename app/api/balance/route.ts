@@ -1,31 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ensureAccount, getBalance, grantCredits, idem } from '@/lib/credits';
+import { ensureAccount, getBalance, grantCredits } from '@/lib/credits';
 
-const WELCOME = Number(process.env.WELCOME_CREDITS ?? 15); // optional initial grant
-
-function userIdFrom(req: NextRequest) {
-  // use auth user id if present; else anon cookie
-  return req.cookies.get('uid')?.value || null;
-}
+const WELCOME = Number(process.env.WELCOME_CREDITS ?? 15);
 
 export async function GET(req: NextRequest) {
-  const userId = userIdFrom(req);
-  if (!userId) return new NextResponse('No identity', { status: 400 }); // shouldn't happen after middleware
+  const uid = req.cookies.get('uid')?.value || null;
+  if (!uid) return new NextResponse('Missing uid', { status: 400 });
 
-  await ensureAccount(userId);
+  await ensureAccount(uid);
 
-  // optional one‑time welcome grant
+  // One-time welcome grant; idempotent on user
   if (WELCOME > 0) {
     await grantCredits({
-      userId,
+      userId: uid,
       amount: WELCOME,
       source: 'migration',
-      idempotencyKey: `welcome:${userId}`, // prevents duplicates
+      idempotencyKey: `welcome:${uid}`,
       refType: 'welcome',
       refId: 'v1',
     });
   }
 
-  const balance = await getBalance(userId);
+  const balance = await getBalance(uid);
   return NextResponse.json({ balance });
 }
