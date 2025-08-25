@@ -26,3 +26,7 @@ output/narratives.json
 # Local env
 env.local
 .env
+
+# Logs
+logs/
+*.log
