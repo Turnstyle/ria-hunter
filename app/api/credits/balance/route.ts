@@ -1,1 +1,2 @@
-export { GET, runtime } from '../../balance/route';
+// app/api/credits/balance/route.ts
+export { GET, runtime, dynamic } from '@/app/_backend/api/credits/balance/route';

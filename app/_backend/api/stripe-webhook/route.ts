@@ -1,118 +1,99 @@
 // app/_backend/api/stripe-webhook/route.ts
 import Stripe from 'stripe';
-import { NextResponse } from 'next/server';
-import { linkStripeCustomerToUser, markSubscriptionStatus } from '@/lib/billing';
+import { NextRequest } from 'next/server';
+import { upsertCustomerLink, setSubscriberByCustomerId, isSubscriptionActive } from '@/lib/billing';
 
 export const runtime = 'nodejs';         // force Node (NOT Edge)
 export const dynamic = 'force-dynamic';  // never cache webhooks
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2024-06-20' });
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  // Keep current account API version; do not hardcode if types complain
+  // apiVersion: '2025-06-30.basil' as any
+});
 
 // Log environment check at boot time
 console.log(`[boot] stripeSecret: ${Boolean(process.env.STRIPE_SECRET_KEY)}, webhookSecret: ${Boolean(process.env.STRIPE_WEBHOOK_SECRET)}, supabase: ${Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY)}`);
 
-function json(status: number, body: unknown) {
-  return new NextResponse(JSON.stringify(body), {
-    status,
-    headers: { 'content-type': 'application/json', 'cache-control': 'no-store' },
-  });
-}
-
-export async function POST(req: Request) {
-  const sig = req.headers.get('stripe-signature');
-  if (!sig) {
-    console.error('[webhook] missing stripe-signature');
-    return json(400, { ok: false, error: 'missing_signature' });
-  }
-
-  // IMPORTANT: read raw body text for signature verification
-  const payload = await req.text();
+export async function POST(req: NextRequest) {
+  const sig = req.headers.get('stripe-signature') ?? '';
+  const rawBody = await req.text();
 
   let event: Stripe.Event;
   try {
-    event = stripe.webhooks.constructEvent(payload, sig, process.env.STRIPE_WEBHOOK_SECRET!);
-  } catch (err: any) {
-    console.error('[webhook] signature verification failed:', err?.message);
-    // Tell Stripe it's a bad signature so it won't keep retrying this specific attempt
-    return json(400, { ok: false, error: 'signature_verification_failed' });
+    event = stripe.webhooks.constructEvent(
+      rawBody,
+      sig,
+      process.env.STRIPE_WEBHOOK_SECRET!
+    );
+  } catch (err) {
+    console.error('stripe_webhook_signature_error', { message: (err as Error).message });
+    return new Response(JSON.stringify({ ok: false, error: 'invalid_signature' }), { status: 400 });
   }
 
+  // Log basic event info for tracking
+  const customerId = getCustomerId(event.data.object);
+  console.log('stripe_webhook_event', { 
+    id: event.id, 
+    type: event.type, 
+    customerId 
+  });
+
   try {
-    // Handle the core subscription lifecycle events
     switch (event.type) {
       case 'customer.subscription.created':
       case 'customer.subscription.updated':
-      case 'customer.subscription.deleted': {
-        const sub = event.data.object as Stripe.Subscription;
-        await handleSubscriptionEvent(sub, event.type);
+      case 'customer.subscription.deleted':
+        await handleSubscriptionChange(event);
         break;
-      }
 
-      case 'checkout.session.completed': {
-        const cs = event.data.object as Stripe.Checkout.Session;
-        await handleCheckoutCompleted(cs);
+      case 'checkout.session.completed':
+        await handleCheckoutCompleted(event);
         break;
-      }
 
+      // Add others if needed; unknown types should be no-ops.
       default:
-        console.log('[webhook] ignoring event:', event.type);
+        break;
     }
-
-    // ALWAYS 200 so Stripe stops retrying. Internal failures must be logged, not bubbled.
-    return json(200, { ok: true });
+    // Always 200 to prevent endless retries; log internal errors below.
+    return new Response(JSON.stringify({ ok: true }), { status: 200 });
   } catch (err) {
-    console.error('[webhook] handler error:', err);
-    // Acknowledge anyway to stop retries; keep details in our logs.
-    return json(200, { ok: true, handled: false });
+    console.error('stripe_webhook_processing_error', {
+      eventId: event.id,
+      type: event.type,
+      message: (err as Error).message,
+      stack: (err as Error).stack,
+    });
+    // Still 200—Stripe has the event; we'll investigate via logs.
+    return new Response(JSON.stringify({ ok: true, warn: 'processing_error' }), { status: 200 });
   }
 }
 
-/** ===== Helpers ===== */
-
-type MaybeString = string | null | undefined;
-
-async function handleCheckoutCompleted(cs: Stripe.Checkout.Session) {
-  const custId = (cs.customer as MaybeString) || undefined;
-  const email =
-    (typeof cs.customer_details?.email === 'string' && cs.customer_details?.email) ||
-    (typeof cs.customer_email === 'string' && cs.customer_email) ||
-    undefined;
-
-  console.log('[webhook] checkout.session.completed', { id: cs.id, customer: custId, email });
-
-  // Link customer/email to a user account record if possible.
-  await linkStripeCustomerToUser({ stripeCustomerId: custId, email, metadata: cs.metadata ?? {} });
+/** Helper to extract customer ID from any Stripe object */
+function getCustomerId(object: any): string | null {
+  if (!object) return null;
+  if (typeof object.customer === 'string') return object.customer;
+  if (object.customer?.id) return object.customer.id;
+  return null;
 }
 
-async function handleSubscriptionEvent(sub: Stripe.Subscription, type: string) {
-  const subId = sub.id;
-  const custId = (sub.customer as MaybeString) || undefined;
-  const status = sub.status;
-  const priceIds = sub.items.data.map(i => i.price.id);
+async function handleSubscriptionChange(event: Stripe.Event) {
+  const sub = event.data.object as Stripe.Subscription;
+  const customerId = typeof sub.customer === 'string' ? sub.customer : sub.customer?.id!;
+  const active = isSubscriptionActive(sub);
+  await setSubscriberByCustomerId(customerId, active);
+}
 
-  console.log('[webhook] subscription event', { type, subId, custId, status, priceIds });
+async function handleCheckoutCompleted(event: Stripe.Event) {
+  const session = event.data.object as Stripe.Checkout.Session;
+  const customerId = (typeof session.customer === 'string'
+    ? session.customer
+    : session.customer?.id) as string;
 
-  // Resolve the user record by Stripe customer ID first, then by email if necessary
-  let email: string | undefined;
-
-  if (!custId) {
-    // Rare, but be defensive: fetch customer from latest invoice if available
-    try {
-      if (sub.latest_invoice && typeof sub.latest_invoice === 'string') {
-        const inv = await stripe.invoices.retrieve(sub.latest_invoice);
-        if (typeof inv.customer_email === 'string') email = inv.customer_email;
-      }
-    } catch (e) {
-      console.warn('[webhook] could not resolve email via invoice', sub.latest_invoice);
-    }
-  }
-
-  await markSubscriptionStatus({
-    stripeCustomerId: custId,
-    email,
-    subscriptionId: subId,
-    status,
-    priceIds,
+  // Best-effort linkage by metadata or email
+  await upsertCustomerLink({
+    userId: (session.metadata && (session.metadata.user_id || session.metadata.userId)) || null,
+    email: session.customer_details?.email ?? null,
+    stripeCustomerId: customerId,
   });
 }
 
