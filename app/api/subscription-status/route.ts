@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import Stripe from 'stripe';
+import { CREDITS_CONFIG } from '@/app/config/credits';
 
 /**
  * Get current subscription status for the authenticated user
@@ -95,7 +96,8 @@ export async function GET(req: NextRequest) {
 
       const queryCount = queryResult.count || 0;
       const shareCount = shareResult.count || 0;
-      const allowedQueries = 2 + Math.min(shareCount, 1);
+      const allowedQueries = CREDITS_CONFIG.FREE_USER_MONTHLY_CREDITS + 
+        Math.min(shareCount, CREDITS_CONFIG.FREE_USER_SHARE_BONUS_MAX);
       const remaining = Math.max(0, allowedQueries - queryCount);
 
       usage = {

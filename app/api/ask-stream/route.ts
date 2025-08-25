@@ -3,6 +3,7 @@ import { callLLMToDecomposeQuery } from '@/app/api/ask/planner'
 import { executeEnhancedQuery } from '@/app/api/ask/retriever'
 import { buildAnswerContext } from '@/app/api/ask/context-builder'
 import { streamAnswerTokens } from '@/app/api/ask/generator'
+import { CREDITS_CONFIG } from '@/app/config/credits'
 
 const DEFAULT_ALLOWED_ORIGINS = [
   'https://www.ria-hunter.app',
@@ -45,12 +46,75 @@ export function OPTIONS(req: NextRequest) {
 	return new Response(null, { status: 204, headers: { ...corsHeaders(req), 'Access-Control-Max-Age': '86400' } })
 }
 
+// Helper function to parse anonymous cookie
+function parseAnonCookie(req: NextRequest): { count: number } {
+  try {
+    const cookie = req.cookies.get(CREDITS_CONFIG.ANONYMOUS_COOKIE_NAME);
+    if (cookie?.value) {
+      const parsed = JSON.parse(cookie.value);
+      return { count: Number(parsed.count) || 0 };
+    }
+  } catch {}
+  return { count: 0 };
+}
+
+// Function to add anon cookie to response
+function withAnonCookie(res: Response, newCount: number): Response {
+  const headers = new Headers(res.headers);
+  headers.set(
+    'Set-Cookie', 
+    `${CREDITS_CONFIG.ANONYMOUS_COOKIE_NAME}=${JSON.stringify({ count: newCount })};path=/;max-age=${CREDITS_CONFIG.ANONYMOUS_COOKIE_MAX_AGE}`
+  );
+  return new Response(res.body, { 
+    status: res.status, 
+    statusText: res.statusText, 
+    headers 
+  });
+}
+
 export async function POST(request: NextRequest) {
+	// Add request logging for debugging
+	const requestId = `req-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+	const method = request.method;
+	const url = request.url;
+	const headers = Object.fromEntries(request.headers.entries());
+	  
+	console.log(`[${requestId}] Incoming request:`, {
+		method,
+		url,
+		headers: {
+			'content-type': headers['content-type'],
+			'accept': headers['accept'],
+			'authorization': headers['authorization'] ? 'Bearer ***' : 'none'
+		}
+	});
+
 	try {
 		const body = await request.json().catch(() => ({} as any))
 		const query = typeof body?.query === 'string' ? body.query : ''
 		if (!query) {
 			return NextResponse.json({ error: 'Query is required' }, { status: 400, headers: corsHeaders(request) })
+		}
+		
+		// Get user authentication if available
+		const userId = request.headers.get('x-user-id');
+		const isAuthenticated = !!userId;
+		
+		// Check credits for anonymous users
+		if (!isAuthenticated) {
+			const anonCookie = parseAnonCookie(request);
+			if (anonCookie.count >= CREDITS_CONFIG.ANONYMOUS_FREE_CREDITS) {
+				return NextResponse.json(
+					{
+						error: CREDITS_CONFIG.MESSAGES.CREDITS_EXHAUSTED_ANONYMOUS,
+						code: 'PAYMENT_REQUIRED',
+						remaining: 0,
+						isSubscriber: false,
+						upgradeRequired: true
+					},
+					{ status: 402, headers: corsHeaders(request) }
+				);
+			}
 		}
 		const plan = await callLLMToDecomposeQuery(query)
 		let city: string | undefined
@@ -84,7 +148,9 @@ export async function POST(request: NextRequest) {
 				}
 			},
 		})
-		return new Response(sse, {
+		
+		// Create the response with stream
+		const response = new Response(sse, {
 			headers: {
 				...corsHeaders(request),
 				'Content-Type': 'text/event-stream; charset=utf-8',
@@ -93,6 +159,15 @@ export async function POST(request: NextRequest) {
 				'X-Accel-Buffering': 'no',
 			},
 		})
+		
+		// If anonymous user, increment count and update cookie
+		if (!isAuthenticated) {
+			const anonCookie = parseAnonCookie(request);
+			const newCount = anonCookie.count + 1;
+			return withAnonCookie(response, newCount);
+		}
+		
+		return response
 	} catch (error) {
 		console.error('Error in /api/ask-stream:', error)
 		return NextResponse.json({ error: 'An internal error occurred.' }, { status: 500, headers: corsHeaders(request) })

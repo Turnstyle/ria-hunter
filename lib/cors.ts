@@ -9,6 +9,8 @@ const DEFAULT_ALLOWED_ORIGINS = [
   'https://www.ria-hunter.app',
   'https://ria-hunter.app',
   'https://ria-hunter-app.vercel.app',
+  'http://localhost:3000',
+  'http://localhost:3001'
 ];
 
 // Parse CORS_ORIGINS from environment variable
@@ -74,15 +76,30 @@ export function corsify(req: NextRequest, res: Response, preflight = false): Res
   const headers = new Headers(res.headers);
   const origin = getAllowedOriginFromRequest(req) || EFFECTIVE_ALLOWED_ORIGINS[0];
   
+  if (!origin) {
+    console.warn(`CORS: Blocked origin ${req.headers.get('origin')}`);
+  }
+  
   // Set CORS headers
-  headers.set('Access-Control-Allow-Origin', origin);
+  headers.set('Access-Control-Allow-Origin', origin || '');
+  headers.set('Access-Control-Allow-Credentials', 'true');
   headers.set('Vary', 'Origin'); // Important for CDN caching
-  headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept, X-Request-Id');
   headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   
   // Set longer cache time for preflight requests
   if (preflight) {
     headers.set('Access-Control-Max-Age', '86400'); // 24 hours
+  }
+
+  // Log CORS headers for debugging
+  if (process.env.DEBUG === 'true' || process.env.NODE_ENV === 'development') {
+    console.log('CORS Headers:', {
+      'Access-Control-Allow-Origin': headers.get('Access-Control-Allow-Origin'),
+      'Access-Control-Allow-Credentials': headers.get('Access-Control-Allow-Credentials'),
+      'Access-Control-Allow-Methods': headers.get('Access-Control-Allow-Methods'),
+      'Access-Control-Allow-Headers': headers.get('Access-Control-Allow-Headers')
+    });
   }
 
   return new Response(res.body, { 

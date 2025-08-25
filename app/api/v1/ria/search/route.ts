@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { createAIService, getAIProvider } from '@/lib/ai-providers';
+import { CREDITS_CONFIG } from '@/app/config/credits';
 // Local CORS helper function
 function corsify(req: NextRequest, res: Response, preflight = false): Response {
   const headers = new Headers(res.headers);
@@ -164,12 +165,12 @@ export async function POST(req: NextRequest) {
       // Handle anonymous user
       const anon = parseAnonCookie(req);
       anonCount = anon.count;
-      if (anonCount >= 2) {
+      if (anonCount >= CREDITS_CONFIG.ANONYMOUS_FREE_CREDITS) {
         return corsify(
           req,
           NextResponse.json(
             {
-              error: 'Free query limit reached. Create an account for more searches.',
+              error: CREDITS_CONFIG.MESSAGES.CREDITS_EXHAUSTED_ANONYMOUS,
               code: 'PAYMENT_REQUIRED',
               remaining: 0,
               isSubscriber: false,
