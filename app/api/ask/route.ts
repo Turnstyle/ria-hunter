@@ -6,6 +6,68 @@ import { buildAnswerContext } from './context-builder'
 import { generateNaturalLanguageAnswer } from './generator'
 import { CREDITS_CONFIG } from '@/app/config/credits'
 import { corsHeaders, handleOptionsRequest, addCorsHeaders, corsError } from '@/lib/cors'
+import { createHmac } from 'node:crypto'
+
+// Utility functions for the cookie ledger
+const CREDITS_SECRET = process.env.CREDITS_SECRET
+
+function createSignature(payload: string): string {
+  if (!CREDITS_SECRET) {
+    console.error('[credits] Missing CREDITS_SECRET env variable')
+    return ''
+  }
+  return createHmac('sha256', CREDITS_SECRET).update(payload).digest('base64url')
+}
+
+function base64UrlEncode(data: any): string {
+  return Buffer.from(JSON.stringify(data)).toString('base64url')
+}
+
+function verifyCookieLedger(cookie: string | undefined, uid: string): { valid: boolean; credits: number } {
+  if (!cookie || !cookie.includes('.')) {
+    return { valid: false, credits: 0 }
+  }
+
+  try {
+    const [payload, signature] = cookie.split('.')
+    
+    // Verify signature
+    const expectedSignature = createSignature(payload)
+    if (signature !== expectedSignature) {
+      return { valid: false, credits: 0 }
+    }
+
+    // Decode payload
+    const data = JSON.parse(Buffer.from(payload, 'base64url').toString())
+    
+    // Verify UID matches
+    if (data.uid !== uid) {
+      return { valid: false, credits: 0 }
+    }
+
+    return { valid: true, credits: data.credits }
+  } catch (error) {
+    console.error('[credits] Error verifying cookie ledger:', error)
+    return { valid: false, credits: 0 }
+  }
+}
+
+function createCreditsCookie(uid: string, credits: number) {
+  const now = Math.floor(Date.now() / 1000)
+  const payload = base64UrlEncode({ uid, credits, iat: now })
+  const signature = createSignature(payload)
+  
+  return {
+    name: 'rh_credits',
+    value: `${payload}.${signature}`,
+    httpOnly: true,
+    secure: true,
+    sameSite: 'lax',
+    path: '/',
+    domain: '.ria-hunter.app',
+    maxAge: 60 * 60 * 24 * 365, // 1 year
+  }
+}
 
 // Use the centralized CORS implementation for OPTIONS
 export function OPTIONS(req: NextRequest) {
@@ -25,6 +87,8 @@ export async function POST(request: NextRequest) {
 		// Credits enforcement (subscriber/unlimited or free-tier)
 		let needsCookieUpdate = false
 		let anonCount = 0
+		let creditsCookieData: { valid: boolean; credits: number } | null = null
+		
 		if (userId) {
 			const limit = await checkQueryLimit(userId)
 			if (!limit.allowed) {
@@ -48,27 +112,58 @@ export async function POST(request: NextRequest) {
 				)
 			}
 		} else {
-			const anon = parseAnonCookie(request)
-			anonCount = anon.count
-			if (anonCount >= CREDITS_CONFIG.ANONYMOUS_FREE_CREDITS) {
-				return new Response(
-					JSON.stringify({
-						error: CREDITS_CONFIG.MESSAGES.CREDITS_EXHAUSTED_ANONYMOUS,
-						code: 'PAYMENT_REQUIRED',
-						remaining: 0,
-						isSubscriber: false,
-						upgradeRequired: true,
-					}),
-					{ 
-						status: 402, 
-						headers: {
-							...corsHeaders(request),
-							'Content-Type': 'application/json'
-						} 
-					}
-				)
+			// First check the rh_credits cookie (new system)
+			const uid = request.cookies.get('uid')?.value || ''
+			
+			if (uid) {
+				const creditsCookie = request.cookies.get('rh_credits')?.value
+				creditsCookieData = verifyCookieLedger(creditsCookie, uid)
+				
+				// If cookie is valid and credits <= 0, return 402
+				if (creditsCookieData.valid && creditsCookieData.credits <= 0) {
+					return new Response(
+						JSON.stringify({
+							error: 'Insufficient credits',
+							code: 'PAYMENT_REQUIRED',
+							remaining: 0,
+							isSubscriber: false,
+							upgradeRequired: true,
+						}),
+						{ 
+							status: 402, 
+							headers: {
+								...corsHeaders(request),
+								'Content-Type': 'application/json'
+							} 
+						}
+					)
+				}
 			}
-			needsCookieUpdate = true
+			
+			// Fallback to old anon cookie system if needed
+			if (!creditsCookieData?.valid) {
+				const anon = parseAnonCookie(request)
+				anonCount = anon.count
+				if (anonCount >= CREDITS_CONFIG.ANONYMOUS_FREE_CREDITS) {
+					return new Response(
+						JSON.stringify({
+							error: CREDITS_CONFIG.MESSAGES.CREDITS_EXHAUSTED_ANONYMOUS,
+							code: 'PAYMENT_REQUIRED',
+							remaining: 0,
+							isSubscriber: false,
+							upgradeRequired: true,
+						}),
+						{ 
+							status: 402, 
+							headers: {
+								...corsHeaders(request),
+								'Content-Type': 'application/json'
+							} 
+						}
+					)
+				}
+				needsCookieUpdate = true
+			}
 		}
 
 		const decomposedPlan = await callLLMToDecomposeQuery(query)
@@ -140,9 +235,28 @@ export async function POST(request: NextRequest) {
 			}),
 			{ status: 200, headers }
 		)
-		if (!userId && needsCookieUpdate) {
-			response = withAnonCookie(response, anonCount + 1)
+		
+		// Handle cookie updates for anonymous users
+		if (!userId) {
+			const uid = request.cookies.get('uid')?.value || ''
+			
+			// If using cookie credits system
+			if (creditsCookieData?.valid && uid) {
+				// Decrement credits and update cookie
+				const newCredits = Math.max(0, creditsCookieData.credits - 1)
+				const cookieData = createCreditsCookie(uid, newCredits)
+				
+				// Add cookie to response
+				const newHeaders = new Headers(response.headers)
+				newHeaders.append('Set-Cookie', `${cookieData.name}=${cookieData.value}; Path=${cookieData.path}; Max-Age=${cookieData.maxAge}; SameSite=${cookieData.sameSite}; ${cookieData.httpOnly ? 'HttpOnly;' : ''} ${cookieData.secure ? 'Secure;' : ''} Domain=${cookieData.domain}`)
+				response = new Response(response.body, { status: response.status, statusText: response.statusText, headers: newHeaders })
+			} 
+			// Fallback to old system
+			else if (needsCookieUpdate) {
+				response = withAnonCookie(response, anonCount + 1)
+			}
 		}
+		
 		return response
 	} catch (error) {
 		console.error('Error in /api/ask:', error)
