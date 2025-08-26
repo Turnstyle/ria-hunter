@@ -39,6 +39,9 @@ export async function middleware(request: NextRequest) {
     '/api/ask-stream',
     // Credits balance endpoint for anonymous users
     '/api/balance',
+    '/api/credits/balance',
+    '/api/_backend/api/balance',
+    '/api/_backend/api/credits/balance',
     // Debug endpoints (guarded with DEBUG_HEALTH_KEY inside the handler)
     '/api/debug/'
   ]
