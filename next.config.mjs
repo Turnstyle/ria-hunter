@@ -13,20 +13,7 @@ const nextConfig = {
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     AI_PROVIDER: process.env.AI_PROVIDER,
   },
-  async rewrites() {
-    return [
-      // Critical mappings to fix frontend/backend mismatch
-      {
-        source: '/api/credits/balance',
-        destination: '/_backend/api/balance'
-      },
-      {
-        source: '/api/balance',
-        destination: '/_backend/api/balance'
-      }
-      // Note: ask and ask-stream routes exist in app/api, not _backend
-    ]
-  },
+
   // Avoid bundling optional native deps and node-fetch encoding for serverless funcs
   webpack: (config) => {
     config.externals = config.externals || []
