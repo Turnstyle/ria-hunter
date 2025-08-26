@@ -270,7 +270,11 @@ export async function POST(req: Request) {
     const isDuplicate = await recordEvent(event.id, event.type, event.data.object)
     if (isDuplicate) {
       console.log('stripe_webhook_already_processed', { eventId: event.id })
-      return NextResponse.json({ ok: true, duplicate: true }, { status: 200 })
+      const dupResponse: any = { ok: true, duplicate: true };
+      if (isDebug) {
+        dupResponse.debug = { eventId: event.id, isDuplicate: true };
+      }
+      return NextResponse.json(dupResponse, { status: 200 })
     }
 
     switch (event.type) {
@@ -282,13 +286,25 @@ export async function POST(req: Request) {
       case 'customer.subscription.deleted':
         await processSubscription(event.data.object as Stripe.Subscription);
         break;
-      default:
-        // No-op but keep idempotency record
-        console.log('stripe_webhook_unhandled_event_type', { type: event.type });
-        break;
+          default:
+      // No-op but keep idempotency record
+      console.log('stripe_webhook_unhandled_event_type', { type: event.type });
+      break;
     }
 
-    return NextResponse.json({ ok: true }, { status: 200 })
+    const response: any = { ok: true };
+    
+    // Add debug info if requested
+    if (isDebug) {
+      response.debug = {
+        eventId: event.id,
+        eventType: event.type,
+        processed: true,
+        timestamp: new Date().toISOString()
+      };
+    }
+    
+    return NextResponse.json(response, { status: 200 })
   } catch (err) {
     // Always swallow with 200 so Stripe stops retrying; log details to Vercel
     console.error('stripe_webhook_handler_error', { 
@@ -300,13 +316,49 @@ export async function POST(req: Request) {
   }
 }
 
+// Handle GET requests for health checks
+export async function GET(req: Request) {
+  const url = new URL(req.url);
+  const isPing = url.searchParams.get('ping') === '1';
+  const isDebug = url.searchParams.get('debug') === '1';
+  
+  if (isPing) {
+    // Simple health check response
+    return NextResponse.json({ 
+      ok: true,
+      message: 'Stripe webhook endpoint is healthy',
+      timestamp: new Date().toISOString()
+    }, { status: 200 });
+  }
+  
+  // Default GET response (can be used for general health check)
+  const response: any = {
+    ok: true,
+    endpoint: '/_backend/api/stripe-webhook',
+    methods: ['GET', 'POST', 'OPTIONS'],
+    health: 'healthy'
+  };
+  
+  // Add debug info if requested
+  if (isDebug) {
+    response.debug = {
+      hasStripeKey: !!process.env.STRIPE_SECRET_KEY,
+      hasWebhookSecret: !!process.env.STRIPE_WEBHOOK_SECRET,
+      hasSupabase: !!(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY),
+      timestamp: new Date().toISOString()
+    };
+  }
+  
+  return NextResponse.json(response, { status: 200 });
+}
+
 // Handle preflight requests
 export async function OPTIONS() {
   return new Response(null, { 
     status: 204,
     headers: {
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, stripe-signature',
     }
   })

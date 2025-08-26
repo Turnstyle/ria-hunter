@@ -113,27 +113,44 @@ export async function POST(request: NextRequest) {
 		const rows = await executeEnhancedQuery({ filters: { state, city }, limit: 10 })
 		const context = buildAnswerContext(rows as any, query)
 		
-		// Set up SSE stream
+		// Set up SSE stream with proper error handling and guaranteed completion
 		const encoder = new TextEncoder()
 		const sse = new ReadableStream<Uint8Array>({
 			async start(controller) {
+				let streamStarted = false;
 				try {
 					// Send initial connection confirmation
-          controller.enqueue(encoder.encode('data: {"type":"connected"}\n\n'));
-          
-					// Stream tokens
-					for await (const token of streamAnswerTokens(query, context)) {
-						controller.enqueue(encoder.encode(`data: ${token}\n\n`))
-					}
+					controller.enqueue(encoder.encode('data: {"type":"connected"}\n\n'));
+					streamStarted = true;
 					
-					// Send completion marker
-					controller.enqueue(encoder.encode('data: [DONE]\n\n'))
-					controller.enqueue(encoder.encode('event: end\n\n'))
-					controller.close()
+					// Stream tokens with proper SSE format
+					for await (const token of streamAnswerTokens(query, context)) {
+						// Properly format each token for SSE (escape newlines if needed)
+						const escapedToken = JSON.stringify(token);
+						controller.enqueue(encoder.encode(`data: {"token":${escapedToken}}\n\n`));
+					}
 				} catch (err) {
 					console.error(`[${requestId}] Stream error:`, err);
-					controller.enqueue(encoder.encode(`event: error\n` + `data: ${(err as any)?.message || String(err)}\n\n`))
-					controller.close()
+					
+					// If we haven't started streaming yet, send a fallback message
+					if (!streamStarted) {
+						controller.enqueue(encoder.encode('data: {"type":"connected"}\n\n'));
+					}
+					
+					// Send error as a proper message instead of error event
+					const errorMessage = `I encountered an issue processing your request. Here's what I found: ${context ? context.substring(0, 500) + '...' : 'No context available'}`;
+					controller.enqueue(encoder.encode(`data: {"token":${JSON.stringify(errorMessage)}}\n\n`));
+				} finally {
+					// ALWAYS send completion marker, no matter what happened
+					try {
+						controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+						controller.enqueue(encoder.encode('event: end\n\n'));
+					} catch (closeErr) {
+						console.error(`[${requestId}] Error sending completion marker:`, closeErr);
+					}
+					
+					// Close the stream
+					controller.close();
 				}
 			},
 		})

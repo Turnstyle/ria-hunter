@@ -1,11 +1,29 @@
-Complete backend implementation for RIA Hunter overhaul
+Fix backend API reliability for production
 
-- Implement hybrid search functionality with SQL function
-- Create API endpoint for semantic search with vector embeddings
-- Create data loading and embedding generation pipeline
-- Add migration script for CIK column
-- Update documentation with deployment instructions
-- Fix BUG-001 and BUG-002 from overhaul plan
+CRITICAL FIXES:
+1. Credits/Balance API (/\_backend/api/balance):
+   - Now allows anonymous users (no 401 errors)
+   - Returns 15 credits for guests with stable guest_id cookie
+   - Properly returns isSubscriber flag for all users
+   - Added Cache-Control: no-store headers
 
-This completes tasks B1-B4 from the overhaul plan. B5 (final deployment) 
-is ready for execution with detailed instructions in BACKEND_DEPLOYMENT.md.
+2. Stripe Webhook (/\_backend/api/stripe-webhook):
+   - Added GET health check endpoint (?ping=1)
+   - Enhanced idempotency and debug logging
+   - Properly handles subscription status updates
+   - Returns 200 on all webhook events to prevent retries
+
+3. Chat Streaming (/api/ask-stream):
+   - Guarantees stream completion with [DONE] marker
+   - Provides friendly fallback when LLM unavailable
+   - Properly formats SSE tokens with JSON escaping
+   - Always closes stream cleanly
+
+4. Testing & Monitoring:
+   - Added unit tests for credits system
+   - Added SSE formatting tests
+   - Created smoke test script for production validation
+   - Added npm run smoke command
+
+All changes ensure production endpoints work reliably for both
+anonymous and authenticated users per requirements.

@@ -3,7 +3,7 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createHmac } from 'node:crypto';
+import { createHmac, randomUUID } from 'node:crypto';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
@@ -117,14 +117,15 @@ export async function GET(req: NextRequest) {
   // Get auth client
   const supabaseAuth = createRouteHandlerClient({ cookies });
   
-  // Try to get the authenticated user
+  // Try to get the authenticated user (but don't fail if not authenticated)
   const { data: { user } } = await supabaseAuth.auth.getUser();
   const userId = user?.id;
   const userEmail = user?.email;
   
+  // Handle anonymous users - no 401, just return guest credits
   if (!userId || !userEmail) {
-    console.log('[balance] No authenticated user, falling back to cookie');
-    return handleCookieFallback(req);
+    console.log('[balance] No authenticated user, returning guest credits');
+    return handleAnonymousUser(req);
   }
   
   try {
@@ -149,13 +150,19 @@ export async function GET(req: NextRequest) {
       return handleCookieFallback(req, userEmail);
     }
     
-    // If user is a subscriber, return unlimited credits (isSubscriber: true)
+    // If user is a subscriber, return 0 credits but isSubscriber: true
     if (userAccount.is_pro) {
       return NextResponse.json({ 
-        credits: null, 
-        balance: null, 
+        credits: 0,  // Set to 0 for Pro users per requirement
+        balance: 0,  // For legacy compatibility
         isSubscriber: true, 
         source: 'db' 
+      }, {
+        status: 200,
+        headers: {
+          'Cache-Control': 'no-store',
+          'Content-Type': 'application/json'
+        }
       });
     }
     
@@ -174,6 +181,12 @@ export async function GET(req: NextRequest) {
       balance: credits, // For legacy compatibility
       isSubscriber: false, 
       source: 'db' 
+    }, {
+      status: 200,
+      headers: {
+        'Cache-Control': 'no-store',
+        'Content-Type': 'application/json'
+      }
     });
   } catch (err) {
     console.error('[balance] Error:', err);
@@ -204,4 +217,49 @@ function handleCookieFallback(req: NextRequest, email?: string): NextResponse {
   res.cookies.set(createCreditsCookie(uid, credits));
   
   return res;
+}
+
+/**
+ * Handles anonymous users by returning guest credits and ensuring stable guest_id
+ */
+function handleAnonymousUser(req: NextRequest): NextResponse {
+  // Get or create stable guest_id
+  let guestId = req.cookies.get('guest_id')?.value;
+  const needsNewGuestId = !guestId;
+  
+  if (needsNewGuestId) {
+    // Generate new guest_id
+    guestId = randomUUID();
+    console.log('[balance] Created new guest_id:', guestId);
+  }
+  
+  // Always return 15 credits for anonymous users (guest default)
+  const response = NextResponse.json({ 
+    credits: WELCOME_CREDITS, // 15 by default
+    balance: WELCOME_CREDITS, // For legacy compatibility
+    isSubscriber: false,
+    source: 'guest-default'
+  }, {
+    status: 200,
+    headers: {
+      'Cache-Control': 'no-store',
+      'Content-Type': 'application/json'
+    }
+  });
+  
+  // Set guest_id cookie if needed (HttpOnly, Secure, SameSite=Lax, 30 days)
+  if (needsNewGuestId && guestId) {
+    response.cookies.set({
+      name: 'guest_id',
+      value: guestId,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      domain: '.ria-hunter.app',
+      maxAge: 60 * 60 * 24 * 30 // 30 days
+    });
+  }
+  
+  return response;
 }
