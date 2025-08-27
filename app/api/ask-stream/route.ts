@@ -1,41 +1,30 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { callLLMToDecomposeQuery } from '@/app/api/ask/planner'
-import { executeEnhancedQuery } from '@/app/api/ask/retriever'
 import { unifiedSemanticSearch } from '@/app/api/ask/unified-search'
 import { buildAnswerContext } from '@/app/api/ask/context-builder'
 import { streamAnswerTokens } from '@/app/api/ask/generator'
-import { CREDITS_CONFIG } from '@/app/config/credits'
-import { corsHeaders, handleOptionsRequest, addCorsHeaders, corsError } from '@/lib/cors'
+import { checkDemoLimit, incrementDemoSession } from '@/lib/demo-session'
+import { corsHeaders, handleOptionsRequest, corsError } from '@/lib/cors'
 
 // Use the new central CORS implementation from lib/cors.ts
 export function OPTIONS(req: NextRequest) {
   return handleOptionsRequest(req);
 }
 
-// Helper function to parse anonymous cookie
-function parseAnonCookie(req: NextRequest): { count: number } {
+// Simple JWT decoder
+function decodeJwtSub(authorizationHeader: string | null): string | null {
+  if (!authorizationHeader) return null
+  const parts = authorizationHeader.split(' ')
+  if (parts.length !== 2 || parts[0] !== 'Bearer') return null
+  const token = parts[1]
+  const segments = token.split('.')
+  if (segments.length < 2) return null
   try {
-    const cookie = req.cookies.get(CREDITS_CONFIG.ANONYMOUS_COOKIE_NAME);
-    if (cookie?.value) {
-      const parsed = JSON.parse(cookie.value);
-      return { count: Number(parsed.count) || 0 };
-    }
-  } catch {}
-  return { count: 0 };
-}
-
-// Function to add anon cookie to response
-function withAnonCookie(res: Response, newCount: number): Response {
-  const headers = new Headers(res.headers);
-  headers.set(
-    'Set-Cookie', 
-    `${CREDITS_CONFIG.ANONYMOUS_COOKIE_NAME}=${JSON.stringify({ count: newCount })};path=/;max-age=${CREDITS_CONFIG.ANONYMOUS_COOKIE_MAX_AGE}`
-  );
-  return new Response(res.body, { 
-    status: res.status, 
-    statusText: res.statusText, 
-    headers 
-  });
+    const payload = JSON.parse(Buffer.from(segments[1].replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8'))
+    return payload?.sub || null
+  } catch {
+    return null
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -45,7 +34,7 @@ export async function POST(request: NextRequest) {
 	const url = request.url;
 	const headers = Object.fromEntries(request.headers.entries());
 	  
-	console.log(`[${requestId}] Incoming request:`, {
+	console.log(`[${requestId}] Incoming streaming request:`, {
 		method,
 		url,
 		origin: headers['origin'],
@@ -65,55 +54,65 @@ export async function POST(request: NextRequest) {
 			return corsError(request, 'Query is required', 400);
 		}
 		
-		// Get user authentication if available
-		const userId = request.headers.get('x-user-id');
-		const isAuthenticated = !!userId;
+		console.log(`[${requestId}] Query: "${query}"`)
 		
-		// Check credits for anonymous users
-		if (!isAuthenticated) {
-			const anonCookie = parseAnonCookie(request);
-			if (anonCookie.count >= CREDITS_CONFIG.ANONYMOUS_FREE_CREDITS) {
-				// Use standard format for CORS error with proper headers
+		// Check authentication
+		const authHeader = request.headers.get('authorization')
+		const userId = decodeJwtSub(authHeader)
+		
+		console.log(`[${requestId}] User ID: ${userId || 'anonymous'}`)
+		
+		// Check subscription status for authenticated users
+		let isSubscriber = false
+		if (userId) {
+			// Note: We would need to import supabaseAdmin if we want subscription checking
+			// For now, treating authenticated users as subscribers for streaming
+			isSubscriber = true
+		}
+		
+		// Check demo limits for anonymous users
+		if (!userId) {
+			const demoCheck = checkDemoLimit(request, isSubscriber)
+			console.log(`[${requestId}] Demo check:`, {
+				allowed: demoCheck.allowed,
+				searchesUsed: demoCheck.searchesUsed,
+				searchesRemaining: demoCheck.searchesRemaining
+			})
+			
+			if (!demoCheck.allowed) {
+				console.log(`[${requestId}] Demo limit reached for streaming, returning 402`)
 				return new Response(
 					JSON.stringify({
-						error: CREDITS_CONFIG.MESSAGES.CREDITS_EXHAUSTED_ANONYMOUS,
-						code: 'PAYMENT_REQUIRED',
-						remaining: 0,
-						isSubscriber: false,
+						error: 'You\'ve used your 5 free demo searches. Sign up for unlimited access.',
+						code: 'DEMO_LIMIT_REACHED',
+						searchesUsed: demoCheck.searchesUsed,
+						searchesRemaining: 0,
 						upgradeRequired: true
 					}),
 					{ 
-						status: 402, 
+						status: 402,
 						headers: {
 							...corsHeaders(request),
 							'Content-Type': 'application/json'
-						} 
+						}
 					}
-				);
+				)
 			}
 		}
 		
 		// Process the query
 		const plan = await callLLMToDecomposeQuery(query)
-		let city: string | undefined
-		let state: string | undefined
-		const loc = plan.structured_filters?.location || ''
-		if (typeof loc === 'string' && loc.length > 0) {
-			const parts = loc.split(',').map((p) => p.trim())
-			if (parts.length === 2) {
-				city = parts[0]
-				state = parts[1].toUpperCase()
-			} else if (parts.length === 1 && parts[0].length === 2) {
-				state = parts[0].toUpperCase()
-			} else {
-				city = parts[0]
-			}
-		}
+		console.log(`[${requestId}] Query decomposed:`, {
+			semantic_query: plan.semantic_query,
+			structured_filters: plan.structured_filters
+		})
 		
 		// Execute the query using unified semantic search
-		console.log('🚀 Using unified semantic search for streaming query:', query)
+		console.log(`[${requestId}] Starting unified semantic search for streaming...`)
 		const searchResult = await unifiedSemanticSearch(query, { limit: 10 })
 		const rows = searchResult.results
+		console.log(`[${requestId}] Search complete, ${rows.length} results found`)
+		
 		const context = buildAnswerContext(rows as any, query)
 		
 		// Set up SSE stream with proper error handling and guaranteed completion
@@ -126,12 +125,16 @@ export async function POST(request: NextRequest) {
 					controller.enqueue(encoder.encode('data: {"type":"connected"}\n\n'));
 					streamStarted = true;
 					
+					console.log(`[${requestId}] Starting token stream...`)
+					
 					// Stream tokens with proper SSE format
 					for await (const token of streamAnswerTokens(query, context)) {
 						// Properly format each token for SSE (escape newlines if needed)
 						const escapedToken = JSON.stringify(token);
 						controller.enqueue(encoder.encode(`data: {"token":${escapedToken}}\n\n`));
 					}
+					
+					console.log(`[${requestId}] Token streaming complete`)
 				} catch (err) {
 					console.error(`[${requestId}] Stream error:`, err);
 					
@@ -167,13 +170,13 @@ export async function POST(request: NextRequest) {
 		headers.set('Connection', 'keep-alive');
 		headers.set('X-Accel-Buffering', 'no');
 		
-		const response = new Response(sse, { headers });
+		let response = new Response(sse, { headers });
 		
-		// If anonymous user, increment count and update cookie
-		if (!isAuthenticated) {
-			const anonCookie = parseAnonCookie(request);
-			const newCount = anonCookie.count + 1;
-			return withAnonCookie(response, newCount);
+		// Update demo counter for anonymous users
+		if (!userId) {
+			const demoCheck = checkDemoLimit(request, isSubscriber)
+			console.log(`[${requestId}] Updating demo session from ${demoCheck.searchesUsed} to ${demoCheck.searchesUsed + 1}`)
+			response = incrementDemoSession(NextResponse.next(), demoCheck.searchesUsed)
 		}
 		
 		// Log successful response
@@ -186,5 +189,3 @@ export async function POST(request: NextRequest) {
 		return corsError(request, 'An internal error occurred', 500);
 	}
 }
-
-

@@ -218,8 +218,8 @@ async function executeSemanticQuery(decomposition: QueryPlan, filters: { state?:
       return executeStructuredFallback(filters, limit)
     }
     
-    // STEP 5: Merge similarity scores with profile data
-    const results = profiles.map(profile => {
+    // STEP 5: Merge similarity scores with profile data AND add executives
+    const resultsWithScores = profiles.map(profile => {
       const semanticMatch = semanticMatches.find(m => m.crd_number === profile.crd_number)
       return {
         ...profile,
@@ -228,9 +228,39 @@ async function executeSemanticQuery(decomposition: QueryPlan, filters: { state?:
         searchStrategy: 'semantic-first'
       }
     }).sort((a, b) => (b.similarity || 0) - (a.similarity || 0))
-    
-    console.log(`✅ Returning ${results.length} semantic results`)
-    return results
+
+    // NEW: Enrich with executives
+    console.log(`Enriching ${resultsWithScores.length} results with executives...`)
+    const enrichedResults = await Promise.all(resultsWithScores.map(async (r) => {
+      try {
+        const { data: execs, error } = await supabaseAdmin
+          .from('control_persons')
+          .select('person_name, title')
+          .eq('crd_number', r.crd_number)
+          .limit(5)
+        
+        if (error) {
+          console.warn(`Failed to fetch executives for CRD ${r.crd_number}:`, error.message)
+        }
+        
+        return {
+          ...r,
+          executives: execs?.map(e => ({ 
+            name: e.person_name, 
+            title: e.title 
+          })) || []
+        }
+      } catch (execError) {
+        console.error(`Error enriching CRD ${r.crd_number}:`, execError)
+        return {
+          ...r,
+          executives: []
+        }
+      }
+    }))
+
+    console.log(`✅ Returning ${enrichedResults.length} enriched semantic results`)
+    return enrichedResults
     
   } catch (error) {
     console.warn('Semantic search failed, falling back to structured search:', error)
@@ -275,15 +305,38 @@ async function executeStructuredFallback(filters: { state?: string; city?: strin
       return []
     }
     
-    const results = (rows || []).map(r => ({
-      ...r,
-      similarity: 0,
-      source: 'structured-fallback',
-      searchStrategy: 'structured-fallback'
+    // NEW: Enrich with executives
+    const enrichedResults = await Promise.all((rows || []).map(async (r) => {
+      try {
+        const { data: execs } = await supabaseAdmin
+          .from('control_persons')
+          .select('person_name, title')
+          .eq('crd_number', r.crd_number)
+          .limit(5)
+        
+        return {
+          ...r,
+          similarity: 0,
+          source: 'structured-fallback',
+          searchStrategy: 'structured-fallback',
+          executives: execs?.map(e => ({ 
+            name: e.person_name, 
+            title: e.title 
+          })) || []
+        }
+      } catch {
+        return {
+          ...r,
+          similarity: 0,
+          source: 'structured-fallback',
+          searchStrategy: 'structured-fallback',
+          executives: []
+        }
+      }
     }))
     
-    console.log(`📊 Returning ${results.length} structured fallback results`)
-    return results
+    console.log(`📊 Returning ${enrichedResults.length} enriched fallback results`)
+    return enrichedResults
     
   } catch (error) {
     console.error('Structured fallback failed:', error)
@@ -328,12 +381,36 @@ async function handleSuperlativeQuery(decomposition: QueryPlan, limit = 10) {
         const { data: profiles } = await q
         
         if (profiles && profiles.length > 0) {
-          return profiles.map(profile => ({
-            ...profile,
-            similarity: semanticMatches.find(m => m.crd_number === profile.crd_number)?.similarity || 0,
-            source: 'semantic-superlative',
-            searchStrategy: 'semantic-superlative'
+          // Enrich with executives
+          const enrichedProfiles = await Promise.all(profiles.map(async (profile) => {
+            try {
+              const { data: execs } = await supabaseAdmin
+                .from('control_persons')
+                .select('person_name, title')
+                .eq('crd_number', profile.crd_number)
+                .limit(5)
+              
+              return {
+                ...profile,
+                similarity: semanticMatches.find(m => m.crd_number === profile.crd_number)?.similarity || 0,
+                source: 'semantic-superlative',
+                searchStrategy: 'semantic-superlative',
+                executives: execs?.map(e => ({ 
+                  name: e.person_name, 
+                  title: e.title 
+                })) || []
+              }
+            } catch {
+              return {
+                ...profile,
+                similarity: semanticMatches.find(m => m.crd_number === profile.crd_number)?.similarity || 0,
+                source: 'semantic-superlative',
+                searchStrategy: 'semantic-superlative',
+                executives: []
+              }
+            }
           }))
+          return enrichedProfiles
         }
       }
     }
@@ -370,15 +447,38 @@ async function handleSuperlativeQuery(decomposition: QueryPlan, limit = 10) {
       return []
     }
     
-    const results = (rows || []).map(r => ({
-      ...r,
-      similarity: 0,
-      source: 'direct-superlative',
-      searchStrategy: 'direct-superlative'
+    // Enrich with executives
+    const enrichedResults = await Promise.all((rows || []).map(async (r) => {
+      try {
+        const { data: execs } = await supabaseAdmin
+          .from('control_persons')
+          .select('person_name, title')
+          .eq('crd_number', r.crd_number)
+          .limit(5)
+        
+        return {
+          ...r,
+          similarity: 0,
+          source: 'direct-superlative',
+          searchStrategy: 'direct-superlative',
+          executives: execs?.map(e => ({ 
+            name: e.person_name, 
+            title: e.title 
+          })) || []
+        }
+      } catch {
+        return {
+          ...r,
+          similarity: 0,
+          source: 'direct-superlative',
+          searchStrategy: 'direct-superlative',
+          executives: []
+        }
+      }
     }))
     
-    console.log(`✅ Direct superlative query returned ${results.length} results`)
-    return results
+    console.log(`✅ Direct superlative query returned ${enrichedResults.length} enriched results`)
+    return enrichedResults
     
   } catch (error) {
     console.error('Superlative query failed completely:', error)
