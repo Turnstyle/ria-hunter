@@ -37,6 +37,8 @@ export async function middleware(request: NextRequest) {
     '/api/ask',
     // Streaming version of ask; allow anonymous
     '/api/ask-stream',
+    // Session status endpoint for anonymous users
+    '/api/session/status',
     // Credits balance endpoint for anonymous users
     '/api/balance',
     '/api/credits/balance',

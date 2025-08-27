@@ -3,7 +3,7 @@ import { callLLMToDecomposeQuery } from '@/app/api/ask/planner'
 import { unifiedSemanticSearch } from '@/app/api/ask/unified-search'
 import { buildAnswerContext } from '@/app/api/ask/context-builder'
 import { streamAnswerTokens } from '@/app/api/ask/generator'
-import { checkDemoLimit, incrementDemoSession } from '@/lib/demo-session'
+import { checkDemoLimit } from '@/lib/demo-session'
 import { corsHeaders, handleOptionsRequest, corsError } from '@/lib/cors'
 
 // Use the new central CORS implementation from lib/cors.ts
@@ -115,14 +115,21 @@ export async function POST(request: NextRequest) {
 		
 		const context = buildAnswerContext(rows as any, query)
 		
+		// Calculate metadata for the response
+		const demoCheck = checkDemoLimit(request, isSubscriber)
+		const metadata = {
+			remaining: isSubscriber ? -1 : demoCheck.searchesRemaining - 1,
+			isSubscriber: isSubscriber
+		}
+		
 		// Set up SSE stream with proper error handling and guaranteed completion
 		const encoder = new TextEncoder()
 		const sse = new ReadableStream<Uint8Array>({
 			async start(controller) {
 				let streamStarted = false;
 				try {
-					// Send initial connection confirmation
-					controller.enqueue(encoder.encode('data: {"type":"connected"}\n\n'));
+					// Send initial connection confirmation with metadata
+					controller.enqueue(encoder.encode(`data: {"type":"connected","metadata":${JSON.stringify(metadata)}}\n\n`));
 					streamStarted = true;
 					
 					console.log(`[${requestId}] Starting token stream...`)
@@ -135,12 +142,15 @@ export async function POST(request: NextRequest) {
 					}
 					
 					console.log(`[${requestId}] Token streaming complete`)
+					
+					// Send metadata at the end too
+					controller.enqueue(encoder.encode(`data: {"type":"metadata","metadata":${JSON.stringify(metadata)}}\n\n`));
 				} catch (err) {
 					console.error(`[${requestId}] Stream error:`, err);
 					
 					// If we haven't started streaming yet, send a fallback message
 					if (!streamStarted) {
-						controller.enqueue(encoder.encode('data: {"type":"connected"}\n\n'));
+						controller.enqueue(encoder.encode(`data: {"type":"connected","metadata":${JSON.stringify(metadata)}}\n\n`));
 					}
 					
 					// Send error as a proper message instead of error event
@@ -170,14 +180,17 @@ export async function POST(request: NextRequest) {
 		headers.set('Connection', 'keep-alive');
 		headers.set('X-Accel-Buffering', 'no');
 		
-		let response = new Response(sse, { headers });
-		
 		// Update demo counter for anonymous users
 		if (!userId) {
 			const demoCheck = checkDemoLimit(request, isSubscriber)
 			console.log(`[${requestId}] Updating demo session from ${demoCheck.searchesUsed} to ${demoCheck.searchesUsed + 1}`)
-			response = incrementDemoSession(NextResponse.next(), demoCheck.searchesUsed)
+			const newCount = demoCheck.searchesUsed + 1
+			
+			// Set the session cookie for demo tracking
+			headers.set('Set-Cookie', `rh_demo=${newCount}; HttpOnly; Secure; SameSite=Lax; Max-Age=${24 * 60 * 60}; Path=/`)
 		}
+		
+		const response = new Response(sse, { headers });
 		
 		// Log successful response
 		console.log(`[${requestId}] Streaming response started`);

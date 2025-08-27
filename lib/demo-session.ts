@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-const DEMO_SEARCHES_ALLOWED = 5
-const SESSION_COOKIE_NAME = 'rh_demo'
-const SESSION_DURATION_HOURS = 24
+export const DEMO_SEARCHES_ALLOWED = 5
+export const SESSION_COOKIE_NAME = 'rh_demo'
+export const SESSION_DURATION_HOURS = 24
 
 /**
  * Get the current demo session count from cookie
