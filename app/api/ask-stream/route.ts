@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { callLLMToDecomposeQuery } from '@/app/api/ask/planner'
 import { executeEnhancedQuery } from '@/app/api/ask/retriever'
+import { unifiedSemanticSearch } from '@/app/api/ask/unified-search'
 import { buildAnswerContext } from '@/app/api/ask/context-builder'
 import { streamAnswerTokens } from '@/app/api/ask/generator'
 import { CREDITS_CONFIG } from '@/app/config/credits'
@@ -109,12 +110,10 @@ export async function POST(request: NextRequest) {
 			}
 		}
 		
-		// Execute the query and build context
-		const rows = await executeEnhancedQuery({ 
-			filters: { state, city }, 
-			limit: 10,
-			semantic_query: plan.semantic_query || query
-		})
+		// Execute the query using unified semantic search
+		console.log('🚀 Using unified semantic search for streaming query:', query)
+		const searchResult = await unifiedSemanticSearch(query, { limit: 10 })
+		const rows = searchResult.results
 		const context = buildAnswerContext(rows as any, query)
 		
 		// Set up SSE stream with proper error handling and guaranteed completion

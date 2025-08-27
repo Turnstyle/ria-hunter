@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { callLLMToDecomposeQuery } from './planner'
 import { executeEnhancedQuery } from './retriever'
+import { unifiedSemanticSearch } from './unified-search'
 import { buildAnswerContext } from './context-builder'
 import { generateNaturalLanguageAnswer } from './generator'
 import { CREDITS_CONFIG } from '@/app/config/credits'
@@ -201,13 +202,13 @@ export async function POST(request: NextRequest) {
 				else city = parts[0]
 			}
 		}
+		// Use unified semantic search instead of broken executeEnhancedQuery
+		console.log('🚀 Using unified semantic search for query:', query)
+		const searchResult = await unifiedSemanticSearch(query, { limit: 10 })
+		let structuredData = searchResult.results
 		let relaxationLevel: 'state' | null = null
-		let structuredData = await executeEnhancedQuery({ filters: { state, city, min_aum: decomposedPlan.structured_filters?.min_aum || null }, limit: 10 })
-		if (Array.isArray(structuredData) && structuredData.length === 0 && state && city) {
-			// Relax to state-only when city filter yields no results
-			structuredData = await executeEnhancedQuery({ filters: { state, city: undefined, min_aum: decomposedPlan.structured_filters?.min_aum || null }, limit: 10 })
-			if (Array.isArray(structuredData) && structuredData.length > 0) relaxationLevel = 'state'
-		}
+		
+		// If no results, the unified search already handles fallbacks internally
 		const context = buildAnswerContext(structuredData as any, query)
 		const answer = await generateNaturalLanguageAnswer(query, context)
 
@@ -227,6 +228,9 @@ export async function POST(request: NextRequest) {
 				insufficient_data: !structuredData || (Array.isArray(structuredData) && structuredData.length === 0),
 				metadata: {
 					plan: decomposedPlan,
+					searchStrategy: searchResult.metadata.searchStrategy,
+					queryType: searchResult.metadata.queryType,
+					confidence: searchResult.metadata.confidence,
 					debug: { provider: process.env.AI_PROVIDER || 'openai', openaiKeyPresent: !!process.env.OPENAI_API_KEY },
 					remaining: userId ? -1 : Math.max(0, CREDITS_CONFIG.ANONYMOUS_FREE_CREDITS - (anonCount + 1)),
 					relaxed: relaxationLevel !== null,
