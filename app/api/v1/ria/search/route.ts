@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { createAIService, getAIProvider } from '@/lib/ai-providers';
-import { CREDITS_CONFIG } from '@/app/config/credits';
+// Credits config removed - now using demo session system
 // Local CORS helper function
 function corsify(req: NextRequest, res: Response, preflight = false): Response {
   const headers = new Headers(res.headers);
@@ -165,12 +165,12 @@ export async function POST(req: NextRequest) {
       // Handle anonymous user
       const anon = parseAnonCookie(req);
       anonCount = anon.count;
-      if (anonCount >= CREDITS_CONFIG.ANONYMOUS_FREE_CREDITS) {
+      if (anonCount >= 15) { // Hardcoded value from removed CREDITS_CONFIG
         return corsify(
           req,
           NextResponse.json(
             {
-              error: CREDITS_CONFIG.MESSAGES.CREDITS_EXHAUSTED_ANONYMOUS,
+              error: 'You have used all 15 free searches. Create an account to continue.',
               code: 'PAYMENT_REQUIRED',
               remaining: 0,
               isSubscriber: false,

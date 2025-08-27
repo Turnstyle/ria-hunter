@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import Stripe from 'stripe';
-import { CREDITS_CONFIG } from '@/app/config/credits';
+// Credits config removed - now using demo session system
 import { corsHeaders, handleOptionsRequest, addCorsHeaders, corsError } from '@/lib/cors';
 
 /**
@@ -91,8 +91,7 @@ export async function GET(req: NextRequest) {
 
       const queryCount = queryResult.count || 0;
       const shareCount = shareResult.count || 0;
-      const allowedQueries = CREDITS_CONFIG.FREE_USER_MONTHLY_CREDITS + 
-        Math.min(shareCount, CREDITS_CONFIG.FREE_USER_SHARE_BONUS_MAX);
+      const allowedQueries = 15 + Math.min(shareCount, 1); // Hardcoded values from removed CREDITS_CONFIG
       const remaining = Math.max(0, allowedQueries - queryCount);
 
       usage = {
