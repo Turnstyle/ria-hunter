@@ -110,7 +110,11 @@ export async function POST(request: NextRequest) {
 		}
 		
 		// Execute the query and build context
-		const rows = await executeEnhancedQuery({ filters: { state, city }, limit: 10 })
+		const rows = await executeEnhancedQuery({ 
+			filters: { state, city }, 
+			limit: 10,
+			semantic_query: plan.semantic_query || query
+		})
 		const context = buildAnswerContext(rows as any, query)
 		
 		// Set up SSE stream with proper error handling and guaranteed completion

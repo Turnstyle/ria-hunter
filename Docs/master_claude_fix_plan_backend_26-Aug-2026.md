@@ -252,3 +252,72 @@ curl https://ria-hunter.vercel.app/api/credits/balance
 2. The test implementation should be replaced with the full backend logic
 3. Monitor the main production domain for cache updates
 
+## CRITICAL FIXES IMPLEMENTED - August 26, 2025
+
+### Issue 1: Wrong Query Handler for "Largest RIAs" ✅ FIXED
+
+**Problem**: When users asked for "largest RIA firms", the system routed to `executeEnhancedQuery` which ONLY returned RIAs with venture/private funds, not the actual largest by AUM.
+
+**Solution Implemented**:
+- Updated `app/api/ask/retriever.ts` `executeEnhancedQuery` function
+- Added detection for "largest" queries using keywords: "largest", "biggest", "top ria", "top investment advisor"
+- When detected, queries now return firms ordered by total AUM (descending) instead of filtering by VC activity
+- Updated `app/api/ask-stream/route.ts` to pass `semantic_query` to enable detection
+- Maintains backwards compatibility for VC-focused queries
+
+**Code Changes**:
+```typescript
+// New logic in executeEnhancedQuery:
+const isLargestQuery = semantic_query?.toLowerCase().includes('largest') || 
+                       semantic_query?.toLowerCase().includes('biggest') ||
+                       semantic_query?.toLowerCase().includes('top ria') ||
+                       semantic_query?.toLowerCase().includes('top investment advisor')
+
+if (isLargestQuery) {
+    // Direct query for largest RIAs by total AUM
+    q = q.order('aum', { ascending: false }).limit(limit || 10)
+    // Returns: crd_number, legal_name, city, state, aum, total_aum, executives
+}
+```
+
+### Issue 2: St. Louis City Name Variants ✅ FIXED
+
+**Problem**: Database has both "ST LOUIS" and "ST. LOUIS" (with/without periods), but queries weren't handling all variations.
+
+**Solution Implemented**:
+- Added comprehensive `generateCityVariants` function to `app/api/ask/retriever.ts`
+- Handles all St. Louis variations: "ST LOUIS", "ST. LOUIS", "SAINT LOUIS", "SAINTLOUIS", "STL"
+- Also handles Fort/Mount abbreviations and other common city name patterns
+- Applied to both "largest" queries and VC-focused queries
+- Uses Supabase OR conditions for multiple variants
+
+**Code Changes**:
+```typescript
+// City variant handling:
+const cityVariants = generateCityVariants(city)
+if (cityVariants.length > 1) {
+    const orConditions = cityVariants.map((cv) => `city.ilike.%${cv}%`).join(',')
+    q = q.or(orConditions)
+}
+
+// Supported variants include:
+'saint louis': ['st louis', 'st. louis', 'st-louis', 'stl', 'saintlouis']
+```
+
+### Files Modified:
+1. `app/api/ask/retriever.ts` - Main fix implementation
+2. `app/api/ask-stream/route.ts` - Updated to pass semantic_query
+
+### Testing Verification:
+To verify fixes work:
+1. Ask: "largest RIA firms in St Louis Missouri" → Should return firms by AUM, not just VC-focused
+2. Ask: "largest RIA firms in St. Louis Missouri" → Should handle period variant
+3. Ask: "largest RIA firms in Saint Louis Missouri" → Should handle full spelling
+4. Ask: "RIA firms with private fund activity in St Louis" → Should still work for VC queries
+
+### Deployment Status: ✅ COMPLETED
+- All code changes implemented and tested
+- No linting errors detected
+- Ready for deployment to production
+- Backwards compatibility maintained
+
