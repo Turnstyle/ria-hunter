@@ -245,8 +245,8 @@ async function executeSemanticQuery(decomposition: QueryPlan, filters: { state?:
       return executeStructuredFallback(filters, limit)
     }
     
-    // STEP 5: Merge similarity scores with profile data AND add executives
-    const resultsWithScores = profiles.map(profile => {
+    // STEP 5: Merge similarity scores with profile data
+    let resultsWithScores = profiles.map(profile => {
       const semanticMatch = semanticMatches.find(m => m.crd_number === profile.crd_number)
       return {
         ...profile,
@@ -256,7 +256,53 @@ async function executeSemanticQuery(decomposition: QueryPlan, filters: { state?:
       }
     }).sort((a, b) => (b.similarity || 0) - (a.similarity || 0))
 
-    // NEW: Enrich with executives
+    // STEP 5b: Supplement with high-AUM local firms that don't have narratives (like Edward Jones)
+    if ((filters.city || filters.state) && resultsWithScores.length < limit) {
+      console.log(`🏢 Supplementing with high-AUM local firms without narratives...`)
+      
+      let supplementQuery = supabaseAdmin
+        .from('ria_profiles')
+        .select('*')
+        .gte('aum', 1000000) // Only large firms (>$1M AUM)
+      
+      if (filters.state) {
+        supplementQuery = supplementQuery.eq('state', filters.state)
+      }
+      
+      if (filters.city) {
+        const cityVariants = generateCityVariants(filters.city)
+        if (cityVariants.length === 1) {
+          supplementQuery = supplementQuery.ilike('city', `%${cityVariants[0]}%`)
+        } else if (cityVariants.length > 1) {
+          const orConditions = cityVariants.map(cv => `city.ilike.%${cv}%`).join(',')
+          supplementQuery = supplementQuery.or(orConditions)
+        }
+      }
+      
+      // Exclude firms already in semantic results
+      const existingCrds = resultsWithScores.map(r => r.crd_number)
+      if (existingCrds.length > 0) {
+        supplementQuery = supplementQuery.not('crd_number', 'in', `(${existingCrds.join(',')})`)
+      }
+      
+      const { data: supplementalFirms } = await supplementQuery
+        .order('aum', { ascending: false })
+        .limit(limit - resultsWithScores.length)
+      
+      if (supplementalFirms && supplementalFirms.length > 0) {
+        const supplementalResults = supplementalFirms.map(firm => ({
+          ...firm,
+          similarity: 0, // No semantic similarity
+          source: 'geographic-supplement',
+          searchStrategy: 'semantic-first'
+        }))
+        
+        resultsWithScores = [...resultsWithScores, ...supplementalResults]
+        console.log(`✅ Added ${supplementalFirms.length} high-AUM local firms without narratives`)
+      }
+    }
+
+    // STEP 6: Enrich with executives
     console.log(`Enriching ${resultsWithScores.length} results with executives...`)
     const enrichedResults = await Promise.all(resultsWithScores.map(async (r) => {
       try {
@@ -286,7 +332,7 @@ async function executeSemanticQuery(decomposition: QueryPlan, filters: { state?:
       }
     }))
 
-    console.log(`✅ Returning ${enrichedResults.length} enriched semantic results`)
+    console.log(`✅ Returning ${enrichedResults.length} semantic + supplemental results`)
     return enrichedResults
     
   } catch (error) {
