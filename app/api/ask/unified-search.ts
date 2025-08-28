@@ -454,46 +454,68 @@ async function handleSuperlativeQuery(decomposition: QueryPlan, limit = 10) {
         const { data: profiles } = await q
         
         if (profiles && profiles.length > 0) {
-          // Supplement with high-AUM local firms that don't have narratives (like Edward Jones)
-          let supplementedProfiles = [...profiles]
+          // For superlative queries, ALWAYS check for high-AUM local firms to ensure we don't miss giants like Edward Jones
+          console.log(`🏢 Merging semantic results with all high-AUM local firms for superlative query...`)
           
-          if (profiles.length < limit) {
-            console.log(`🏢 Supplementing superlative results with high-AUM local firms...`)
-            
-            let supplementQuery = supabaseAdmin
-              .from('ria_profiles')
-              .select('*')
-              .gte('aum', 1000000) // Only large firms (>$1M AUM)
-            
-            if (filters.state) {
-              supplementQuery = supplementQuery.eq('state', filters.state)
-            }
-            
-            if (filters.city) {
-              const cityVariants = generateCityVariants(filters.city)
-              if (cityVariants.length === 1) {
-                supplementQuery = supplementQuery.ilike('city', `%${cityVariants[0]}%`)
-              } else if (cityVariants.length > 1) {
-                const orConditions = cityVariants.map(cv => `city.ilike.%${cv}%`).join(',')
-                supplementQuery = supplementQuery.or(orConditions)
-              }
-            }
-            
-            // Exclude firms already in semantic results
-            const existingCrds = profiles.map(p => p.crd_number)
-            if (existingCrds.length > 0) {
-              supplementQuery = supplementQuery.not('crd_number', 'in', `(${existingCrds.join(',')})`)
-            }
-            
-            const { data: supplementalFirms } = await supplementQuery
-              .order('aum', { ascending: !isLargest })
-              .limit(limit - profiles.length)
-            
-            if (supplementalFirms && supplementalFirms.length > 0) {
-              supplementedProfiles = [...profiles, ...supplementalFirms]
-              console.log(`✅ Added ${supplementalFirms.length} high-AUM firms to superlative results`)
+          let allHighAumQuery = supabaseAdmin
+            .from('ria_profiles')
+            .select('*')
+            .gte('aum', 1000000) // Only large firms (>$1M AUM)
+          
+          if (filters.state) {
+            allHighAumQuery = allHighAumQuery.eq('state', filters.state)
+          }
+          
+          if (filters.city) {
+            const cityVariants = generateCityVariants(filters.city)
+            if (cityVariants.length === 1) {
+              allHighAumQuery = allHighAumQuery.ilike('city', `%${cityVariants[0]}%`)
+            } else if (cityVariants.length > 1) {
+              const orConditions = cityVariants.map(cv => `city.ilike.%${cv}%`).join(',')
+              allHighAumQuery = allHighAumQuery.or(orConditions)
             }
           }
+          
+          const { data: allHighAumFirms } = await allHighAumQuery
+            .order('aum', { ascending: !isLargest })
+            .limit(50) // Get top 50 by AUM, we'll trim later
+          
+          // Merge semantic and high-AUM results, prioritizing AUM for superlative queries
+          const profilesMap = new Map()
+          
+          // Add semantic results with their similarity scores
+          profiles.forEach(profile => {
+            const semanticMatch = semanticMatches.find(m => m.crd_number === profile.crd_number)
+            profilesMap.set(profile.crd_number, {
+              ...profile,
+              similarity: semanticMatch?.similarity || 0,
+              source: 'semantic-superlative'
+            })
+          })
+          
+          // Add high-AUM firms (some may overlap with semantic results)
+          if (allHighAumFirms && allHighAumFirms.length > 0) {
+            allHighAumFirms.forEach(firm => {
+              if (profilesMap.has(firm.crd_number)) {
+                // Already in semantic results, keep semantic score
+                const existing = profilesMap.get(firm.crd_number)
+                profilesMap.set(firm.crd_number, { ...existing, ...firm })
+              } else {
+                // New high-AUM firm not in semantic results
+                profilesMap.set(firm.crd_number, {
+                  ...firm,
+                  similarity: 0,
+                  source: 'superlative-supplement'
+                })
+              }
+            })
+            console.log(`✅ Merged ${allHighAumFirms.length} high-AUM local firms with semantic results`)
+          }
+          
+          // Convert back to array and sort by AUM for superlative queries
+          const supplementedProfiles = Array.from(profilesMap.values())
+            .sort((a, b) => isLargest ? (b.aum || 0) - (a.aum || 0) : (a.aum || 0) - (b.aum || 0))
+            .slice(0, limit)
           
           // Enrich with executives
           const enrichedProfiles = await Promise.all(supplementedProfiles.map(async (profile) => {
