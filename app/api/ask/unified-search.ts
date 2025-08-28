@@ -454,8 +454,49 @@ async function handleSuperlativeQuery(decomposition: QueryPlan, limit = 10) {
         const { data: profiles } = await q
         
         if (profiles && profiles.length > 0) {
+          // Supplement with high-AUM local firms that don't have narratives (like Edward Jones)
+          let supplementedProfiles = [...profiles]
+          
+          if (profiles.length < limit) {
+            console.log(`🏢 Supplementing superlative results with high-AUM local firms...`)
+            
+            let supplementQuery = supabaseAdmin
+              .from('ria_profiles')
+              .select('*')
+              .gte('aum', 1000000) // Only large firms (>$1M AUM)
+            
+            if (filters.state) {
+              supplementQuery = supplementQuery.eq('state', filters.state)
+            }
+            
+            if (filters.city) {
+              const cityVariants = generateCityVariants(filters.city)
+              if (cityVariants.length === 1) {
+                supplementQuery = supplementQuery.ilike('city', `%${cityVariants[0]}%`)
+              } else if (cityVariants.length > 1) {
+                const orConditions = cityVariants.map(cv => `city.ilike.%${cv}%`).join(',')
+                supplementQuery = supplementQuery.or(orConditions)
+              }
+            }
+            
+            // Exclude firms already in semantic results
+            const existingCrds = profiles.map(p => p.crd_number)
+            if (existingCrds.length > 0) {
+              supplementQuery = supplementQuery.not('crd_number', 'in', `(${existingCrds.join(',')})`)
+            }
+            
+            const { data: supplementalFirms } = await supplementQuery
+              .order('aum', { ascending: !isLargest })
+              .limit(limit - profiles.length)
+            
+            if (supplementalFirms && supplementalFirms.length > 0) {
+              supplementedProfiles = [...profiles, ...supplementalFirms]
+              console.log(`✅ Added ${supplementalFirms.length} high-AUM firms to superlative results`)
+            }
+          }
+          
           // Enrich with executives
-          const enrichedProfiles = await Promise.all(profiles.map(async (profile) => {
+          const enrichedProfiles = await Promise.all(supplementedProfiles.map(async (profile) => {
             try {
               const { data: execs } = await supabaseAdmin
                 .from('control_persons')
@@ -463,10 +504,12 @@ async function handleSuperlativeQuery(decomposition: QueryPlan, limit = 10) {
                 .eq('crd_number', profile.crd_number)
                 .limit(5)
               
+              const semanticMatch = semanticMatches.find(m => m.crd_number === profile.crd_number)
+              
               return {
                 ...profile,
-                similarity: semanticMatches.find(m => m.crd_number === profile.crd_number)?.similarity || 0,
-                source: 'semantic-superlative',
+                similarity: semanticMatch?.similarity || 0,
+                source: semanticMatch ? 'semantic-superlative' : 'superlative-supplement',
                 searchStrategy: 'semantic-superlative',
                 executives: execs?.map(e => ({ 
                   name: e.person_name, 
