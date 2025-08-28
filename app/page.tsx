@@ -1,5 +1,5 @@
-import { PageContent } from '@/components/page-content'
+import RIAHunterPage from './ria-hunter/page'
 
 export default function Home() {
-  return <PageContent />
+  return <RIAHunterPage />
 } 
