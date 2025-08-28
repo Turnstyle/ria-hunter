@@ -30,14 +30,26 @@ export class VertexAIService implements AIService {
   private embeddingEndpoint: string;
   private generativeModel: any;
 
-  constructor(projectId: string, location: string) {
-    this.vertexAI = new VertexAI({
+  constructor(projectId: string, location: string, credentials?: any) {
+    // Use explicit credentials if provided, otherwise fall back to ADC
+    const vertexAIConfig: any = {
       project: projectId,
       location: location,
-    });
+    };
     
-    // Initialize prediction client for embeddings
-    this.predictionClient = new PredictionServiceClient();
+    if (credentials) {
+      vertexAIConfig.googleAuthOptions = { credentials };
+    }
+    
+    this.vertexAI = new VertexAI(vertexAIConfig);
+    
+    // Initialize prediction client for embeddings with same credentials
+    const clientConfig: any = {};
+    if (credentials) {
+      clientConfig.credentials = credentials;
+    }
+    this.predictionClient = new PredictionServiceClient(clientConfig);
+    
     // Use current embedding model instead of deprecated textembedding-gecko@003
     this.embeddingEndpoint = `projects/${projectId}/locations/${location}/publishers/google/models/text-embedding-005`;
     
@@ -178,31 +190,40 @@ export function createAIService(config: AIConfig): AIService | null {
         return null;
       }
 
-      // Check for JSON credentials in environment variable (for Vercel deployment)
-      const credentialsJson = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
-      if (credentialsJson) {
+      // Get credentials using Vercel-compatible approach
+      let credentials: any = null;
+      
+      // Try base64 encoded credentials first (recommended for Vercel)
+      if (process.env.GOOGLE_APPLICATION_CREDENTIALS_B64) {
         try {
-          // Parse and validate JSON credentials
-          const credentials = JSON.parse(credentialsJson);
-          if (credentials.type === 'service_account' && credentials.private_key && credentials.client_email) {
-            // Set credentials for Google Auth Library
-            process.env.GOOGLE_APPLICATION_CREDENTIALS = JSON.stringify(credentials);
-            console.log('Vertex AI: Using JSON credentials from environment variable');
-          } else {
-            console.error('Vertex AI: Invalid service account JSON format');
-            return null;
-          }
+          console.log('🔑 Vertex AI: Using base64 encoded service account credentials');
+          credentials = JSON.parse(
+            Buffer.from(process.env.GOOGLE_APPLICATION_CREDENTIALS_B64, 'base64').toString('utf-8')
+          );
+        } catch (error) {
+          console.error('Vertex AI: Failed to parse base64 credentials:', error);
+          return null;
+        }
+      }
+      // Fallback to JSON string credentials
+      else if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
+        try {
+          console.log('🔑 Vertex AI: Using JSON string service account credentials');
+          credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
         } catch (error) {
           console.error('Vertex AI: Failed to parse JSON credentials:', error);
           return null;
         }
-      } else if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-        console.warn('Vertex AI: Missing credentials (GOOGLE_APPLICATION_CREDENTIALS or GOOGLE_APPLICATION_CREDENTIALS_JSON)');
+      }
+      
+      // Validate credentials if provided
+      if (credentials && (!credentials.type || credentials.type !== 'service_account' || !credentials.private_key || !credentials.client_email)) {
+        console.error('Vertex AI: Invalid service account JSON format');
         return null;
       }
       
       try {
-        return new VertexAIService(projectId, location);
+        return new VertexAIService(projectId, location, credentials);
       } catch (error) {
         console.error('Failed to initialize Vertex AI:', error);
         return null;

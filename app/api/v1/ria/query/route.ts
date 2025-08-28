@@ -625,9 +625,36 @@ async function generateVertex768Embedding(text: string): Promise<number[] | null
   if (!projectId) return null
 
   try {
-    // Use Application Default Credentials
+    // Get credentials from environment variables (Vercel-compatible approach)
     const { GoogleAuth } = await import('google-auth-library')
-    const auth = new GoogleAuth({ scopes: ['https://www.googleapis.com/auth/cloud-platform'] })
+    let auth: any
+    
+    // Try base64 encoded credentials first (recommended for Vercel)
+    if (process.env.GOOGLE_APPLICATION_CREDENTIALS_B64) {
+      console.log('🔑 Using base64 encoded service account credentials')
+      const credentials = JSON.parse(
+        Buffer.from(process.env.GOOGLE_APPLICATION_CREDENTIALS_B64, 'base64').toString('utf-8')
+      )
+      auth = new GoogleAuth({
+        credentials,
+        scopes: ['https://www.googleapis.com/auth/cloud-platform']
+      })
+    }
+    // Fallback to JSON string credentials
+    else if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
+      console.log('🔑 Using JSON string service account credentials')
+      const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON)
+      auth = new GoogleAuth({
+        credentials,
+        scopes: ['https://www.googleapis.com/auth/cloud-platform']
+      })
+    }
+    // Final fallback to Application Default Credentials (works locally)
+    else {
+      console.log('🔑 Falling back to Application Default Credentials')
+      auth = new GoogleAuth({ scopes: ['https://www.googleapis.com/auth/cloud-platform'] })
+    }
+    
     const accessToken = await auth.getAccessToken()
     if (!accessToken) return null
 
