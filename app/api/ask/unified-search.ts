@@ -378,74 +378,7 @@ async function handleSuperlativeQuery(decomposition: QueryPlan, limit = 10) {
                     decomposition.semantic_query.toLowerCase().includes('top ')
   const isSmallest = decomposition.semantic_query.toLowerCase().includes('smallest')
   
-  // For geographic superlative queries, skip semantic search and use direct database search
-  const filters = parseFiltersFromDecomposition(decomposition)
-  if (filters.city || filters.state) {
-    console.log('🌍 Geographic superlative detected - using direct database search to avoid semantic filtering')
-    
-    let q = supabaseAdmin.from('ria_profiles')
-      .select('crd_number, legal_name, city, state, aum, private_fund_count, private_fund_aum')
-    
-    // Apply location filters
-    if (filters.state) q = q.eq('state', filters.state)
-    if (filters.city) {
-      const cityVariants = generateCityVariants(filters.city)
-      if (cityVariants.length === 1) {
-        q = q.ilike('city', `%${cityVariants[0]}%`)
-      } else if (cityVariants.length > 1) {
-        const orConditions = cityVariants.map(cv => `city.ilike.%${cv}%`).join(',')
-        q = q.or(orConditions)
-      }
-    }
-    
-    if (filters.min_aum) {
-      q = q.gte('aum', filters.min_aum)
-    }
-    
-    // Order by AUM and limit
-    q = q.order('aum', { ascending: !isLargest }).limit(limit)
-    const { data: rows, error } = await q
-    
-    if (error) {
-      console.error('Geographic superlative query error:', error)
-      return []
-    }
-    
-    // Enrich with executives
-    const enrichedResults = await Promise.all((rows || []).map(async (r) => {
-      try {
-        const { data: execs } = await supabaseAdmin
-          .from('control_persons')
-          .select('person_name, title')
-          .eq('crd_number', r.crd_number)
-          .limit(5)
-        
-        return {
-          ...r,
-          similarity: 0, // No semantic matching for geographic queries
-          source: 'geographic-superlative',
-          searchStrategy: 'geographic-superlative',
-          executives: execs?.map(e => ({ 
-            name: e.person_name, 
-            title: e.title 
-          })) || []
-        }
-      } catch {
-        return {
-          ...r,
-          similarity: 0,
-          source: 'geographic-superlative',
-          searchStrategy: 'geographic-superlative',
-          executives: []
-        }
-      }
-    }))
-    
-    console.log(`✅ Geographic superlative query returned ${enrichedResults.length} results`)
-    return enrichedResults
-  }
-  
-  // For non-geographic superlative queries, try semantic search first
+  // Try semantic search first, but if it fails, use the proven superlative logic
   try {
     const embedding = await generateVertex768Embedding(decomposition.semantic_query)
     if (embedding && embedding.length === 768) {
