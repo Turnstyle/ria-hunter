@@ -1,19 +1,32 @@
+// app/api/credits/debug/route.ts
 export const runtime = 'nodejs';
-import { NextResponse } from 'next/server';
+export const dynamic = 'force-dynamic';
 
-export async function GET() {
+import { NextRequest, NextResponse } from 'next/server';
+
+export async function GET(req: NextRequest) {
+  const authHeader = req.headers.get('Authorization');
+  const providedSecret = authHeader?.replace('Bearer ', '');
+  
+  if (!process.env.CREDITS_SECRET || providedSecret !== process.env.CREDITS_SECRET) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
-    // Simple environment check without prisma
     return NextResponse.json({
       ok: true,
-      env: {
-        NODE_ENV: process.env.NODE_ENV,
-        DATABASE_URL_present: Boolean(process.env.DATABASE_URL),
-        WELCOME_CREDITS: process.env.WELCOME_CREDITS,
-      },
       timestamp: new Date().toISOString(),
+      env: {
+        hasCreditsSecret: !!process.env.CREDITS_SECRET,
+        hasWelcomeCredits: !!process.env.WELCOME_CREDITS,
+        welcomeCredits: process.env.WELCOME_CREDITS || '15'
+      }
     });
-  } catch (e: any) {
-    return NextResponse.json({ ok: false, error: String(e?.message) }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({
+      ok: false,
+      error: 'Credits debug check failed',
+      details: (error as Error).message
+    }, { status: 500 });
   }
 }

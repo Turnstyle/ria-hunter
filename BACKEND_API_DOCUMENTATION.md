@@ -11,24 +11,24 @@ Author: Backend AI Agent
 
 In production (https://ria-hunter.app), all API endpoints are accessible at:
 ```
-/_backend/api/*
+/api/*
 ```
 
-**NOT** at `/api/*` directly. This is a Vercel routing configuration.
+This follows standard Next.js API routing conventions.
 
 ---
 
 ## Core Endpoints
 
 ### 1. Session Status Endpoint ✅ WORKING
-**Endpoint:** `/_backend/api/session/status`  
+**Endpoint:** `/api/session/status`  
 **Method:** GET  
 **Authentication:** Not required  
 **Purpose:** Check remaining searches for demo/free tier users
 
 **Example Request:**
 ```bash
-curl https://ria-hunter.app/_backend/api/session/status
+curl https://ria-hunter.app/api/session/status
 ```
 
 **Response:**
@@ -50,14 +50,14 @@ curl https://ria-hunter.app/_backend/api/session/status
 ---
 
 ### 2. Ask Endpoint (Main Search) ✅ WORKING  
-**Endpoint:** `/_backend/api/ask`  
+**Endpoint:** `/api/ask`  
 **Method:** POST  
 **Authentication:** Optional (affects rate limits)  
 **Purpose:** Main AI-powered search endpoint
 
 **Example Request:**
 ```bash
-curl -X POST https://ria-hunter.app/_backend/api/ask \
+curl -X POST https://ria-hunter.app/api/ask \
   -H "Content-Type: application/json" \
   -d '{"query":"Show me the largest RIAs in St. Louis"}'
 ```
@@ -105,14 +105,14 @@ curl -X POST https://ria-hunter.app/_backend/api/ask \
 ---
 
 ### 3. Ask Stream Endpoint (SSE Streaming) ✅ WORKING
-**Endpoint:** `/_backend/api/ask-stream`  
+**Endpoint:** `/api/ask-stream`  
 **Method:** POST  
 **Authentication:** Optional  
 **Purpose:** Streaming version of search for real-time UI updates
 
 **Example Request:**
 ```bash
-curl -X POST https://ria-hunter.app/_backend/api/ask-stream \
+curl -X POST https://ria-hunter.app/api/ask-stream \
   -H "Content-Type: application/json" \
   -H "Accept: text/event-stream" \
   -d '{"query":"largest RIAs in New York"}'
@@ -212,7 +212,7 @@ The backend now returns the correct fields:
 ```javascript
 // CORRECT - Use /_backend prefix in production
 const API_BASE = process.env.NODE_ENV === 'production' 
-  ? 'https://ria-hunter.app/_backend/api'
+  ? 'https://ria-hunter.app/api'
   : 'http://localhost:3000/api';
 
 // Making a search request
@@ -286,16 +286,16 @@ while (true) {
 ### Test Search Counter Flow
 ```bash
 # 1. Check initial status
-curl https://ria-hunter.app/_backend/api/session/status
+curl https://ria-hunter.app/api/session/status
 
 # 2. Make a search (saves cookies)
-curl -X POST https://ria-hunter.app/_backend/api/ask \
+curl -X POST https://ria-hunter.app/api/ask \
   -H "Content-Type: application/json" \
   -d '{"query":"test"}' \
   --cookie-jar cookies.txt
 
 # 3. Check status again (with cookies)
-curl https://ria-hunter.app/_backend/api/session/status \
+curl https://ria-hunter.app/api/session/status \
   --cookie cookies.txt
 ```
 
@@ -304,14 +304,14 @@ curl https://ria-hunter.app/_backend/api/session/status \
 ## Summary for Frontend Team
 
 ### ✅ What's Working:
-1. **All endpoints are functional** at `/_backend/api/*`
+1. **All endpoints are functional** at `/api/*`
 2. **Session counting works** - decrements correctly
 3. **Semantic search works** - returns relevant results
 4. **Data fields are correct** - showing real AUM, not VC data
 5. **Streaming works** - proper SSE implementation
 
 ### ❌ What Frontend Needs to Fix:
-1. **Use correct URL prefix:** `/_backend/api/*` in production
+1. **Use correct URL prefix:** `/api/*` in production
 2. **Include credentials:** Add `credentials: 'include'` to all fetch calls
 3. **Handle cookies properly:** Let browser manage the httpOnly cookies
 4. **Check session status:** Before allowing searches, check remaining count
@@ -319,7 +319,7 @@ curl https://ria-hunter.app/_backend/api/session/status \
 
 ### 🎯 Key Points:
 - The backend is **100% functional**
-- The routing issue is **resolved** (use `/_backend/api/*`)
+- The routing issue is **resolved** (use `/api/*`)
 - Session tracking **works perfectly** with cookies
 - The data returned is **accurate** (real AUM values)
 

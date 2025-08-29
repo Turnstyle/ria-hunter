@@ -1,5 +1,14 @@
 # 🔧 RIA HUNTER MASTER FIX PLAN
 
+## ⚠️ DEPRECATED DOCUMENTATION - IMPLEMENTED AND SUPERSEDED
+
+**WARNING**: This document contains deprecated `/_backend/api/*` path references that NO LONGER EXIST.
+**STATUS**: The routing issues described here have been RESOLVED by consolidating all APIs to standard `/api/*` paths.
+
+For current API structure, see: `API_ROUTING_CONSOLIDATION.md`
+
+---
+
 **Date:** December 2024  
 Built by Claude
 

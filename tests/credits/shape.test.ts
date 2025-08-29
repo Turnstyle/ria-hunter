@@ -1,6 +1,6 @@
 // tests/credits/shape.test.ts
 import { NextRequest } from 'next/server';
-import { GET } from '@/app/_backend/api/balance/route';
+import { GET } from '@/app/api/balance/route';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 
 // Mock the dependencies
@@ -38,7 +38,7 @@ describe('Credits Balance API - Response Shape', () => {
     (createRouteHandlerClient as jest.Mock).mockReturnValue(mockSupabaseAuth);
     
     // Create a mock request
-    mockRequest = new NextRequest('https://ria-hunter.app/_backend/api/credits/balance');
+    mockRequest = new NextRequest('https://ria-hunter.app/api/credits/balance');
   });
 
   it('should return status 200 and correct JSON shape for anonymous users', async () => {

@@ -5,7 +5,7 @@
 
 require('dotenv').config({ path: './env.local' });
 
-const BASE_URL = 'https://ria-hunter.app/_backend/api';
+const BASE_URL = 'https://ria-hunter.app/api';
 
 // Test queries - some should trigger semantic search, others structured
 const testQueries = [

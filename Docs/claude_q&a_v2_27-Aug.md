@@ -1336,6 +1336,13 @@ This indicates that the function might not always return results even when calle
 2. Issues with the embedding quality or dimension
 3. Database schema or column name inconsistencies
 
+## ⚠️ DEPRECATED DOCUMENTATION - DO NOT USE
+
+**WARNING**: This document contains references to deprecated `/_backend/api/*` paths that NO LONGER EXIST.
+For current API documentation, see: `BACKEND_API_DOCUMENTATION.md` and `API_ROUTING_CONSOLIDATION.md`
+
+---
+
 ## API Route Configuration
 
 1. In production, are requests to /_backend/api/ask being properly routed to the backend service?

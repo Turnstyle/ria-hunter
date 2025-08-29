@@ -11,6 +11,8 @@ A Next.js backend service for processing and querying Registered Investment Advi
 
 ## API Endpoints
 
+**Current API Structure**: All endpoints use standard Next.js `/api/*` routing.
+
 ### `/api/ask` - Natural Language Query Endpoint
 
 Query adviser data using natural language questions.
@@ -48,8 +50,15 @@ Query adviser data using natural language questions.
 
 ### Other Endpoints
 
+- `/api/ask-stream` - Streaming version of natural language queries
+- `/api/balance` - Get user credit balance and subscription status  
+- `/api/credits/balance` - Legacy alias for balance endpoint
+- `/api/stripe-webhook` - Stripe webhook handler for subscription events
+- `/api/v1/ria/*` - RESTful RIA data endpoints
 - `/api/ria-hunter-waitlist` - Waitlist signup
 - `/api/save-form-data` - Contact form submission
+
+For complete API documentation, see: `BACKEND_API_DOCUMENTATION.md`
 
 ## Setup
 

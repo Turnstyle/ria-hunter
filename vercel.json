@@ -11,19 +11,7 @@
     },
     "app/api/*/*/*/*/route.ts": {
       "maxDuration": 30
-    },
-    "app/_backend/api/*/route.ts": {
-      "maxDuration": 30
-    },
-    "app/_backend/api/*/*/route.ts": {
-      "maxDuration": 30
     }
   },
-  "rewrites": [
-    {
-      "source": "/_backend/api/:path*",
-      "destination": "/api/:path*"
-    }
-  ],
   "buildCommand": "npm run build"
 }
