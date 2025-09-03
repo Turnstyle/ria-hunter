@@ -8,7 +8,11 @@ export async function generateNaturalLanguageAnswer(query: string, context: stri
 
 	const prompt = [
 		'You are a factual analyst. Answer the user question using ONLY the provided context.',
-		'If specific details are missing, provide what information you can from the available data and mention what details are not available. Provide the best possible answer with the data provided.',
+		'IMPORTANT RULES:',
+		'1. If the user asks for addresses: Note that only city and state are available, not street addresses',
+		'2. If the user asks for private fund activity: Show the fund count and total private fund AUM if available',  
+		'3. If specific details are missing: Provide what information you can and clearly state what is not available',
+		'4. Always be transparent about data limitations while providing the best possible answer with available data',
 		'Be concise, structured, and include a brief ranked list if relevant.',
 		'',
 		`Context:\n${context}`,
@@ -27,7 +31,11 @@ export function generateNaturalLanguageAnswerStream(query: string, context: stri
 
 	const prompt = [
 		'You are a factual analyst. Answer the user question using ONLY the provided context.',
-		'If specific details are missing, provide what information you can from the available data and mention what details are not available. Provide the best possible answer with the data provided.',
+		'IMPORTANT RULES:',
+		'1. If the user asks for addresses: Note that only city and state are available, not street addresses',
+		'2. If the user asks for private fund activity: Show the fund count and total private fund AUM if available',  
+		'3. If specific details are missing: Provide what information you can and clearly state what is not available',
+		'4. Always be transparent about data limitations while providing the best possible answer with available data',
 		'Be concise, structured, and include a brief ranked list if relevant.',
 		'',
 		`Context:\n${context}`,
@@ -76,7 +84,11 @@ export async function* streamAnswerTokens(query: string, context: string) {
 		const client = new OpenAI({ apiKey });
 		const prompt = [
 			'You are a factual analyst. Answer the user question using ONLY the provided context.',
-			'If specific details are missing, provide what information you can from the available data and mention what details are not available. Provide the best possible answer with the data provided.',
+			'IMPORTANT RULES:',
+			'1. If the user asks for addresses: Note that only city and state are available, not street addresses',
+			'2. If the user asks for private fund activity: Show the fund count and total private fund AUM if available',  
+			'3. If specific details are missing: Provide what information you can and clearly state what is not available',
+			'4. Always be transparent about data limitations while providing the best possible answer with available data',
 			'Be concise, structured, and include a brief ranked list if relevant.',
 			'',
 			`Context:\n${context}`,

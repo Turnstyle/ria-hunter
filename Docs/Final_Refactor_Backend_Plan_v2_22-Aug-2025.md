@@ -3059,3 +3059,78 @@ The implementation has exceeded expectations for control persons and private fun
    - Partially complete but needs further enhancement
 
 These items were identified during implementation but not completed due to prioritization of critical tasks and time constraints. They represent valuable future enhancements that would further improve the system's robustness and maintainability.
+
+---
+
+## Update: Semantic Search Data Completeness Improvements (December 2024)
+
+### Issue Identified
+The semantic search was functioning correctly in finding RIAs but not providing complete information in responses:
+- **Address data**: Showing "Not provided" because street addresses aren't stored in the database (only city/state available)
+- **Private fund activity**: Showing "Not specified" despite having detailed fund data in `ria_private_funds` table
+
+### Root Cause Analysis
+1. **Database Schema Limitation**: The `ria_profiles` table only contains:
+   - Basic fields: `crd_number`, `legal_name`, `city`, `state`, `aum`, `form_adv_date`
+   - Missing: street address, zip code, suite number fields
+   
+2. **Data Retrieval Gap**: The semantic search was finding the right RIAs but not fetching related data from `ria_private_funds` table
+
+3. **Context Building Issue**: The context builder wasn't including available private fund details in the data passed to the LLM
+
+### Improvements Implemented
+
+#### 1. Enhanced Data Retrieval (`app/api/ask/unified-search.ts`)
+- Modified all search strategies to fetch private fund details
+- Now retrieves `fund_name`, `fund_type`, `gross_asset_value`, and `created_at` from `ria_private_funds`
+- Fetches up to 5 most recent private funds per RIA
+- Applied to semantic search, structured fallback, and superlative queries
+
+#### 2. Improved Context Building (`app/api/ask/context-builder.ts`)
+- Enhanced type definitions to include private fund data
+- Added explicit location display (city, state) for each RIA
+- Shows up to 3 recent private funds with names, types, and values
+- Added notice when address data is requested but unavailable
+- Better formatting of private fund counts and AUM
+
+#### 3. Updated LLM Instructions (`app/api/ask/generator.ts`)
+- Added clear rules about data limitations:
+  - Only city/state available for addresses, not street addresses
+  - Instructions to display available private fund data
+  - Emphasis on transparency about missing data
+- Applied to all generator functions (sync, stream, and token stream)
+
+### Database Schema Recommendations
+
+To fully support address queries, the following schema changes would be needed:
+
+```sql
+-- Add address fields to ria_profiles
+ALTER TABLE ria_profiles 
+ADD COLUMN IF NOT EXISTS address_line_1 TEXT,
+ADD COLUMN IF NOT EXISTS address_line_2 TEXT,
+ADD COLUMN IF NOT EXISTS zip_code VARCHAR(10),
+ADD COLUMN IF NOT EXISTS phone_number VARCHAR(20);
+
+-- Create index for address searches
+CREATE INDEX IF NOT EXISTS idx_ria_profiles_zip ON ria_profiles(zip_code);
+```
+
+### Data Sourcing Requirements
+To populate address data:
+1. Parse Form ADV filings for principal office addresses
+2. Extract from SEC EDGAR API or IAPD bulk downloads
+3. Implement ETL process to update address fields
+
+### Testing Notes
+The improvements ensure that:
+- Queries about "largest RIAs" now show accurate AUM and fund counts
+- Location information (city, state) is always displayed
+- Private fund activity is shown when available
+- Clear messaging when requested data (like street addresses) isn't available
+
+### Future Enhancements
+1. **Address Data Integration**: Source and populate full address data from Form ADV
+2. **Private Fund Timeline**: Add date filtering for "last 6 months" activity queries
+3. **Fund Performance Data**: Include fund performance metrics when available
+4. **Geographic Enrichment**: Add metropolitan area grouping for city searches

@@ -321,18 +321,31 @@ async function executeSemanticQuery(decomposition: QueryPlan, filters: { state?:
       }
     }
 
-    // STEP 6: Enrich with executives
-    console.log(`Enriching ${resultsWithScores.length} results with executives...`)
+    // STEP 6: Enrich with executives and private funds
+    console.log(`Enriching ${resultsWithScores.length} results with executives and private funds...`)
     const enrichedResults = await Promise.all(resultsWithScores.map(async (r) => {
       try {
-        const { data: execs, error } = await supabaseAdmin
+        // Fetch executives
+        const { data: execs, error: execError } = await supabaseAdmin
           .from('control_persons')
           .select('person_name, title')
           .eq('crd_number', r.crd_number)
           .limit(5)
         
-        if (error) {
-          console.warn(`Failed to fetch executives for CRD ${r.crd_number}:`, error.message)
+        if (execError) {
+          console.warn(`Failed to fetch executives for CRD ${r.crd_number}:`, execError.message)
+        }
+        
+        // Fetch recent private funds (last 6 months or most recent)
+        const { data: funds, error: fundsError } = await supabaseAdmin
+          .from('ria_private_funds')
+          .select('fund_name, fund_type, gross_asset_value, created_at')
+          .eq('crd_number', r.crd_number)
+          .order('created_at', { ascending: false })
+          .limit(5)
+        
+        if (fundsError) {
+          console.warn(`Failed to fetch private funds for CRD ${r.crd_number}:`, fundsError.message)
         }
         
         return {
@@ -340,13 +353,20 @@ async function executeSemanticQuery(decomposition: QueryPlan, filters: { state?:
           executives: execs?.map(e => ({ 
             name: e.person_name, 
             title: e.title 
+          })) || [],
+          private_funds: funds?.map(f => ({
+            fund_name: f.fund_name,
+            fund_type: f.fund_type,
+            gross_asset_value: f.gross_asset_value,
+            created_at: f.created_at
           })) || []
         }
-      } catch (execError) {
-        console.error(`Error enriching CRD ${r.crd_number}:`, execError)
+      } catch (enrichError) {
+        console.error(`Error enriching CRD ${r.crd_number}:`, enrichError)
         return {
           ...r,
-          executives: []
+          executives: [],
+          private_funds: []
         }
       }
     }))
@@ -397,13 +417,20 @@ async function executeStructuredFallback(filters: { state?: string; city?: strin
       return []
     }
     
-    // NEW: Enrich with executives
+    // NEW: Enrich with executives and private funds
     const enrichedResults = await Promise.all((rows || []).map(async (r) => {
       try {
         const { data: execs } = await supabaseAdmin
           .from('control_persons')
           .select('person_name, title')
           .eq('crd_number', r.crd_number)
+          .limit(5)
+        
+        const { data: funds } = await supabaseAdmin
+          .from('ria_private_funds')
+          .select('fund_name, fund_type, gross_asset_value, created_at')
+          .eq('crd_number', r.crd_number)
+          .order('created_at', { ascending: false })
           .limit(5)
         
         return {
@@ -414,6 +441,12 @@ async function executeStructuredFallback(filters: { state?: string; city?: strin
           executives: execs?.map(e => ({ 
             name: e.person_name, 
             title: e.title 
+          })) || [],
+          private_funds: funds?.map(f => ({
+            fund_name: f.fund_name,
+            fund_type: f.fund_type,
+            gross_asset_value: f.gross_asset_value,
+            created_at: f.created_at
           })) || []
         }
       } catch {
@@ -422,7 +455,8 @@ async function executeStructuredFallback(filters: { state?: string; city?: strin
           similarity: 0,
           source: 'structured-fallback',
           searchStrategy: 'structured-fallback',
-          executives: []
+          executives: [],
+          private_funds: []
         }
       }
     }))
