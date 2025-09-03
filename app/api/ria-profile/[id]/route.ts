@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { supabaseAdmin } from '@/lib/supabaseAdmin'
 
 /**
  * Proxy endpoint to maintain backward compatibility with frontend
@@ -19,9 +20,6 @@ export async function OPTIONS(request: NextRequest) {
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const { id } = params
-    
-    // Import supabase admin client
-    const { supabaseAdmin } = await import('@/lib/supabaseAdmin')
     
     // First, check if this is a CIK from advisers table
     const { data: adviserData, error: adviserError } = await supabaseAdmin
