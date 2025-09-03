@@ -27,8 +27,8 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 const genAI = new GoogleGenerativeAI(googleApiKey);
 
 // Configuration
-const BATCH_SIZE = 5; // Small batch size to avoid rate limits
-const DELAY_BETWEEN_BATCHES = 30000; // 30 seconds between batches (to avoid rate limits)
+const BATCH_SIZE = 10; // Increased batch size for better throughput
+const DELAY_BETWEEN_BATCHES = 2000; // 2 seconds between batches
 const MAX_RETRIES = 3;
 const LOG_FILE = path.join(__dirname, '..', 'logs', 'final_narrative_generation.log');
 const PROGRESS_FILE = path.join(__dirname, '..', 'logs', 'final_narrative_progress.json');
@@ -95,49 +95,72 @@ Create a professional, factual 3-4 sentence narrative summarizing their advisory
 // Get RIAs without narratives
 async function getRIAsWithoutNarratives(lastProcessedCRD, limit) {
   try {
-    // Get all RIAs above the last processed CRD
+    // Get all RIAs with legal_name and no narrative
     const { data: rias, error } = await supabase
-      .from('ria_profiles')
-      .select('*')
-      .gt('crd_number', lastProcessedCRD)
-      .order('crd_number', { ascending: true })
-      .limit(limit * 3); // Get more than we need to filter
+      .rpc('get_rias_without_narratives', {
+        last_crd: lastProcessedCRD,
+        limit_count: limit * 3
+      });
       
     if (error) {
       log(`Error fetching RIAs: ${error.message}`);
-      return [];
+      
+      // Fallback method if RPC doesn't exist
+      log(`Falling back to direct query method`);
+      
+      // Select profiles directly
+      const { data: rias2, error: error2 } = await supabase
+        .from('ria_profiles')
+        .select('*')
+        .gt('crd_number', lastProcessedCRD)
+        .not('legal_name', 'ilike', 'Investment Adviser (CRD #%')
+        .not('legal_name', 'is', null)
+        .order('crd_number', { ascending: true })
+        .limit(limit * 3);
+        
+      if (error2) {
+        log(`Error in fallback query: ${error2.message}`);
+        return [];
+      }
+      
+      if (!rias2 || rias2.length === 0) {
+        return [];
+      }
+      
+      // For each RIA, check if it already has a narrative
+      const riasWithoutNarratives = [];
+      
+      for (const ria of rias2) {
+        const { data: narratives, error: narrativesError } = await supabase
+          .from('narratives')
+          .select('id')
+          .eq('crd_number', ria.crd_number)
+          .limit(1);
+          
+        if (narrativesError) {
+          log(`Error checking narratives for CRD ${ria.crd_number}: ${narrativesError.message}`);
+          continue;
+        }
+        
+        if (!narratives || narratives.length === 0) {
+          riasWithoutNarratives.push(ria);
+          
+          // If we have enough, stop checking
+          if (riasWithoutNarratives.length >= limit) {
+            break;
+          }
+        }
+      }
+      
+      return riasWithoutNarratives;
     }
     
     if (!rias || rias.length === 0) {
       return [];
     }
     
-    // For each RIA, check if it already has a narrative
-    const riasWithoutNarratives = [];
-    
-    for (const ria of rias) {
-      const { data: narratives, error: narrativesError } = await supabase
-        .from('narratives')
-        .select('id')
-        .eq('crd_number', ria.crd_number)
-        .limit(1);
-        
-      if (narrativesError) {
-        log(`Error checking narratives for CRD ${ria.crd_number}: ${narrativesError.message}`);
-        continue;
-      }
-      
-      if (!narratives || narratives.length === 0) {
-        riasWithoutNarratives.push(ria);
-        
-        // If we have enough, stop checking
-        if (riasWithoutNarratives.length >= limit) {
-          break;
-        }
-      }
-    }
-    
-    return riasWithoutNarratives;
+    // Return only up to the limit
+    return rias.slice(0, limit);
   } catch (error) {
     log(`Error in getRIAsWithoutNarratives: ${error.message}`);
     return [];

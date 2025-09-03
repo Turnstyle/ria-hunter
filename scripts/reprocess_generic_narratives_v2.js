@@ -32,7 +32,7 @@ const genAI = new GoogleGenerativeAI(googleApiKey);
 
 // Configuration
 const BATCH_SIZE = 10;
-const DELAY_BETWEEN_BATCHES = 5000; // 5 seconds
+const DELAY_BETWEEN_BATCHES = 2000; // 2 seconds
 const MAX_RETRIES = 3;
 const LOG_FILE = path.join(__dirname, '..', 'logs', 'reprocess_narratives_v2.log');
 const PROGRESS_FILE = path.join(__dirname, '..', 'logs', 'reprocess_narratives_v2_progress.json');
@@ -116,7 +116,7 @@ async function getNarrativesForReprocessing(processedCRDs, limit) {
     let query = supabase
       .from('narratives')
       .select('id, narrative, crd_number')
-      .ilike('narrative', '%Undefined (CRD%')
+      .ilike('narrative', '%Investment Adviser (CRD #%')
       .limit(limit * 3); // Get more than needed to filter
       
     // If we have processed CRDs, exclude them
@@ -240,7 +240,7 @@ async function main() {
   const { count, error: countError } = await supabase
     .from('narratives')
     .select('*', { count: 'exact', head: true })
-    .ilike('narrative', '%Undefined (CRD%');
+    .ilike('narrative', '%Investment Adviser (CRD #%');
     
   if (countError) {
     log(`Error getting total count: ${countError.message}`);
