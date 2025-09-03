@@ -33,6 +33,9 @@ export async function middleware(request: NextRequest) {
     '/api/v1/ria/',
     // Simple search endpoints for public access
     '/api/ria/',
+    // Legacy RIA profile endpoints (proxy to v1)
+    '/api/ria-profile/',
+    '/api/funds/summary/',
     // Alias to v1 query; allow anonymous to reach handler for free-tier logic
     '/api/ask',
     // Streaming version of ask; allow anonymous
