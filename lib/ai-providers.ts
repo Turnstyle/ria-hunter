@@ -190,7 +190,7 @@ export function createAIService(config: AIConfig): AIService | null {
         return null;
       }
 
-      // Get credentials using Vercel-compatible approach
+      // Get credentials using multiple approaches
       let credentials: any = null;
       
       // Try base64 encoded credentials first (recommended for Vercel)
@@ -205,13 +205,36 @@ export function createAIService(config: AIConfig): AIService | null {
           return null;
         }
       }
-      // Fallback to JSON string credentials
+      // Try JSON string credentials
       else if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
         try {
           console.log('🔑 Vertex AI: Using JSON string service account credentials');
           credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
         } catch (error) {
           console.error('Vertex AI: Failed to parse JSON credentials:', error);
+          return null;
+        }
+      }
+      // Try reading from file path (for local development and some deployment scenarios)
+      else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+        try {
+          console.log('🔑 Vertex AI: Reading credentials from file path:', process.env.GOOGLE_APPLICATION_CREDENTIALS);
+          const fs = require('fs');
+          const path = require('path');
+          
+          // Resolve the path (could be relative or absolute)
+          const credPath = path.resolve(process.env.GOOGLE_APPLICATION_CREDENTIALS);
+          
+          if (fs.existsSync(credPath)) {
+            const fileContent = fs.readFileSync(credPath, 'utf-8');
+            credentials = JSON.parse(fileContent);
+            console.log('✅ Successfully loaded credentials from file');
+          } else {
+            console.error('Vertex AI: Credentials file not found at:', credPath);
+            return null;
+          }
+        } catch (error) {
+          console.error('Vertex AI: Failed to read credentials from file:', error);
           return null;
         }
       }

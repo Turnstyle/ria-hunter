@@ -226,6 +226,33 @@ async function executeSemanticQuery(decomposition: QueryPlan, filters: { state?:
         searchStrategy: 'semantic-first'
       }
     }).sort((a, b) => (b.similarity || 0) - (a.similarity || 0))
+    
+    // Deduplicate firms with the same name and similar AUM (e.g., Edward Jones branches)
+    const deduplicatedResults = []
+    const seenFirms = new Map()
+    
+    for (const result of resultsWithScores) {
+      const normalizedName = result.legal_name?.toLowerCase().trim() || ''
+      const aumBucket = Math.round((result.aum || 0) / 1000000000) * 1000000000
+      const firmKey = `${normalizedName}_${aumBucket}`
+      
+      if (!seenFirms.has(firmKey)) {
+        seenFirms.set(firmKey, result)
+        deduplicatedResults.push(result)
+      } else {
+        // Keep the one with higher similarity score or lower CRD number
+        const existing = seenFirms.get(firmKey)
+        if ((result.similarity || 0) > (existing.similarity || 0) ||
+            ((result.similarity || 0) === (existing.similarity || 0) && 
+             result.crd_number < existing.crd_number)) {
+          const index = deduplicatedResults.indexOf(existing)
+          deduplicatedResults[index] = result
+          seenFirms.set(firmKey, result)
+        }
+      }
+    }
+    
+    resultsWithScores = deduplicatedResults
 
     // STEP 5b: Supplement with high-AUM local firms that don't have narratives (like Edward Jones)
     if ((filters.city || filters.state) && resultsWithScores.length < limit) {
@@ -484,9 +511,37 @@ async function handleSuperlativeQuery(decomposition: QueryPlan, limit = 10) {
           }
           
           // Convert back to array and sort by AUM for superlative queries
-          const supplementedProfiles = Array.from(profilesMap.values())
+          let supplementedProfiles = Array.from(profilesMap.values())
             .sort((a, b) => isLargest ? (b.aum || 0) - (a.aum || 0) : (a.aum || 0) - (b.aum || 0))
-            .slice(0, limit)
+          
+          // Deduplicate firms with the same name and similar AUM (e.g., Edward Jones branches)
+          const deduplicatedProfiles = []
+          const seenFirms = new Map() // Track by normalized name + AUM range
+          
+          for (const profile of supplementedProfiles) {
+            const normalizedName = profile.legal_name?.toLowerCase().trim() || ''
+            // Round AUM to nearest billion for comparison (handles slight variations)
+            const aumBucket = Math.round((profile.aum || 0) / 1000000000) * 1000000000
+            const firmKey = `${normalizedName}_${aumBucket}`
+            
+            if (!seenFirms.has(firmKey)) {
+              seenFirms.set(firmKey, profile)
+              deduplicatedProfiles.push(profile)
+            } else {
+              // Keep the one with higher similarity score or lower CRD number
+              const existing = seenFirms.get(firmKey)
+              if ((profile.similarity || 0) > (existing.similarity || 0) ||
+                  ((profile.similarity || 0) === (existing.similarity || 0) && 
+                   profile.crd_number < existing.crd_number)) {
+                // Replace with better match
+                const index = deduplicatedProfiles.indexOf(existing)
+                deduplicatedProfiles[index] = profile
+                seenFirms.set(firmKey, profile)
+              }
+            }
+          }
+          
+          supplementedProfiles = deduplicatedProfiles.slice(0, limit)
           
           // Enrich with executives
           const enrichedProfiles = await Promise.all(supplementedProfiles.map(async (profile) => {
@@ -547,8 +602,8 @@ async function handleSuperlativeQuery(decomposition: QueryPlan, limit = 10) {
       }
     }
     
-    // Order by AUM and limit
-    q = q.order('aum', { ascending: !isLargest }).limit(limit)
+    // Order by AUM and get extra results to account for deduplication
+    q = q.order('aum', { ascending: !isLargest }).limit(limit * 5)  // Get 5x more to handle duplicates
     const { data: rows, error } = await q
     
     if (error) {
@@ -556,8 +611,34 @@ async function handleSuperlativeQuery(decomposition: QueryPlan, limit = 10) {
       return []
     }
     
+    // Deduplicate before enriching
+    const deduplicatedRows = []
+    const seenFirms = new Map()
+    
+    for (const row of (rows || [])) {
+      const normalizedName = row.legal_name?.toLowerCase().trim() || ''
+      const aumBucket = Math.round((row.aum || 0) / 1000000000) * 1000000000
+      const firmKey = `${normalizedName}_${aumBucket}`
+      
+      if (!seenFirms.has(firmKey)) {
+        seenFirms.set(firmKey, row)
+        deduplicatedRows.push(row)
+      } else {
+        // Keep the one with lower CRD number (likely the main entity)
+        const existing = seenFirms.get(firmKey)
+        if (row.crd_number < existing.crd_number) {
+          const index = deduplicatedRows.indexOf(existing)
+          deduplicatedRows[index] = row
+          seenFirms.set(firmKey, row)
+        }
+      }
+    }
+    
+    // Limit to requested number after deduplication
+    const finalRows = deduplicatedRows.slice(0, limit)
+    
     // Enrich with executives
-    const enrichedResults = await Promise.all((rows || []).map(async (r) => {
+    const enrichedResults = await Promise.all(finalRows.map(async (r) => {
       try {
         const { data: execs } = await supabaseAdmin
           .from('control_persons')
@@ -586,7 +667,7 @@ async function handleSuperlativeQuery(decomposition: QueryPlan, limit = 10) {
       }
     }))
     
-    console.log(`✅ Direct superlative query returned ${enrichedResults.length} enriched results`)
+    console.log(`✅ Direct superlative query returned ${enrichedResults.length} deduplicated enriched results`)
     return enrichedResults
     
   } catch (error) {
