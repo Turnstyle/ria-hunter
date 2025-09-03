@@ -850,10 +850,17 @@ function fallbackDecompose(query: string): QueryPlan {
 }
 
 // Main unified semantic search function
-export async function unifiedSemanticSearch(query: string, options: { limit?: number; threshold?: number } = {}) {
-  const { limit = 10, threshold = 0.3 } = options
+export async function unifiedSemanticSearch(query: string, options: { 
+  limit?: number; 
+  threshold?: number;
+  structuredFilters?: { state?: string; city?: string; fundType?: string };
+  forceStructured?: boolean;
+} = {}) {
+  const { limit = 10, threshold = 0.3, structuredFilters = {}, forceStructured = false } = options
   
   console.log(`🔍 Starting unified semantic search for: "${query}"`)
+  console.log(`📋 Structured filters:`, structuredFilters)
+  console.log(`🎯 Force structured search:`, forceStructured)
   
   // ALWAYS decompose with AI first
   let decomposition: QueryPlan
@@ -865,17 +872,40 @@ export async function unifiedSemanticSearch(query: string, options: { limit?: nu
     decomposition = fallbackDecompose(query)
   }
   
-  // Extract filters from decomposition
-  const filters = parseFiltersFromDecomposition(decomposition)
+  // Extract filters from decomposition and merge with structured filters
+  const decomposedFilters = parseFiltersFromDecomposition(decomposition)
+  const filters = {
+    ...decomposedFilters,
+    ...structuredFilters, // Structured filters override decomposed ones
+    state: structuredFilters.state || decomposedFilters.state,
+    city: structuredFilters.city || decomposedFilters.city
+  }
+  
+  console.log(`🔀 Merged filters:`, filters)
   
   // Check if this is a superlative query
   const queryType = classifyQueryType(decomposition)
   let results: any[]
   
-  if (queryType.startsWith('superlative')) {
+  // If forceStructured is true or no narratives exist, skip semantic search
+  if (forceStructured) {
+    console.log('⚡ Forced structured search - skipping semantic search')
+    results = await executeStructuredFallback(filters, limit)
+  } else if (queryType.startsWith('superlative')) {
     results = await handleSuperlativeQuery(decomposition, limit)
   } else {
     results = await executeSemanticQuery(decomposition, filters, limit)
+  }
+  
+  // Apply fund type filter if specified
+  if (structuredFilters.fundType && results.length > 0) {
+    console.log(`🔍 Filtering for fund type: ${structuredFilters.fundType}`)
+    const fundFilteredResults = await filterByFundType(results, structuredFilters.fundType, limit)
+    if (fundFilteredResults.length > 0) {
+      results = fundFilteredResults
+    } else {
+      console.log('⚠️ No results match fund type filter, returning unfiltered results')
+    }
   }
   
   const confidence = calculateAverageConfidence(results)
@@ -885,12 +915,67 @@ export async function unifiedSemanticSearch(query: string, options: { limit?: nu
   return {
     results,
     metadata: {
-      searchStrategy: 'semantic-first',
+      searchStrategy: forceStructured ? 'structured_query' : 'semantic-first',
       queryType,
       confidence,
       decomposition,
       filters,
       totalResults: results.length
     }
+  }
+}
+
+// Filter results by fund type
+async function filterByFundType(results: any[], fundType: string, limit: number): Promise<any[]> {
+  try {
+    const crdNumbers = results.map(r => r.crd_number)
+    
+    // Query private funds for these CRDs
+    const { data: fundsData, error } = await supabaseAdmin
+      .from('ria_private_funds')
+      .select('crd_number, fund_type')
+      .in('crd_number', crdNumbers)
+    
+    if (error || !fundsData) {
+      console.error('Error querying private funds:', error)
+      return results
+    }
+    
+    // Normalize fund type for comparison
+    const normalizedSearchType = fundType.toLowerCase()
+    const vcKeywords = ['vc', 'venture', 'venture capital']
+    const peKeywords = ['pe', 'private equity', 'buyout', 'lbo']
+    const hfKeywords = ['hf', 'hedge', 'hedge fund']
+    
+    // Determine which CRDs have matching fund types
+    const matchingCrds = new Set<number>()
+    for (const fund of fundsData) {
+      const fundTypeStr = (fund.fund_type || '').toLowerCase()
+      
+      let matches = false
+      if (vcKeywords.some(k => normalizedSearchType.includes(k))) {
+        matches = vcKeywords.some(k => fundTypeStr.includes(k))
+      } else if (peKeywords.some(k => normalizedSearchType.includes(k))) {
+        matches = peKeywords.some(k => fundTypeStr.includes(k))
+      } else if (hfKeywords.some(k => normalizedSearchType.includes(k))) {
+        matches = hfKeywords.some(k => fundTypeStr.includes(k))
+      } else {
+        matches = fundTypeStr.includes(normalizedSearchType)
+      }
+      
+      if (matches) {
+        matchingCrds.add(fund.crd_number)
+      }
+    }
+    
+    // Filter results to only include matching CRDs
+    const filteredResults = results.filter(r => matchingCrds.has(r.crd_number))
+    
+    console.log(`✅ Fund type filter: ${filteredResults.length} of ${results.length} results have ${fundType} funds`)
+    return filteredResults.slice(0, limit)
+    
+  } catch (error) {
+    console.error('Error in filterByFundType:', error)
+    return results
   }
 }

@@ -41,12 +41,22 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const query = body.query?.trim()
     
+    // Extract structured options for browse functionality
+    const structuredOptions = {
+      state: body.state,
+      city: body.city,
+      fundType: body.fundType,
+      maxResults: body.maxResults || 20,
+      useHybridSearch: body.useHybridSearch !== false // Default true
+    }
+    
     if (!query) {
       console.log(`[${requestId}] Error: Empty query`)
       return corsError(request, 'Query is required', 400)
     }
     
     console.log(`[${requestId}] Query: "${query}"`)
+    console.log(`[${requestId}] Structured options:`, structuredOptions)
     
     // Check authentication
     const authHeader = request.headers.get('authorization')
@@ -108,9 +118,17 @@ export async function POST(request: NextRequest) {
       structured_filters: decomposedPlan.structured_filters
     })
     
-    // Execute unified semantic search
+    // Execute unified semantic search with structured options
     console.log(`[${requestId}] Starting unified semantic search...`)
-    const searchResult = await unifiedSemanticSearch(query, { limit: 10 })
+    const searchResult = await unifiedSemanticSearch(query, { 
+      limit: structuredOptions.maxResults,
+      structuredFilters: {
+        state: structuredOptions.state,
+        city: structuredOptions.city,
+        fundType: structuredOptions.fundType
+      },
+      forceStructured: !structuredOptions.useHybridSearch
+    })
     console.log(`[${requestId}] Search complete:`, {
       resultCount: searchResult.results.length,
       searchStrategy: searchResult.metadata.searchStrategy,
@@ -125,8 +143,22 @@ export async function POST(request: NextRequest) {
     const answer = await generateNaturalLanguageAnswer(query, context)
     console.log(`[${requestId}] Answer generated, length: ${answer.length}`)
     
-    // Prepare response data
-    const responseData = {
+    // Prepare response data - for browse queries, structure the response differently
+    const isBrowseQuery = structuredOptions.state || structuredOptions.city || structuredOptions.fundType
+    const responseData = isBrowseQuery ? {
+      results: searchResult.results,
+      metadata: {
+        totalCount: searchResult.results.length,
+        searchStrategy: searchResult.metadata.searchStrategy || 'semantic-first',
+        queryType: searchResult.metadata.queryType,
+        confidence: searchResult.metadata.confidence,
+        searchesRemaining: isSubscriber ? -1 : demoCheck.searchesRemaining - 1,
+        searchesUsed: isSubscriber ? 0 : demoCheck.searchesUsed + 1,
+        isAuthenticated: !!userId,
+        isSubscriber,
+        requestId
+      }
+    } : {
       answer,
       sources: searchResult.results,
       metadata: {
