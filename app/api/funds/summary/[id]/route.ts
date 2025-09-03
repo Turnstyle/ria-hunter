@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+// Force Node.js runtime to avoid Edge runtime limitations
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
 /**
  * Proxy endpoint to maintain backward compatibility with frontend
  * Forwards requests to the v1 API endpoint at /api/v1/ria/funds/summary/[cik]/

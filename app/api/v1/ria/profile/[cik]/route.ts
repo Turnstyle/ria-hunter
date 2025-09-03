@@ -2,6 +2,9 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 
+// Force Node.js runtime to avoid Edge runtime limitations with Supabase
+export const runtime = 'nodejs'
+
 const DEFAULT_ALLOWED_ORIGINS = [
   'https://www.ria-hunter.app',
   'https://ria-hunter.app',

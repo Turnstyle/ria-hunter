@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 
+// Force Node.js runtime to avoid Edge runtime limitations with Supabase
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
 /**
  * Proxy endpoint to maintain backward compatibility with frontend
  * Forwards requests to the v1 API endpoint at /api/v1/ria/profile/[cik]/
