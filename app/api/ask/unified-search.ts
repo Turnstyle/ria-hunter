@@ -227,32 +227,53 @@ async function executeSemanticQuery(decomposition: QueryPlan, filters: { state?:
       }
     }).sort((a, b) => (b.similarity || 0) - (a.similarity || 0))
     
-    // Deduplicate firms with the same name and similar AUM (e.g., Edward Jones branches)
-    const deduplicatedResults = []
-    const seenFirms = new Map()
+    // Filter out bad data entries (firms with invalid names like "N")
+    resultsWithScores = resultsWithScores.filter(result => {
+      const name = result.legal_name?.trim() || ''
+      return name.length > 2 && name.toLowerCase() !== 'n'
+    })
+    
+    // Aggregate firms with the same name (e.g., Edward Jones branches)
+    const aggregatedFirms = new Map()
     
     for (const result of resultsWithScores) {
       const normalizedName = result.legal_name?.toLowerCase().trim() || ''
-      const aumBucket = Math.round((result.aum || 0) / 1000000000) * 1000000000
-      const firmKey = `${normalizedName}_${aumBucket}`
       
-      if (!seenFirms.has(firmKey)) {
-        seenFirms.set(firmKey, result)
-        deduplicatedResults.push(result)
+      if (!aggregatedFirms.has(normalizedName)) {
+        // First occurrence of this firm name
+        aggregatedFirms.set(normalizedName, {
+          ...result,
+          aggregated_aum: result.aum || 0,
+          branch_count: 1,
+          all_crds: [result.crd_number]
+        })
       } else {
-        // Keep the one with higher similarity score or lower CRD number
-        const existing = seenFirms.get(firmKey)
+        // Aggregate with existing firm
+        const existing = aggregatedFirms.get(normalizedName)
+        existing.aggregated_aum += (result.aum || 0)
+        existing.branch_count++
+        existing.all_crds.push(result.crd_number)
+        // Keep the entry with better similarity score or lower CRD number as primary
         if ((result.similarity || 0) > (existing.similarity || 0) ||
             ((result.similarity || 0) === (existing.similarity || 0) && 
              result.crd_number < existing.crd_number)) {
-          const index = deduplicatedResults.indexOf(existing)
-          deduplicatedResults[index] = result
-          seenFirms.set(firmKey, result)
+          // Update primary details but keep aggregated values
+          aggregatedFirms.set(normalizedName, {
+            ...result,
+            aggregated_aum: existing.aggregated_aum,
+            aum: existing.aggregated_aum, // Update the displayed AUM to the total
+            branch_count: existing.branch_count,
+            all_crds: existing.all_crds
+          })
+        } else {
+          // Just update the aggregated AUM in the existing entry
+          existing.aum = existing.aggregated_aum
         }
       }
     }
     
-    resultsWithScores = deduplicatedResults
+    resultsWithScores = Array.from(aggregatedFirms.values())
+      .sort((a, b) => (b.similarity || 0) - (a.similarity || 0))
 
     // STEP 5b: Supplement with high-AUM local firms that don't have narratives (like Edward Jones)
     if ((filters.city || filters.state) && resultsWithScores.length < limit) {
@@ -514,34 +535,54 @@ async function handleSuperlativeQuery(decomposition: QueryPlan, limit = 10) {
           let supplementedProfiles = Array.from(profilesMap.values())
             .sort((a, b) => isLargest ? (b.aum || 0) - (a.aum || 0) : (a.aum || 0) - (b.aum || 0))
           
-          // Deduplicate firms with the same name and similar AUM (e.g., Edward Jones branches)
-          const deduplicatedProfiles = []
-          const seenFirms = new Map() // Track by normalized name + AUM range
+          // Filter out bad data entries (firms with invalid names like "N")
+          supplementedProfiles = supplementedProfiles.filter(profile => {
+            const name = profile.legal_name?.trim() || ''
+            return name.length > 2 && name.toLowerCase() !== 'n'
+          })
+          
+          // Aggregate firms with the same name (e.g., Edward Jones branches)
+          const aggregatedFirms = new Map()
           
           for (const profile of supplementedProfiles) {
             const normalizedName = profile.legal_name?.toLowerCase().trim() || ''
-            // Round AUM to nearest billion for comparison (handles slight variations)
-            const aumBucket = Math.round((profile.aum || 0) / 1000000000) * 1000000000
-            const firmKey = `${normalizedName}_${aumBucket}`
             
-            if (!seenFirms.has(firmKey)) {
-              seenFirms.set(firmKey, profile)
-              deduplicatedProfiles.push(profile)
+            if (!aggregatedFirms.has(normalizedName)) {
+              // First occurrence of this firm name
+              aggregatedFirms.set(normalizedName, {
+                ...profile,
+                aggregated_aum: profile.aum || 0,
+                branch_count: 1,
+                all_crds: [profile.crd_number]
+              })
             } else {
-              // Keep the one with higher similarity score or lower CRD number
-              const existing = seenFirms.get(firmKey)
+              // Aggregate with existing firm
+              const existing = aggregatedFirms.get(normalizedName)
+              existing.aggregated_aum += (profile.aum || 0)
+              existing.branch_count++
+              existing.all_crds.push(profile.crd_number)
+              // Keep the entry with better score or lower CRD number as primary
               if ((profile.similarity || 0) > (existing.similarity || 0) ||
                   ((profile.similarity || 0) === (existing.similarity || 0) && 
                    profile.crd_number < existing.crd_number)) {
-                // Replace with better match
-                const index = deduplicatedProfiles.indexOf(existing)
-                deduplicatedProfiles[index] = profile
-                seenFirms.set(firmKey, profile)
+                // Update primary details but keep aggregated values
+                aggregatedFirms.set(normalizedName, {
+                  ...profile,
+                  aggregated_aum: existing.aggregated_aum,
+                  aum: existing.aggregated_aum, // Update the displayed AUM to the total
+                  branch_count: existing.branch_count,
+                  all_crds: existing.all_crds
+                })
+              } else {
+                // Just update the aggregated AUM in the existing entry
+                existing.aum = existing.aggregated_aum
               }
             }
           }
           
-          supplementedProfiles = deduplicatedProfiles.slice(0, limit)
+          supplementedProfiles = Array.from(aggregatedFirms.values())
+            .sort((a, b) => isLargest ? (b.aum || 0) - (a.aum || 0) : (a.aum || 0) - (b.aum || 0))
+            .slice(0, limit)
           
           // Enrich with executives
           const enrichedProfiles = await Promise.all(supplementedProfiles.map(async (profile) => {
@@ -611,31 +652,53 @@ async function handleSuperlativeQuery(decomposition: QueryPlan, limit = 10) {
       return []
     }
     
-    // Deduplicate before enriching
-    const deduplicatedRows = []
-    const seenFirms = new Map()
+    // Filter out bad data entries (firms with invalid names like "N")
+    const validRows = (rows || []).filter(row => {
+      const name = row.legal_name?.trim() || ''
+      return name.length > 2 && name.toLowerCase() !== 'n'
+    })
     
-    for (const row of (rows || [])) {
+    // Aggregate firms with the same name (e.g., Edward Jones branches)
+    const aggregatedFirms = new Map()
+    
+    for (const row of validRows) {
       const normalizedName = row.legal_name?.toLowerCase().trim() || ''
-      const aumBucket = Math.round((row.aum || 0) / 1000000000) * 1000000000
-      const firmKey = `${normalizedName}_${aumBucket}`
       
-      if (!seenFirms.has(firmKey)) {
-        seenFirms.set(firmKey, row)
-        deduplicatedRows.push(row)
+      if (!aggregatedFirms.has(normalizedName)) {
+        // First occurrence of this firm name
+        aggregatedFirms.set(normalizedName, {
+          ...row,
+          aggregated_aum: row.aum || 0,
+          branch_count: 1,
+          all_crds: [row.crd_number]
+        })
       } else {
-        // Keep the one with lower CRD number (likely the main entity)
-        const existing = seenFirms.get(firmKey)
+        // Aggregate with existing firm
+        const existing = aggregatedFirms.get(normalizedName)
+        existing.aggregated_aum += (row.aum || 0)
+        existing.branch_count++
+        existing.all_crds.push(row.crd_number)
+        // Keep the entry with lower CRD number as primary
         if (row.crd_number < existing.crd_number) {
-          const index = deduplicatedRows.indexOf(existing)
-          deduplicatedRows[index] = row
-          seenFirms.set(firmKey, row)
+          // Update primary details but keep aggregated values
+          aggregatedFirms.set(normalizedName, {
+            ...row,
+            aggregated_aum: existing.aggregated_aum,
+            aum: existing.aggregated_aum, // Update the displayed AUM to the total
+            branch_count: existing.branch_count,
+            all_crds: existing.all_crds
+          })
+        } else {
+          // Just update the aggregated AUM in the existing entry
+          existing.aum = existing.aggregated_aum
         }
       }
     }
     
-    // Limit to requested number after deduplication
-    const finalRows = deduplicatedRows.slice(0, limit)
+    // Sort and limit after aggregation
+    const finalRows = Array.from(aggregatedFirms.values())
+      .sort((a, b) => isLargest ? (b.aum || 0) - (a.aum || 0) : (a.aum || 0) - (b.aum || 0))
+      .slice(0, limit)
     
     // Enrich with executives
     const enrichedResults = await Promise.all(finalRows.map(async (r) => {
@@ -667,7 +730,14 @@ async function handleSuperlativeQuery(decomposition: QueryPlan, limit = 10) {
       }
     }))
     
-    console.log(`✅ Direct superlative query returned ${enrichedResults.length} deduplicated enriched results`)
+    console.log(`✅ Direct superlative query returned ${enrichedResults.length} aggregated enriched results`)
+    
+    // Log aggregation details for Edward Jones if present
+    const edwardJones = enrichedResults.find(r => r.legal_name?.toLowerCase().includes('edward jones'))
+    if (edwardJones && edwardJones.branch_count > 1) {
+      console.log(`💰 Edward Jones aggregated from ${edwardJones.branch_count} branches: Total AUM = $${(edwardJones.aum / 1000000000).toFixed(2)}B`)
+    }
+    
     return enrichedResults
     
   } catch (error) {
