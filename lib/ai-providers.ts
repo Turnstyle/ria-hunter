@@ -262,9 +262,13 @@ export function getAIProvider(requestProvider?: AIProvider): AIProvider {
     return requestProvider;
   }
   
-  const envProvider = process.env.AI_PROVIDER as AIProvider;
+  const envProvider = process.env.AI_PROVIDER;
+  // Map 'google' to 'vertex' for backward compatibility
+  if (envProvider === 'google') {
+    return 'vertex';
+  }
   if (envProvider && ['vertex', 'openai'].includes(envProvider)) {
-    return envProvider;
+    return envProvider as AIProvider;
   }
   
   // Default logic: prefer OpenAI for production stability, fall back to Vertex

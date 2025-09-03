@@ -1,69 +1,40 @@
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { callLLMToDecomposeQuery } from './planner'
 import type { QueryPlan } from './planner'
+import { createAIService, getAIProvider } from '@/lib/ai-providers'
 
-// Generate Vertex AI embedding (768 dimensions)
+// Generate embedding using the configured AI provider (supports both Vertex and OpenAI)
 async function generateVertex768Embedding(text: string): Promise<number[] | null> {
-  const projectId = process.env.GOOGLE_PROJECT_ID || process.env.GOOGLE_CLOUD_PROJECT
-  const location = process.env.DOCUMENT_AI_PROCESSOR_LOCATION || process.env.GOOGLE_CLOUD_LOCATION || 'us-central1'
-  if (!projectId) return null
-
   try {
-    // Get credentials from environment variables (Vercel-compatible approach)
-    const { GoogleAuth } = await import('google-auth-library')
-    let auth: any
+    const provider = getAIProvider() // This will return 'vertex' when AI_PROVIDER=google
+    console.log(`🔧 Using AI provider: ${provider} for embeddings`)
     
-    // Try base64 encoded credentials first (recommended for Vercel)
-    if (process.env.GOOGLE_APPLICATION_CREDENTIALS_B64) {
-      console.log('🔑 Using base64 encoded service account credentials')
-      const credentials = JSON.parse(
-        Buffer.from(process.env.GOOGLE_APPLICATION_CREDENTIALS_B64, 'base64').toString('utf-8')
-      )
-      auth = new GoogleAuth({
-        credentials,
-        scopes: ['https://www.googleapis.com/auth/cloud-platform']
-      })
-    }
-    // Fallback to JSON string credentials
-    else if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
-      console.log('🔑 Using JSON string service account credentials')
-      const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON)
-      auth = new GoogleAuth({
-        credentials,
-        scopes: ['https://www.googleapis.com/auth/cloud-platform']
-      })
-    }
-    // Final fallback to Application Default Credentials (works locally)
-    else {
-      console.log('🔑 Falling back to Application Default Credentials')
-      auth = new GoogleAuth({ scopes: ['https://www.googleapis.com/auth/cloud-platform'] })
-    }
+    const aiService = createAIService({ provider })
     
-    const accessToken = await auth.getAccessToken()
-    if (!accessToken) return null
-
-    const url = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/text-embedding-005:predict`
-    const body = {
-      instances: [{ content: text }],
-    }
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
-    })
-    if (!response.ok) {
-      const errText = await response.text()
-      console.warn('Vertex embedding HTTP error', response.status, errText)
+    if (!aiService) {
+      console.error('❌ Failed to create AI service - check credentials configuration')
+      console.log('Environment check:', {
+        AI_PROVIDER: process.env.AI_PROVIDER,
+        GOOGLE_PROJECT_ID: !!process.env.GOOGLE_PROJECT_ID,
+        GOOGLE_CLOUD_PROJECT: !!process.env.GOOGLE_CLOUD_PROJECT,
+        GOOGLE_APPLICATION_CREDENTIALS: !!process.env.GOOGLE_APPLICATION_CREDENTIALS,
+        OPENAI_API_KEY: !!process.env.OPENAI_API_KEY
+      })
       return null
     }
-    const result = (await response.json()) as any
-    const embedding = result?.predictions?.[0]?.embeddings?.values
-    return Array.isArray(embedding) ? embedding : null
-  } catch (e) {
-    console.warn('Vertex embedding failed:', (e as any)?.message || e)
+    
+    const result = await aiService.generateEmbedding(text)
+    
+    if (!result || !result.embedding || result.embedding.length !== 768) {
+      console.error(`❌ Invalid embedding result: ${result?.embedding?.length || 0} dimensions`)
+      return null
+    }
+    
+    console.log(`✅ Generated ${result.embedding.length}-dimensional embedding`)
+    return result.embedding
+    
+  } catch (error) {
+    console.error('❌ Embedding generation failed:', error)
     return null
   }
 }

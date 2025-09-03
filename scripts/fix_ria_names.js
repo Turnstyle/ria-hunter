@@ -169,7 +169,7 @@ async function getRIAsWithUndefinedNames(lastProcessedCRD, limit) {
     const { data: rias, error } = await supabase
       .from('ria_profiles')
       .select('crd_number')
-      .is('legal_name', null)
+      .or('legal_name.is.null,legal_name.ilike.Investment Adviser (CRD #%')
       .gt('crd_number', lastProcessedCRD)
       .order('crd_number', { ascending: true })
       .limit(limit);
@@ -318,7 +318,7 @@ async function main() {
       const { data: rias, error } = await supabase
         .from('ria_profiles')
         .select('crd_number')
-        .is('legal_name', null)
+        .or('legal_name.is.null,legal_name.ilike.Investment Adviser (CRD #%')
         .gt('crd_number', progress.lastProcessedCRD)
         .lte('crd_number', args.maxCRD)
         .order('crd_number', { ascending: true })
