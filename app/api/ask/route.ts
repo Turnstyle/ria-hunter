@@ -116,7 +116,7 @@ export async function POST(req: NextRequest) {
     // Execute unified semantic search
     console.log(`[${requestId}] Starting unified semantic search...`);
     
-    // CRITICAL FIX: Merge location from LLM decomposition with explicit filters
+    // CRITICAL FIX: Extract location from query if LLM missed it
     // This ensures location queries like "RIAs in St. Louis" actually filter by location
     const extractedLocation = decomposition.structured_filters?.location;
     let extractedCity = filters.city;
@@ -136,6 +136,18 @@ export async function POST(req: NextRequest) {
         } else {
           extractedCity = loc; // City name
         }
+      }
+    }
+    
+    // FALLBACK: If LLM didn't extract location, check query directly for St. Louis
+    if (!extractedCity && !extractedState) {
+      if (/\b(st\.?|saint)\s+louis\b/i.test(query)) {
+        extractedCity = 'Saint Louis';
+        extractedState = 'MO';
+        console.log(`[${requestId}] 🔍 Detected St. Louis in query directly`);
+      } else if (/\bmissouri\b/i.test(query)) {
+        extractedState = 'MO';
+        console.log(`[${requestId}] 🔍 Detected Missouri in query directly`);
       }
     }
     
