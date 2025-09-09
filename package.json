@@ -59,6 +59,7 @@
     "lucide-react": "^0.323.0",
     "next": "13.4.8",
     "next-themes": "^0.2.1",
+    "node-fetch": "^2.7.0",
     "openai": "^5.11.0",
     "pgvector": "^0.2.1",
     "prisma": "^6.14.0",

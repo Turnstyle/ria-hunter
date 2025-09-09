@@ -17,6 +17,7 @@ All API endpoints follow this clean pattern:
 ```
 /api/ask           - Main search endpoint
 /api/ask/search    - Explicit search endpoint (same as /api/ask)
+/api/ask/comprehensive-search - Comprehensive database search (returns ALL matching RIAs)
 /api/ask/browse    - Browse RIAs without search query
 /api/ask/profile/[crd] - Get specific RIA profile
 ```
@@ -219,7 +220,138 @@ data.results.forEach(ria => {
 });
 ```
 
-### 3. Profile Endpoint
+### 3. Hybrid Comprehensive Search Endpoint (NEW - BEST OF BOTH WORLDS)
+
+**Purpose:** Combines comprehensive database retrieval with semantic search ranking for complete AND intelligent results.
+
+**Endpoint:** `POST /api/ask/hybrid-comprehensive`
+
+**Key Features:**
+- Gets ALL matching RIAs from the database (no missing results)
+- Uses semantic search/embeddings to rank them by relevance
+- Maintains RAG capabilities for natural language understanding
+- Combines semantic scores with database metrics (AUM, fund count) for optimal ranking
+
+**When to Use:**
+- For natural language queries that need comprehensive results (e.g., "What RIAs in St. Louis have VC activity?")
+- When you want both completeness AND intelligent ranking
+- For AI-powered search that doesn't miss any results
+- When the regular semantic search returns suspiciously few results
+
+**Request Body:**
+```typescript
+interface HybridComprehensiveSearchRequest {
+  query?: string;           // Natural language query for semantic ranking
+  filters?: {
+    state?: string;         // State code (e.g., "MO")
+    city?: string;          // City name (e.g., "St. Louis")
+    fundType?: string;      // Fund type filter (e.g., "Venture Capital", "VC", "Private Equity", "PE")
+    minAum?: number;        // Minimum AUM in dollars
+    hasVcActivity?: boolean; // Filter for VC/PE activity
+  };
+  limit?: number;           // Final results after ranking (default: 100)
+  semanticWeight?: number;  // Weight for semantic relevance (0-1, default: 0.7)
+  databaseWeight?: number;  // Weight for database metrics (0-1, default: 0.3)
+}
+```
+
+**Response:**
+```typescript
+interface HybridComprehensiveSearchResponse {
+  success: boolean;
+  query: string;
+  filters: object;
+  summary: {
+    total_database_results: number;      // Total RIAs found in database
+    total_filtered_results: number;      // After applying filters
+    total_with_semantic_match: number;   // RIAs with semantic relevance scores
+    total_returned: number;              // Final count after ranking/limiting
+    total_vc_pe_firms: number;
+    search_strategy: string;             // 'hybrid-semantic-database' or 'database-only'
+    ranking_method: string;              // How results were ranked
+    semantic_weight: number;
+    database_weight: number;
+  };
+  results: Array<{
+    crd_number: number;
+    legal_name: string;
+    city: string;
+    state: string;
+    aum: number;
+    private_fund_count: number;
+    private_fund_aum: number;
+    website?: string;
+    phone?: string;
+    narrative?: string;
+    executives: Array<{
+      name: string;
+      title: string;
+    }>;
+    funds: Array<{
+      name: string;
+      type: string;
+      aum: number;
+    }>;
+    fund_types: string[];
+    vc_fund_count: number;
+    pe_fund_count: number;
+    has_vc_activity: boolean;
+    relevance_scores: {                  // Transparency in scoring
+      semantic_similarity: number;       // Embedding similarity score
+      semantic_rank: number;             // Rank-based score from semantic search
+      database_score: number;            // Score based on AUM/fund count
+      combined_score: number;            // Final weighted score
+      has_semantic_match: boolean;      // Whether this RIA had semantic relevance
+    };
+  }>;
+  metadata: {
+    requestId: string;
+    timestamp: string;
+    searchStrategy: 'hybrid-comprehensive';
+    note: string;
+  };
+}
+```
+
+**Example Usage:**
+```javascript
+// Get St. Louis RIAs with VC activity - comprehensive with semantic ranking
+const response = await fetch('/api/ask/hybrid-comprehensive', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    query: "What RIAs in St. Louis have venture capital activity?",
+    filters: {
+      state: "MO",
+      city: "St. Louis",
+      hasVcActivity: true
+    },
+    limit: 100,  // Return top 100 after ranking
+    semanticWeight: 0.7,  // 70% weight on semantic relevance
+    databaseWeight: 0.3   // 30% weight on AUM/fund metrics
+  })
+});
+
+const data = await response.json();
+
+console.log(`Database found: ${data.summary.total_database_results} St. Louis RIAs`);
+console.log(`After filtering: ${data.summary.total_filtered_results} with VC/PE`);
+console.log(`With semantic match: ${data.summary.total_with_semantic_match}`);
+console.log(`Returned (ranked): ${data.summary.total_returned}`);
+
+// Results are ranked by combined semantic + database score
+data.results.forEach((ria, index) => {
+  console.log(`${index + 1}. ${ria.legal_name}`);
+  console.log(`   Relevance: ${(ria.relevance_scores.combined_score * 100).toFixed(1)}%`);
+  console.log(`   Semantic: ${ria.relevance_scores.has_semantic_match ? 'Yes' : 'No'}`);
+  console.log(`   AUM: $${(ria.aum / 1e9).toFixed(2)}B`);
+  console.log(`   VC Funds: ${ria.vc_fund_count}`);
+});
+```
+
+### 4. Profile Endpoint
 
 **Purpose:** Get detailed information about a specific RIA
 
