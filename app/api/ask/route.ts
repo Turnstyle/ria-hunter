@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { callLLMToDecomposeQuery } from './planner';
+import { callLLMToDecomposeQuery, fallbackDecompose } from './planner';
 import { unifiedSemanticSearch } from './unified-search';
 import { buildAnswerContext } from './context-builder';
 import { generateNaturalLanguageAnswer, streamAnswerTokens } from './generator';
@@ -104,8 +104,7 @@ export async function POST(req: NextRequest) {
       }));
     } catch (decompositionError) {
       console.error(`[${requestId}] ❌ Query decomposition failed:`, decompositionError);
-      // Import and use proper fallback
-      const { fallbackDecompose } = require('./planner');
+      // Use proper fallback
       decomposition = fallbackDecompose(query);
       console.log(`[${requestId}] Fallback decomposition used:`, JSON.stringify({
         query: query,
