@@ -116,52 +116,51 @@ export async function POST(req: NextRequest) {
     // Execute unified semantic search
     console.log(`[${requestId}] Starting unified semantic search...`);
     
-    // CRITICAL FIX: Extract location from query if LLM missed it
-    // This ensures location queries like "RIAs in St. Louis" actually filter by location
-    const extractedLocation = decomposition.structured_filters?.location;
+    // Extract location - prioritize direct detection over decomposition
     let extractedCity = filters.city;
     let extractedState = filters.state;
     
-    // Parse location from decomposition if not explicitly provided
-    if (extractedLocation && !extractedCity && !extractedState) {
-      const locationParts = extractedLocation.split(', ');
+    // First, check the query directly for known patterns
+    const queryLower = query.toLowerCase();
+    
+    if (queryLower.includes('st. louis') || queryLower.includes('st louis') || queryLower.includes('saint louis')) {
+      extractedCity = 'St. Louis'; // Use the format that matches DB
+      extractedState = 'MO';
+      console.log(`[${requestId}] ✅ Direct detection: St. Louis, MO`);
+    } else if (queryLower.includes('missouri')) {
+      extractedState = 'MO';
+      console.log(`[${requestId}] ✅ Direct detection: Missouri`);
+    } else if (decomposition.structured_filters?.location) {
+      // Fall back to decomposition if no direct match
+      const extractedLocation = decomposition.structured_filters.location;
+      console.log(`[${requestId}] Using decomposed location: ${extractedLocation}`);
+      
+      const locationParts = extractedLocation.split(',').map(p => p.trim());
       if (locationParts.length === 2) {
         extractedCity = locationParts[0];
         extractedState = locationParts[1];
       } else if (locationParts.length === 1) {
-        // Could be city or state
-        const loc = locationParts[0].trim();
+        const loc = locationParts[0];
         if (loc.length === 2 && loc === loc.toUpperCase()) {
-          extractedState = loc; // State abbreviation
+          extractedState = loc;
         } else {
-          extractedCity = loc; // City name
+          extractedCity = loc;
         }
-      }
-    }
-    
-    // FALLBACK: If LLM didn't extract location, check query directly for St. Louis
-    if (!extractedCity && !extractedState) {
-      console.log(`[${requestId}] ⚠️ No location extracted from decomposition, checking query directly: "${query}"`);
-      if (/\b(st\.?|saint)\s+louis\b/i.test(query)) {
-        extractedCity = 'Saint Louis';
-        extractedState = 'MO';
-        console.log(`[${requestId}] ✅ Detected St. Louis in query directly - applying filters`);
-      } else if (/\bmissouri\b/i.test(query)) {
-        extractedState = 'MO';
-        console.log(`[${requestId}] ✅ Detected Missouri in query directly - applying filter`);
-      } else {
-        console.log(`[${requestId}] ❌ No location found in query`);
       }
     }
     
     console.log(`[${requestId}] Location extraction details:`, JSON.stringify({
       query: query,
       decomposedFilters: decomposition.structured_filters,
-      extractedLocation: extractedLocation,
       finalCity: extractedCity,
       finalState: extractedState,
       willApplyFilters: !!(extractedCity || extractedState)
     }));
+    
+    // Force structured search for location-based superlative queries
+    const isSuperlativeQuery = /\b(largest|biggest|top\s+\d+)\b/i.test(query);
+    const hasLocation = !!(extractedCity || extractedState);
+    const shouldForceStructured = !!filters.hasVcActivity || (isSuperlativeQuery && hasLocation);
     
     const searchOptions = { 
       limit: body?.limit || 10,
@@ -170,7 +169,7 @@ export async function POST(req: NextRequest) {
         city: extractedCity,
         fundType: filters.fundType
       },
-      forceStructured: !!filters.hasVcActivity // Force structured search if VC activity filtering needed
+      forceStructured: shouldForceStructured
     };
     console.log(`[${requestId}] Search options:`, searchOptions);
     

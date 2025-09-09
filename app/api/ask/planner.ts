@@ -94,9 +94,11 @@ export function fallbackDecompose(userQuery: string): QueryPlan {
 	let city: string | undefined
 	const inCity = q.match(/\bin\s+([A-Za-z.\s]+?)(?:,\s*[A-Za-z]{2}|$)/i)
 	if (inCity) city = inCity[1].trim()
-	if (/\b(st\.?|saint)\s+louis\b/i.test(q)) city = 'Saint Louis'
+	if (/\b(st\.?|saint)\s+louis\b/i.test(q)) {
+		city = 'Saint Louis'
+		state = 'MO' // Always set Missouri for St. Louis
+	}
 	let state = normalizeState((fullStateMatch?.[0] as string) || (abbrev as string | undefined))
-	if (!state && city && /saint\s+louis/i.test(city)) state = 'MO'
 	const location = city && state ? `${city}, ${state}` : city ? city : state ? state : null
 	let min_aum: number | null = null
 	const aumMatch = q.toLowerCase().match(/(over|greater than|at least|>=?)\s*\$?\s*([0-9.,]+)\s*(b|bn|billion|m|mm|million)?/)
