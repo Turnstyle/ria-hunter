@@ -165,13 +165,19 @@ export async function POST(req: NextRequest) {
     const searchOptions = { 
       limit: body?.limit || 10,
       structuredFilters: {
-        state: extractedState,
-        city: extractedCity,
-        fundType: filters.fundType
+        state: extractedState || undefined,
+        city: extractedCity || undefined,
+        fundType: filters.fundType || undefined
       },
       forceStructured: shouldForceStructured
     };
-    console.log(`[${requestId}] Search options:`, searchOptions);
+    console.log(`[${requestId}] 🚨 CRITICAL: Search options:`, JSON.stringify({
+      ...searchOptions,
+      detectedLocation: { city: extractedCity, state: extractedState },
+      isSuperlative: isSuperlativeQuery,
+      hasLocation: hasLocation,
+      shouldForce: shouldForceStructured
+    }, null, 2));
     
     let searchResult;
     try {

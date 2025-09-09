@@ -390,7 +390,8 @@ async function executeSemanticQuery(decomposition: QueryPlan, filters: { state?:
 async function executeStructuredFallback(filters: { state?: string; city?: string; min_aum?: number }, limit: number) {
   try {
     console.log('📊 Executing structured fallback search...')
-    console.log('🔍 Structured fallback filters:', filters)
+    console.log('🚨 CRITICAL: Structured fallback filters:', JSON.stringify(filters, null, 2))
+    console.log('🚨 Filter check - state:', filters.state, 'city:', filters.city, 'min_aum:', filters.min_aum)
     
     let query = supabaseAdmin
       .from('ria_profiles')
@@ -897,14 +898,14 @@ export async function unifiedSemanticSearch(query: string, options: {
   
   // Extract filters from decomposition and merge with structured filters
   const decomposedFilters = parseFiltersFromDecomposition(decomposition)
+  // IMPORTANT: structuredFilters (from route.ts) should override decomposed filters
   const filters = {
     ...decomposedFilters,
-    ...structuredFilters, // Structured filters override decomposed ones
-    state: structuredFilters.state || decomposedFilters.state,
-    city: structuredFilters.city || decomposedFilters.city
+    ...structuredFilters, // This spreads all structuredFilters, overriding decomposed ones
   }
   
-  console.log(`🔀 Merged filters:`, filters)
+  console.log(`🔀 Merged filters:`, JSON.stringify(filters, null, 2))
+  console.log(`🚨 Filter values - state: "${filters.state}", city: "${filters.city}"`)
   
   // Check if this is a superlative query
   const queryType = classifyQueryType(decomposition)
