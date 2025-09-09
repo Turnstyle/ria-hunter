@@ -97,22 +97,21 @@ export async function POST(req: NextRequest) {
     let decomposition;
     try {
       decomposition = await callLLMToDecomposeQuery(query);
-      console.log(`[${requestId}] Query decomposed:`, {
+      console.log(`[${requestId}] LLM Query decomposed:`, JSON.stringify({
+        query: query,
         semantic_query: decomposition.semantic_query,
         structured_filters: decomposition.structured_filters
-      });
+      }));
     } catch (decompositionError) {
       console.error(`[${requestId}] ❌ Query decomposition failed:`, decompositionError);
-      // Use fallback decomposition if LLM fails
-      decomposition = {
-        semantic_query: query,
-        structured_filters: {
-          location: null,
-          min_aum: null,
-          max_aum: null,
-          services: null
-        }
-      };
+      // Import and use proper fallback
+      const { fallbackDecompose } = require('./planner');
+      decomposition = fallbackDecompose(query);
+      console.log(`[${requestId}] Fallback decomposition used:`, JSON.stringify({
+        query: query,
+        semantic_query: decomposition.semantic_query,
+        structured_filters: decomposition.structured_filters
+      }));
     }
     
     // Execute unified semantic search
@@ -141,11 +140,14 @@ export async function POST(req: NextRequest) {
       }
     }
     
-    console.log(`[${requestId}] Location extraction:`, {
-      originalLocation: extractedLocation,
+    console.log(`[${requestId}] Location extraction details:`, JSON.stringify({
+      query: query,
+      decomposedFilters: decomposition.structured_filters,
+      extractedLocation: extractedLocation,
       finalCity: extractedCity,
-      finalState: extractedState
-    });
+      finalState: extractedState,
+      willApplyFilters: !!(extractedCity || extractedState)
+    }));
     
     const searchOptions = { 
       limit: body?.limit || 10,

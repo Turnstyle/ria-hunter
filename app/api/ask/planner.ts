@@ -53,9 +53,16 @@ Your response MUST be a valid JSON object with two top-level keys: "semantic_que
 
 2. "structured_filters": This should be a JSON object containing specific, structured data points extracted from the query.
 - Valid keys are: "location", "min_aum", "max_aum", "services".
-- "location": Normalize to "City, ST" format (e.g., "Saint Louis, MO").
+- "location": CRITICAL - Extract ANY location mentioned (city, state, or both). For "St. Louis" or "Saint Louis", always return "Saint Louis, MO". For any Missouri city, include ", MO". Normalize to "City, ST" format.
 - "min_aum", "max_aum": Extract numerical values for Assets Under Management.
 - "services": Extract specific financial services mentioned, like "private placements", "retirement planning", etc.
+
+IMPORTANT: If the query mentions ANY location (like "in St. Louis", "in Missouri", "in New York"), you MUST extract it to the location field.
+
+Examples:
+- Query: "largest RIAs in St. Louis" -> location: "Saint Louis, MO"
+- Query: "top firms in Missouri" -> location: "MO"
+- Query: "biggest advisors in Saint Louis" -> location: "Saint Louis, MO"
 
 Return ONLY the raw JSON object. Do not include markdown formatting or any other explanatory text.`
 
