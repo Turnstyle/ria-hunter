@@ -117,11 +117,41 @@ export async function POST(req: NextRequest) {
     
     // Execute unified semantic search
     console.log(`[${requestId}] Starting unified semantic search...`);
+    
+    // CRITICAL FIX: Merge location from LLM decomposition with explicit filters
+    // This ensures location queries like "RIAs in St. Louis" actually filter by location
+    const extractedLocation = decomposition.structured_filters?.location;
+    let extractedCity = filters.city;
+    let extractedState = filters.state;
+    
+    // Parse location from decomposition if not explicitly provided
+    if (extractedLocation && !extractedCity && !extractedState) {
+      const locationParts = extractedLocation.split(', ');
+      if (locationParts.length === 2) {
+        extractedCity = locationParts[0];
+        extractedState = locationParts[1];
+      } else if (locationParts.length === 1) {
+        // Could be city or state
+        const loc = locationParts[0].trim();
+        if (loc.length === 2 && loc === loc.toUpperCase()) {
+          extractedState = loc; // State abbreviation
+        } else {
+          extractedCity = loc; // City name
+        }
+      }
+    }
+    
+    console.log(`[${requestId}] Location extraction:`, {
+      originalLocation: extractedLocation,
+      finalCity: extractedCity,
+      finalState: extractedState
+    });
+    
     const searchOptions = { 
       limit: body?.limit || 10,
       structuredFilters: {
-        state: filters.state,
-        city: filters.city,
+        state: extractedState,
+        city: extractedCity,
         fundType: filters.fundType
       },
       forceStructured: !!filters.hasVcActivity // Force structured search if VC activity filtering needed
