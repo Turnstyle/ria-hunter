@@ -141,13 +141,16 @@ export async function POST(req: NextRequest) {
     
     // FALLBACK: If LLM didn't extract location, check query directly for St. Louis
     if (!extractedCity && !extractedState) {
+      console.log(`[${requestId}] ⚠️ No location extracted from decomposition, checking query directly: "${query}"`);
       if (/\b(st\.?|saint)\s+louis\b/i.test(query)) {
         extractedCity = 'Saint Louis';
         extractedState = 'MO';
-        console.log(`[${requestId}] 🔍 Detected St. Louis in query directly`);
+        console.log(`[${requestId}] ✅ Detected St. Louis in query directly - applying filters`);
       } else if (/\bmissouri\b/i.test(query)) {
         extractedState = 'MO';
-        console.log(`[${requestId}] 🔍 Detected Missouri in query directly`);
+        console.log(`[${requestId}] ✅ Detected Missouri in query directly - applying filter`);
+      } else {
+        console.log(`[${requestId}] ❌ No location found in query`);
       }
     }
     
