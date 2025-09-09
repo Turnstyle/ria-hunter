@@ -6,6 +6,7 @@ export function OPTIONS(req: NextRequest) {
   return handleOptionsRequest(req);
 }
 
+// Public endpoint for debugging - no auth required
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
