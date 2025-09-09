@@ -5,6 +5,7 @@ import { buildAnswerContext } from './context-builder';
 import { generateNaturalLanguageAnswer, streamAnswerTokens } from './generator';
 import { checkDemoLimit } from '@/lib/demo-session';
 import { corsHeaders, handleOptionsRequest, corsError } from '@/lib/cors';
+import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
 // Handle OPTIONS requests for CORS
 export function OPTIONS(req: NextRequest) {
@@ -111,6 +112,53 @@ export async function POST(req: NextRequest) {
         semantic_query: decomposition.semantic_query,
         structured_filters: decomposition.structured_filters
       }));
+    }
+    
+    // BYPASS: For St. Louis queries, use simple direct search
+    if (queryLower.includes('st. louis') || queryLower.includes('st louis') || queryLower.includes('saint louis')) {
+      console.log(`[${requestId}] 🚀 BYPASS: Using direct St. Louis search`);
+      
+      // Direct database query for St. Louis RIAs
+      const { data: stLouisRias, error: dbError } = await supabaseAdmin
+        .from('ria_profiles')
+        .select('*')
+        .eq('state', 'MO')
+        .or('city.ilike.%St. Louis%,city.ilike.%ST LOUIS%,city.ilike.%Saint Louis%')
+        .order('aum', { ascending: false })
+        .limit(body?.limit || 10);
+      
+      if (!dbError && stLouisRias && stLouisRias.length > 0) {
+        console.log(`[${requestId}] ✅ Found ${stLouisRias.length} St. Louis RIAs`);
+        
+        const context = buildAnswerContext(stLouisRias, query);
+        const demoCheck = checkDemoLimit(req, isSubscriber);
+        
+        const headers = corsHeaders(req);
+        if (!userId) {
+          const newCount = demoCheck.searchesUsed + 1;
+          headers.set('Set-Cookie', `rh_demo=${newCount}; HttpOnly; Secure; SameSite=Lax; Max-Age=${24 * 60 * 60}; Path=/`);
+        }
+        
+        // Handle streaming vs non-streaming
+        if (isStreaming) {
+          return handleStreamingResponse(req, requestId, query, context, stLouisRias, {
+            searchStrategy: 'direct_st_louis',
+            confidence: 1.0
+          }, headers);
+        } else {
+          const answer = await generateNaturalLanguageAnswer(query, context);
+          return NextResponse.json({
+            answer,
+            sources: stLouisRias,
+            metadata: {
+              searchStrategy: 'direct_st_louis',
+              confidence: 1.0,
+              searchesRemaining: isSubscriber ? -1 : demoCheck.searchesRemaining - 1,
+              isSubscriber
+            }
+          }, { headers });
+        }
+      }
     }
     
     // Execute unified semantic search
