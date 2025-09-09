@@ -48,17 +48,18 @@ BEGIN
     semantic_results AS (
         SELECT 
             n.crd_number,
-            1 - (n.embedding_proper <=> query_embedding) as semantic_score,
-            ROW_NUMBER() OVER (ORDER BY n.embedding_proper <=> query_embedding) as semantic_rank
+            1 - (n.embedding_vector::vector(768) <=> query_embedding) as semantic_score,
+            ROW_NUMBER() OVER (ORDER BY n.embedding_vector::vector(768) <=> query_embedding) as semantic_rank
         FROM narratives n
         JOIN ria_profiles r ON n.crd_number = r.crd_number
-        WHERE n.embedding_proper IS NOT NULL
-            AND 1 - (n.embedding_proper <=> query_embedding) > match_threshold
+        WHERE n.embedding_vector IS NOT NULL
+            AND n.embedding_vector != ''
+            AND 1 - (n.embedding_vector::vector(768) <=> query_embedding) > match_threshold
             -- CRITICAL FIX: Apply state filter HERE in semantic search
             AND (state_filter IS NULL OR state_filter = '' OR r.state = UPPER(TRIM(state_filter)))
             AND COALESCE(r.aum, 0) >= min_aum
             AND COALESCE(r.private_fund_count, 0) >= min_vc_activity
-        ORDER BY n.embedding_proper <=> query_embedding
+        ORDER BY n.embedding_vector::vector(768) <=> query_embedding
         LIMIT match_count * 3
     ),
     -- Full-text search WITH location filtering applied DURING search
@@ -188,16 +189,17 @@ BEGIN
     WITH semantic_matches AS (
         SELECT 
             n.crd_number,
-            1 - (n.embedding_proper <=> query_embedding) as similarity_score
+            1 - (n.embedding_vector::vector(768) <=> query_embedding) as similarity_score
         FROM narratives n
         JOIN ria_profiles r ON n.crd_number = r.crd_number
-        WHERE n.embedding_proper IS NOT NULL
-            AND 1 - (n.embedding_proper <=> query_embedding) > match_threshold
+        WHERE n.embedding_vector IS NOT NULL
+            AND n.embedding_vector != ''
+            AND 1 - (n.embedding_vector::vector(768) <=> query_embedding) > match_threshold
             -- CRITICAL: Apply filters DURING search
             AND (state_filter IS NULL OR state_filter = '' OR r.state = UPPER(TRIM(state_filter)))
             AND COALESCE(r.aum, 0) >= min_aum
             AND COALESCE(r.private_fund_count, 0) >= min_vc_activity
-        ORDER BY n.embedding_proper <=> query_embedding
+        ORDER BY n.embedding_vector::vector(768) <=> query_embedding
         LIMIT match_count * 2  -- Get extra for fund type filtering
     )
     SELECT 
