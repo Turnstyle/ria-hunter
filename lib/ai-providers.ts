@@ -28,7 +28,7 @@ export class VertexAIService implements AIService {
   private vertexAI: VertexAI;
   private predictionClient: PredictionServiceClient;
   private embeddingEndpoint: string;
-  private generativeModel: any;
+  private generativeModel: ReturnType<VertexAI['getGenerativeModel']>;
 
   constructor(projectId: string, location: string, credentials?: any) {
     // Use explicit credentials if provided, otherwise fall back to ADC
