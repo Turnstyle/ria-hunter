@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { callLLMToDecomposeQuery } from './planner';
 import { unifiedSemanticSearch } from './unified-search';
 import { buildAnswerContext } from './context-builder';
-import { generateNaturalLanguageAnswer } from './generator';
+import { generateNaturalLanguageAnswer, streamAnswerTokens } from './generator';
 import { checkDemoLimit } from '@/lib/demo-session';
 import { corsHeaders, handleOptionsRequest, corsError } from '@/lib/cors';
 
@@ -27,23 +27,25 @@ function decodeJwtSub(authorizationHeader: string | null): string | null {
   }
 }
 
-// Main /api/ask endpoint - using unified semantic search
+// Main /api/ask endpoint - unified for both streaming and non-streaming
 export async function POST(req: NextRequest) {
   const requestId = `ask-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
   
-  console.log(`[${requestId}] === MAIN ASK ENDPOINT ===`);
+  console.log(`[${requestId}] === UNIFIED ASK ENDPOINT ===`);
   console.log(`[${requestId}] Using unified semantic search`);
   
   try {
     // Parse request body
     const body = await req.json().catch(() => ({} as any));
     const query = typeof body?.query === 'string' ? body.query : '';
+    const isStreaming = body?.streaming === true;
     
     if (!query) {
       return corsError(req, 'Query is required', 400);
     }
     
     console.log(`[${requestId}] Query: "${query}"`);
+    console.log(`[${requestId}] Streaming mode: ${isStreaming}`);
     
     // Check authentication
     const authHeader = req.headers.get('authorization');
@@ -157,9 +159,8 @@ export async function POST(req: NextRequest) {
       console.log(`[${requestId}] After VC filtering: ${filteredRows.length} results`);
     }
     
-    // Build context and generate answer
+    // Build context for AI generation
     const context = buildAnswerContext(filteredRows as any, query);
-    const answer = await generateNaturalLanguageAnswer(query, context);
     
     // Calculate metadata for the response
     const demoCheck = checkDemoLimit(req, isSubscriber);
@@ -176,16 +177,23 @@ export async function POST(req: NextRequest) {
       headers.set('Set-Cookie', `rh_demo=${newCount}; HttpOnly; Secure; SameSite=Lax; Max-Age=${24 * 60 * 60}; Path=/`);
     }
     
-    // Return the response
-    const response = {
-      answer: answer,
-      sources: filteredRows,
-      metadata: metadata
-    };
-    
-    console.log(`[${requestId}] Returning ${filteredRows.length} results with answer`);
-    
-    return NextResponse.json(response, { headers });
+    // Handle streaming vs non-streaming response
+    if (isStreaming) {
+      console.log(`[${requestId}] Returning streaming response`);
+      return handleStreamingResponse(req, requestId, query, context, filteredRows, metadata, headers);
+    } else {
+      console.log(`[${requestId}] Returning non-streaming response`);
+      const answer = await generateNaturalLanguageAnswer(query, context);
+      
+      const response = {
+        answer: answer,
+        sources: filteredRows,
+        metadata: metadata
+      };
+      
+      console.log(`[${requestId}] Returning ${filteredRows.length} results with answer`);
+      return NextResponse.json(response, { headers });
+    }
     
   } catch (error) {
     console.error(`[${requestId}] Error in /api/ask:`, error);
@@ -207,7 +215,8 @@ export async function GET(req: NextRequest) {
       minAum: searchParams.get('minAum') ? parseInt(searchParams.get('minAum')!) : undefined,
       hasVcActivity: searchParams.get('hasVcActivity') === 'true' || searchParams.get('vc') === 'true'
     },
-    limit: parseInt(searchParams.get('limit') || '10')
+    limit: parseInt(searchParams.get('limit') || '10'),
+    streaming: searchParams.get('streaming') === 'true'
   };
 
   // Create a mock POST request with the body
@@ -218,4 +227,135 @@ export async function GET(req: NextRequest) {
   });
 
   return POST(mockRequest);
+}
+
+// Handle streaming response (extracted from ask-stream endpoint)
+async function handleStreamingResponse(
+  req: NextRequest,
+  requestId: string, 
+  query: string,
+  context: string,
+  filteredRows: any[],
+  metadata: any,
+  headers: Headers
+): Promise<Response> {
+  // Set up SSE headers
+  headers.set('Content-Type', 'text/event-stream; charset=utf-8');
+  headers.set('Cache-Control', 'no-cache, no-transform');
+  headers.set('Connection', 'keep-alive');
+  headers.set('X-Accel-Buffering', 'no');
+  
+  // Create streaming response
+  const encoder = new TextEncoder();
+  const stream = new ReadableStream<Uint8Array>({
+    async start(controller) {
+      let streamStarted = false;
+      let lastTokenTime = Date.now();
+      
+      // Heartbeat function to prevent inactivity timeout
+      const sendHeartbeat = () => {
+        try {
+          const heartbeat = JSON.stringify('.');
+          controller.enqueue(encoder.encode(`data: {"token":${heartbeat}}\n\n`));
+          lastTokenTime = Date.now();
+        } catch (err) {
+          console.error(`[${requestId}] Heartbeat error:`, err);
+        }
+      };
+      
+      // Set up heartbeat interval (every 2 seconds)
+      const heartbeatInterval = setInterval(() => {
+        const timeSinceLastToken = Date.now() - lastTokenTime;
+        // Send heartbeat if more than 3 seconds since last token
+        if (timeSinceLastToken > 3000) {
+          sendHeartbeat();
+        }
+      }, 2000);
+      
+      try {
+        // Send initial connection confirmation with metadata
+        controller.enqueue(encoder.encode(`data: {"type":"connected","metadata":${JSON.stringify(metadata)}}\n\n`));
+        streamStarted = true;
+        
+        // Send processing status update
+        const statusToken = JSON.stringify('🔍 Searching database...');
+        controller.enqueue(encoder.encode(`data: {"token":${statusToken}}\n\n`));
+        lastTokenTime = Date.now();
+        
+        console.log(`[${requestId}] Starting token stream...`);
+        
+        // Send another status update before AI generation
+        const aiStatusToken = JSON.stringify('\n\n✨ Generating response...\n\n');
+        controller.enqueue(encoder.encode(`data: {"token":${aiStatusToken}}\n\n`));
+        lastTokenTime = Date.now();
+        
+        // Collect all tokens to build final response
+        let fullAnswer = '';
+        
+        // Stream tokens with proper SSE format and timeout protection
+        for await (const token of streamAnswerTokens(query, context)) {
+          // Clear heartbeat since we got a real token
+          lastTokenTime = Date.now();
+          
+          // Collect token for final response
+          fullAnswer += token;
+          
+          // Properly format each token for SSE (escape newlines if needed)
+          const escapedToken = JSON.stringify(token);
+          controller.enqueue(encoder.encode(`data: {"token":${escapedToken}}\n\n`));
+        }
+        
+        console.log(`[${requestId}] Token streaming complete`);
+        
+        // Send metadata and sources at the end
+        const sourcesToken = JSON.stringify(`\n\n📊 **Sources**: ${filteredRows.length} RIAs found`);
+        controller.enqueue(encoder.encode(`data: {"token":${sourcesToken}}\n\n`));
+        
+        // Send final complete response object for frontend
+        const completeResponse = {
+          answer: fullAnswer.trim(),
+          sources: filteredRows,
+          metadata: metadata
+        };
+        controller.enqueue(encoder.encode(`data: {"type":"complete","response":${JSON.stringify(completeResponse)}}\n\n`));
+        controller.enqueue(encoder.encode(`data: {"type":"metadata","metadata":${JSON.stringify(metadata)}}\n\n`));
+        
+      } catch (err) {
+        console.error(`[${requestId}] Stream error:`, err);
+        
+        // If we haven't started streaming yet, send a fallback message
+        if (!streamStarted) {
+          controller.enqueue(encoder.encode(`data: {"type":"connected","metadata":${JSON.stringify(metadata)}}\n\n`));
+        }
+        
+        // Send error as a proper message instead of error event
+        const errorMessage = `I encountered an issue processing your request. Here's what I found: ${context ? context.substring(0, 500) + '...' : 'No context available'}`;
+        controller.enqueue(encoder.encode(`data: {"token":${JSON.stringify(errorMessage)}}\n\n`));
+        
+        // Send error response object for frontend
+        const errorResponse = {
+          answer: errorMessage,
+          sources: filteredRows || [],
+          metadata: metadata
+        };
+        controller.enqueue(encoder.encode(`data: {"type":"complete","response":${JSON.stringify(errorResponse)}}\n\n`));
+      } finally {
+        // Clear heartbeat interval
+        clearInterval(heartbeatInterval);
+        
+        // ALWAYS send completion marker, no matter what happened
+        try {
+          controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+          controller.enqueue(encoder.encode('event: end\n\n'));
+        } catch (closeErr) {
+          console.error(`[${requestId}] Error sending completion marker:`, closeErr);
+        }
+        
+        // Close the stream
+        controller.close();
+      }
+    },
+  });
+  
+  return new Response(stream, { headers });
 }
