@@ -160,68 +160,53 @@ async function executeSemanticQuery(decomposition: QueryPlan, filters: { state?:
     
     console.log(`✅ Generated embedding with ${embedding.length} dimensions`)
     
-    // STEP 2: Get semantic matches with scores preserved
-    const { data: semanticMatches, error } = await supabaseAdmin.rpc('match_narratives', {
+    // STEP 2: Use hybrid_search_rias RPC which combines semantic and full-text search with proper state filtering
+    const { data: searchResults, error } = await supabaseAdmin.rpc('hybrid_search_rias', {
+      query_text: decomposition.semantic_query,  // Pass the text query for full-text search
       query_embedding: embedding,
       match_threshold: 0.3,
-      match_count: limit * 2  // Get extra for filtering
+      match_count: limit * 2,  // Get extra for city filtering if needed
+      state_filter: filters.state || null,
+      min_vc_activity: 0,
+      min_aum: filters.min_aum || 0
     })
     
     if (error) {
-      console.error('RPC match_narratives error:', error)
+      console.error('RPC hybrid_search_rias error:', error)
       throw error
     }
     
-    if (!semanticMatches || semanticMatches.length === 0) {
+    if (!searchResults || searchResults.length === 0) {
       console.warn('No semantic matches found, falling back to structured search')
       return executeStructuredFallback(filters, limit)
     }
     
-    console.log(`🎯 Found ${semanticMatches.length} semantic matches`)
+    console.log(`🎯 Found ${searchResults.length} semantic matches with state filtering`)
     
-    // STEP 3: Get full profile data for matched CRDs
-    let crdNumbers = semanticMatches.map(m => m.crd_number)
+    // STEP 3: Apply city filter if needed (since RPC only filters by state)
+    let profiles = searchResults
     
-    let profileQuery = supabaseAdmin
-      .from('ria_profiles')
-      .select('*')
-      .in('crd_number', crdNumbers)
-    
-    // STEP 4: Apply structured filters to semantic results
-    if (filters.state) {
-      profileQuery = profileQuery.eq('state', filters.state)
-    }
     if (filters.city) {
       const cityVariants = generateCityVariants(filters.city)
-      if (cityVariants.length === 1) {
-        profileQuery = profileQuery.ilike('city', `%${cityVariants[0]}%`)
-      } else if (cityVariants.length > 1) {
-        const cityConditions = cityVariants.map(c => `city.ilike.%${c}%`).join(',')
-        profileQuery = profileQuery.or(cityConditions)
+      profiles = searchResults.filter(profile => {
+        const profileCity = (profile.city || '').toUpperCase()
+        return cityVariants.some(variant => profileCity.includes(variant.toUpperCase()))
+      })
+      
+      if (profiles.length === 0) {
+        console.warn('City filter removed all results, falling back to structured search')
+        return executeStructuredFallback(filters, limit)
       }
     }
-    if (filters.min_aum) {
-      profileQuery = profileQuery.gte('aum', filters.min_aum)
-    }
     
-    const { data: profiles, error: profileError } = await profileQuery.limit(limit)
+    // Limit results
+    profiles = profiles.slice(0, limit)
     
-    if (profileError) {
-      console.error('Profile query error:', profileError)
-      throw profileError
-    }
-    
-    if (!profiles || profiles.length === 0) {
-      console.warn('Semantic matches filtered out by structured filters, trying fallback')
-      return executeStructuredFallback(filters, limit)
-    }
-    
-    // STEP 5: Merge similarity scores with profile data
+    // STEP 4: Format results with scores
     let resultsWithScores = profiles.map(profile => {
-      const semanticMatch = semanticMatches.find(m => m.crd_number === profile.crd_number)
       return {
         ...profile,
-        similarity: semanticMatch?.similarity || 0,
+        similarity: profile.similarity || 0,
         source: 'semantic-first',
         searchStrategy: 'semantic-first'
       }
@@ -481,10 +466,17 @@ async function handleSuperlativeQuery(decomposition: QueryPlan, limit = 10) {
   try {
     const embedding = await generateVertex768Embedding(decomposition.semantic_query)
     if (embedding && embedding.length === 768) {
-      const { data: semanticMatches, error } = await supabaseAdmin.rpc('match_narratives', {
+      // Extract filters from decomposition
+      const filters = parseFiltersFromDecomposition(decomposition)
+      
+      const { data: semanticMatches, error } = await supabaseAdmin.rpc('hybrid_search_rias', {
+        query_text: decomposition.semantic_query,
         query_embedding: embedding,
         match_threshold: 0.3,
-        match_count: limit * 2
+        match_count: limit * 2,
+        state_filter: filters.state || null,
+        min_vc_activity: 0,
+        min_aum: filters.min_aum || 0
       })
       
       if (!error && semanticMatches && semanticMatches.length > 0) {
