@@ -68,11 +68,17 @@ export async function POST(req: NextRequest) {
       dbQuery = dbQuery.gte('aum', minAum);
     }
 
+    // PERFORMANCE OPTIMIZATION: Skip text search for superlative + location queries
+    // Detect queries that are asking for "largest", "biggest", "top N" with location filters
+    const isSuperlaticeLocationQuery = query && (state || city) && 
+      /\b(largest|biggest|top\s+\d+|most|best|greatest)\b/i.test(query);
+    
     // Text search on query if provided, but skip if we're doing filtered searches
     // When filters are applied, the query is more of a description than a literal search term
     const hasFilters = state || city || fundType || hasVcActivity || minAum;
     
-    if (query && !hasFilters) {
+    // Skip text search for superlative queries with location filters (performance optimization)
+    if (query && !hasFilters && !isSuperlaticeLocationQuery) {
       // Check if query is a CRD number
       const isNumber = /^\d+$/.test(query);
       if (isNumber) {
