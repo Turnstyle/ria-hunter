@@ -115,7 +115,8 @@ export async function POST(req: NextRequest) {
     }
     
     // BYPASS: For St. Louis queries, use simple direct search
-    if (queryLower.includes('st. louis') || queryLower.includes('st louis') || queryLower.includes('saint louis')) {
+    const queryLowerCheck = query.toLowerCase();
+    if (queryLowerCheck.includes('st. louis') || queryLowerCheck.includes('st louis') || queryLowerCheck.includes('saint louis')) {
       console.log(`[${requestId}] 🚀 BYPASS: Using direct St. Louis search`);
       
       // Direct database query for St. Louis RIAs
