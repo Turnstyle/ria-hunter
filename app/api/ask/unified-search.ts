@@ -175,9 +175,12 @@ async function executeSemanticQuery(decomposition: QueryPlan, filters: { state?:
       min_aum: filters.min_aum || 0
     })
     
-    const { data: searchResults, error } = await supabaseAdmin.rpc('hybrid_search_rias', {
+    // Convert embedding array to JSON string for the RPC function
+    const embeddingString = JSON.stringify(embedding);
+    
+    const { data: searchResults, error } = await supabaseAdmin.rpc('hybrid_search_rias_with_string_embedding', {
       query_text: decomposition.semantic_query,  // Pass the text query for full-text search
-      query_embedding: embedding,
+      query_embedding_string: embeddingString,  // Pass as JSON string
       match_threshold: 0.3,
       match_count: limit * 2,  // Get extra for city filtering if needed
       state_filter: filters.state || null,
@@ -494,9 +497,12 @@ async function handleSuperlativeQuery(decomposition: QueryPlan, limit = 10) {
       // Extract filters from decomposition
       const filters = parseFiltersFromDecomposition(decomposition)
       
-      const { data: semanticMatches, error } = await supabaseAdmin.rpc('hybrid_search_rias', {
+      // Convert embedding array to JSON string for the RPC function
+      const embeddingString = JSON.stringify(embedding);
+      
+      const { data: semanticMatches, error } = await supabaseAdmin.rpc('hybrid_search_rias_with_string_embedding', {
         query_text: decomposition.semantic_query,
-        query_embedding: embedding,
+        query_embedding_string: embeddingString,  // Pass as JSON string
         match_threshold: 0.3,
         match_count: limit * 2,
         state_filter: filters.state || null,
