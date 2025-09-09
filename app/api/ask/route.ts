@@ -122,18 +122,19 @@ export async function POST(req: NextRequest) {
     
     // First, check the query directly for known patterns
     const queryLower = query.toLowerCase();
+    console.log(`[${requestId}] 🔍 Checking query for location patterns: "${queryLower}"`);
     
     if (queryLower.includes('st. louis') || queryLower.includes('st louis') || queryLower.includes('saint louis')) {
       extractedCity = 'St. Louis'; // Use the format that matches DB
       extractedState = 'MO';
-      console.log(`[${requestId}] ✅ Direct detection: St. Louis, MO`);
+      console.log(`[${requestId}] ✅✅✅ DETECTED ST. LOUIS! Setting city='${extractedCity}', state='${extractedState}'`);
     } else if (queryLower.includes('missouri')) {
       extractedState = 'MO';
-      console.log(`[${requestId}] ✅ Direct detection: Missouri`);
+      console.log(`[${requestId}] ✅✅✅ DETECTED MISSOURI! Setting state='${extractedState}'`);
     } else if (decomposition.structured_filters?.location) {
       // Fall back to decomposition if no direct match
       const extractedLocation = decomposition.structured_filters.location;
-      console.log(`[${requestId}] Using decomposed location: ${extractedLocation}`);
+      console.log(`[${requestId}] No direct match, using decomposed location: ${extractedLocation}`);
       
       const locationParts = extractedLocation.split(',').map(p => p.trim());
       if (locationParts.length === 2) {
@@ -147,6 +148,8 @@ export async function POST(req: NextRequest) {
           extractedCity = loc;
         }
       }
+    } else {
+      console.log(`[${requestId}] ❌ No location detected in query or decomposition`);
     }
     
     console.log(`[${requestId}] Location extraction details:`, JSON.stringify({
@@ -162,13 +165,15 @@ export async function POST(req: NextRequest) {
     const hasLocation = !!(extractedCity || extractedState);
     const shouldForceStructured = !!filters.hasVcActivity || (isSuperlativeQuery && hasLocation);
     
+    // Build filters object only with defined values
+    const structuredFilters: any = {};
+    if (extractedState) structuredFilters.state = extractedState;
+    if (extractedCity) structuredFilters.city = extractedCity;
+    if (filters.fundType) structuredFilters.fundType = filters.fundType;
+    
     const searchOptions = { 
       limit: body?.limit || 10,
-      structuredFilters: {
-        state: extractedState || undefined,
-        city: extractedCity || undefined,
-        fundType: filters.fundType || undefined
-      },
+      structuredFilters,
       forceStructured: shouldForceStructured
     };
     console.log(`[${requestId}] 🚨 CRITICAL: Search options:`, JSON.stringify({
