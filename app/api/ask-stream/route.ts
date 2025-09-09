@@ -199,10 +199,16 @@ export async function POST(request: NextRequest) {
 					controller.enqueue(encoder.encode(`data: {"token":${aiStatusToken}}\n\n`));
 					lastTokenTime = Date.now();
 					
+					// Collect all tokens to build final response
+					let fullAnswer = '';
+					
 					// Stream tokens with proper SSE format and timeout protection
 					for await (const token of streamAnswerTokens(query, context)) {
 						// Clear heartbeat since we got a real token
 						lastTokenTime = Date.now();
+						
+						// Collect token for final response
+						fullAnswer += token;
 						
 						// Properly format each token for SSE (escape newlines if needed)
 						const escapedToken = JSON.stringify(token);
@@ -214,6 +220,14 @@ export async function POST(request: NextRequest) {
 					// Send metadata and sources at the end
 					const sourcesToken = JSON.stringify(`\n\n📊 **Sources**: ${filteredRows.length} RIAs found`);
 					controller.enqueue(encoder.encode(`data: {"token":${sourcesToken}}\n\n`));
+					
+					// Send final complete response object for frontend
+					const completeResponse = {
+						answer: fullAnswer.trim(),
+						sources: filteredRows,
+						metadata: metadata
+					};
+					controller.enqueue(encoder.encode(`data: {"type":"complete","response":${JSON.stringify(completeResponse)}}\n\n`));
 					controller.enqueue(encoder.encode(`data: {"type":"metadata","metadata":${JSON.stringify(metadata)}}\n\n`));
 					
 				} catch (err) {
@@ -227,6 +241,14 @@ export async function POST(request: NextRequest) {
 					// Send error as a proper message instead of error event
 					const errorMessage = `I encountered an issue processing your request. Here's what I found: ${context ? context.substring(0, 500) + '...' : 'No context available'}`;
 					controller.enqueue(encoder.encode(`data: {"token":${JSON.stringify(errorMessage)}}\n\n`));
+					
+					// Send error response object for frontend
+					const errorResponse = {
+						answer: errorMessage,
+						sources: filteredRows || [],
+						metadata: metadata
+					};
+					controller.enqueue(encoder.encode(`data: {"type":"complete","response":${JSON.stringify(errorResponse)}}\n\n`));
 				} finally {
 					// Clear heartbeat interval
 					clearInterval(heartbeatInterval);
