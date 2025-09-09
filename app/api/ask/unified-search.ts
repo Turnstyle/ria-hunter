@@ -484,7 +484,7 @@ async function executeStructuredFallback(filters: { state?: string; city?: strin
 }
 
 // Handle superlative queries (largest/smallest) with proven logic
-async function handleSuperlativeQuery(decomposition: QueryPlan, limit = 10) {
+async function handleSuperlativeQuery(decomposition: QueryPlan, limit = 10, filters: { state?: string; city?: string; min_aum?: number } = {}) {
   const isLargest = decomposition.semantic_query.toLowerCase().includes('largest') ||
                     decomposition.semantic_query.toLowerCase().includes('biggest') ||
                     decomposition.semantic_query.toLowerCase().includes('top ')
@@ -494,8 +494,8 @@ async function handleSuperlativeQuery(decomposition: QueryPlan, limit = 10) {
   try {
     const embedding = await generateVertex768Embedding(decomposition.semantic_query)
     if (embedding && embedding.length === 768) {
-      // Extract filters from decomposition
-      const filters = parseFiltersFromDecomposition(decomposition)
+      // Use passed filters (already merged from decomposition and structured filters)
+      console.log('🎯 Superlative query using filters:', filters)
       
       // Convert embedding array to JSON string for the RPC function
       const embeddingString = JSON.stringify(embedding);
@@ -515,8 +515,8 @@ async function handleSuperlativeQuery(decomposition: QueryPlan, limit = 10) {
         const crdNumbers = semanticMatches.map(m => m.crd_number)
         let q = supabaseAdmin.from('ria_profiles').select('*').in('crd_number', crdNumbers)
         
-        // Apply filters from decomposition
-        const filters = parseFiltersFromDecomposition(decomposition)
+        // Apply merged filters (already contains decomposition + structured filters)
+        console.log('🎯 Superlative query using location filters:', filters)
         if (filters.state) q = q.eq('state', filters.state)
         if (filters.city) {
           const cityVariants = generateCityVariants(filters.city)
@@ -915,7 +915,7 @@ export async function unifiedSemanticSearch(query: string, options: {
     console.log('⚡ Forced structured search - skipping semantic search')
     results = await executeStructuredFallback(filters, limit)
   } else if (queryType.startsWith('superlative')) {
-    results = await handleSuperlativeQuery(decomposition, limit)
+    results = await handleSuperlativeQuery(decomposition, limit, filters)
   } else {
     results = await executeSemanticQuery(decomposition, filters, limit)
   }
