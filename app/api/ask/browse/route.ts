@@ -20,13 +20,14 @@ export async function GET(req: NextRequest) {
     const state = searchParams.get('state');
     const city = searchParams.get('city');
     const fundType = searchParams.get('fundType');
+    const hasVcActivity = searchParams.get('hasVcActivity') === 'true';
     const minAum = searchParams.get('minAum') ? parseInt(searchParams.get('minAum')) : undefined;
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');
     const sortBy = searchParams.get('sortBy') || 'aum'; // 'aum', 'name', 'fund_count'
     const sortOrder = searchParams.get('sortOrder') || 'desc';
 
-    console.log(`[${requestId}] Filters:`, { state, city, fundType, minAum, limit, offset });
+    console.log(`[${requestId}] Filters:`, { state, city, fundType, hasVcActivity, minAum, limit, offset });
 
     // Build the base query
     let query = supabaseAdmin
@@ -128,6 +129,22 @@ export async function GET(req: NextRequest) {
       });
     }
 
+    // Filter by VC activity if specified
+    if (hasVcActivity) {
+      filteredResults = filteredResults.filter(ria => {
+        if (!ria.ria_private_funds || ria.ria_private_funds.length === 0) {
+          return false;
+        }
+        return ria.ria_private_funds.some((fund: any) => {
+          const fundType = (fund.fund_type || '').toLowerCase();
+          return fundType.includes('venture') || 
+                 fundType.includes('vc') || 
+                 fundType.includes('private equity') || 
+                 fundType.includes('pe');
+        });
+      });
+    }
+
     // Format results with fund analysis
     const formattedResults = filteredResults.map(ria => {
       // Analyze fund types
@@ -179,6 +196,7 @@ export async function GET(req: NextRequest) {
         state,
         city,
         fundType,
+        hasVcActivity,
         minAum
       },
       pagination: {

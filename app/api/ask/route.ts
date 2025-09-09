@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
       minAum: searchParams.get('minAum') ? parseInt(searchParams.get('minAum')!) : undefined,
       hasVcActivity: searchParams.get('hasVcActivity') === 'true' || searchParams.get('vc') === 'true'
     },
-    limit: parseInt(searchParams.get('limit') || '20')
+    limit: parseInt(searchParams.get('limit') || '500')
   };
 
   // Create a mock POST request with the body
