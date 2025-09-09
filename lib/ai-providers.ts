@@ -50,12 +50,12 @@ export class VertexAIService implements AIService {
     }
     this.predictionClient = new PredictionServiceClient(clientConfig);
     
-    // Use current embedding model instead of deprecated textembedding-gecko@003
+    // Use text-embedding-005 (768 dimensions) as per Gemini spec section 3.2.4
     this.embeddingEndpoint = `projects/${projectId}/locations/${location}/publishers/google/models/text-embedding-005`;
     
-    // Keep generative model for text generation
+    // Use Gemini 2.0 Flash as per Gemini spec section 4.1
     this.generativeModel = this.vertexAI.preview.getGenerativeModel({
-      model: 'gemini-2.5-flash-lite',
+      model: 'gemini-2.0-flash',
     });
   }
 
@@ -182,43 +182,58 @@ export function createAIService(config: AIConfig): AIService | null {
   switch (config.provider) {
     case 'vertex':
       const projectId = process.env.GOOGLE_PROJECT_ID || process.env.GOOGLE_CLOUD_PROJECT;
-      // Use specific Vertex AI location or default to us-central1 (Document AI location might be different)
-      const location = process.env.VERTEX_AI_LOCATION || process.env.GOOGLE_CLOUD_LOCATION || 'us-central1';
+      // Use specific Vertex AI location from env or default to us-central1
+      const location = process.env.VERTEX_AI_LOCATION || 'us-central1';
       
       if (!projectId) {
         console.warn('Vertex AI: Missing Google Cloud project ID');
         return null;
       }
 
-      // Get credentials using multiple approaches
+      // Get credentials using the approach from Gemini spec section 2.1.3
       let credentials: any = null;
       
-      // Try base64 encoded credentials first (recommended for Vercel)
-      if (process.env.GOOGLE_APPLICATION_CREDENTIALS_B64) {
+      // Priority 1: Base64 encoded credentials (recommended for Vercel per Gemini spec)
+      if (process.env.GCP_SA_KEY_BASE64) {
         try {
-          console.log('🔑 Vertex AI: Using base64 encoded service account credentials');
+          console.log('🔑 Vertex AI: Using Base64 encoded service account (Gemini spec 2.1.3)');
+          const credentialsJson = Buffer.from(
+            process.env.GCP_SA_KEY_BASE64,
+            'base64'
+          ).toString('utf-8');
+          credentials = JSON.parse(credentialsJson);
+          console.log('✅ Successfully decoded Base64 credentials');
+        } catch (error) {
+          console.error('Vertex AI: Failed to decode Base64 credentials:', error);
+          return null;
+        }
+      }
+      // Priority 2: Legacy base64 format for backward compatibility
+      else if (process.env.GOOGLE_APPLICATION_CREDENTIALS_B64) {
+        try {
+          console.log('🔑 Vertex AI: Using legacy base64 encoded credentials');
           credentials = JSON.parse(
             Buffer.from(process.env.GOOGLE_APPLICATION_CREDENTIALS_B64, 'base64').toString('utf-8')
           );
         } catch (error) {
-          console.error('Vertex AI: Failed to parse base64 credentials:', error);
+          console.error('Vertex AI: Failed to parse legacy base64 credentials:', error);
           return null;
         }
       }
-      // Try JSON string credentials
+      // Priority 3: JSON string credentials (not recommended)
       else if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
         try {
-          console.log('🔑 Vertex AI: Using JSON string service account credentials');
+          console.log('⚠️  Vertex AI: Using JSON string credentials (migrate to Base64)');
           credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
         } catch (error) {
           console.error('Vertex AI: Failed to parse JSON credentials:', error);
           return null;
         }
       }
-      // Try reading from file path (for local development and some deployment scenarios)
+      // Priority 4: File path (for local development only)
       else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
         try {
-          console.log('🔑 Vertex AI: Reading credentials from file path:', process.env.GOOGLE_APPLICATION_CREDENTIALS);
+          console.log('📁 Vertex AI: Reading credentials from file (local dev only):', process.env.GOOGLE_APPLICATION_CREDENTIALS);
           const fs = require('fs');
           const path = require('path');
           
@@ -239,9 +254,19 @@ export function createAIService(config: AIConfig): AIService | null {
         }
       }
       
-      // Validate credentials if provided
-      if (credentials && (!credentials.type || credentials.type !== 'service_account' || !credentials.private_key || !credentials.client_email)) {
-        console.error('Vertex AI: Invalid service account JSON format');
+      // Validate credentials structure as per Gemini spec
+      if (credentials) {
+        if (!credentials.type || credentials.type !== 'service_account') {
+          console.error('Vertex AI: Invalid credential type, must be "service_account"');
+          return null;
+        }
+        if (!credentials.private_key || !credentials.client_email || !credentials.project_id) {
+          console.error('Vertex AI: Missing required fields in service account JSON');
+          return null;
+        }
+        console.log(`✅ Valid service account: ${credentials.client_email}`);
+      } else {
+        console.error('Vertex AI: No credentials found. Please set GCP_SA_KEY_BASE64');
         return null;
       }
       

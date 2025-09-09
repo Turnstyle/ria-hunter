@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { callLLMToDecomposeQuery } from './planner';
+import { callLLMToDecomposeQuery } from './planner-v2'; // Use enhanced planner with Gemini function calling
 import { unifiedSemanticSearch } from './unified-search';
 import { buildAnswerContext } from './context-builder';
 import { generateNaturalLanguageAnswer, streamAnswerTokens } from './generator';
@@ -108,13 +108,14 @@ export async function POST(req: NextRequest) {
     console.log(`[${requestId}] Starting unified semantic search...`);
     
     // Trust the AI's decomposition - it understands locations naturally
-    let extractedCity = filters.city;
-    let extractedState = filters.state;
+    // The enhanced planner now provides city and state separately
+    let extractedCity = filters.city || decomposition.structured_filters?.city || null;
+    let extractedState = filters.state || decomposition.structured_filters?.state || null;
     
-    // Use AI's location extraction directly without overriding
-    if (decomposition.structured_filters?.location) {
+    // Also check the combined location field for backward compatibility
+    if (!extractedCity && !extractedState && decomposition.structured_filters?.location) {
       const extractedLocation = decomposition.structured_filters.location;
-      console.log(`[${requestId}] Using AI-decomposed location: ${extractedLocation}`);
+      console.log(`[${requestId}] Using AI-decomposed location (legacy): ${extractedLocation}`);
       
       const locationParts = extractedLocation.split(',').map(p => p.trim());
       if (locationParts.length === 2) {

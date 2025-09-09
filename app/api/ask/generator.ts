@@ -1,10 +1,24 @@
 import { createAIService, getAIProvider } from '@/lib/ai-providers'
+import { createResilientAIService } from '@/lib/ai-resilience'
 import OpenAI from 'openai'
 
 export async function generateNaturalLanguageAnswer(query: string, context: string): Promise<string> {
-	const provider = getAIProvider()
-	const ai = createAIService({ provider })
-	if (!ai) throw new Error('AI provider not configured')
+	// Create primary and fallback services with resilience wrapper
+	const primaryProvider = getAIProvider()
+	const primaryService = createAIService({ provider: primaryProvider })
+	
+	// Create fallback service (OpenAI if primary is Vertex, or vice versa)
+	const fallbackProvider = primaryProvider === 'vertex' ? 'openai' : 'vertex'
+	const fallbackService = createAIService({ provider: fallbackProvider })
+	
+	// Wrap with circuit breaker and resilience features
+	const ai = createResilientAIService(primaryService, fallbackService)
+	
+	if (!ai) {
+		// Complete failure - return graceful degradation message
+		console.error('No AI service available - returning context-based response')
+		return `Based on the search results:\n\n${context}\n\nNote: AI summarization is temporarily unavailable.`
+	}
 
 	const prompt = [
 		'You are a factual analyst. Answer the user question using ONLY the provided context.',
@@ -20,8 +34,14 @@ export async function generateNaturalLanguageAnswer(query: string, context: stri
 		`Question: ${query}`,
 	].join('\n')
 
-	const result = await ai.generateText(prompt)
-	return (result.text || '').trim()
+	try {
+		const result = await ai.generateText(prompt)
+		return (result.text || '').trim()
+	} catch (error) {
+		// Even with circuit breaker, handle any unexpected errors
+		console.error('Failed to generate AI response:', error)
+		return `Based on the search results:\n\n${context}\n\nNote: AI summarization encountered an error.`
+	}
 }
 
 export function generateNaturalLanguageAnswerStream(query: string, context: string): ReadableStream<Uint8Array> {
@@ -70,7 +90,7 @@ export function generateNaturalLanguageAnswerStream(query: string, context: stri
 
 export async function* streamAnswerTokens(query: string, context: string) {
 	const currentProvider = getAIProvider();
-	console.log(`[generator] Using AI provider: ${currentProvider}`);
+	console.log(`[generator] Primary AI provider: ${currentProvider}`);
 	
 	const prompt = [
 		'You are a factual analyst. Answer the user question using ONLY the provided context.',
@@ -87,15 +107,24 @@ export async function* streamAnswerTokens(query: string, context: string) {
 	].join('\n');
 	
 	try {
-		// Create AI service using the configured provider
-		const ai = createAIService({ provider: currentProvider });
+		// Create primary and fallback services with resilience wrapper
+		const primaryService = createAIService({ provider: currentProvider });
+		const fallbackProvider = currentProvider === 'vertex' ? 'openai' : 'vertex';
+		const fallbackService = createAIService({ provider: fallbackProvider });
+		
+		// Wrap with circuit breaker and resilience features
+		const ai = createResilientAIService(primaryService, fallbackService);
+		
 		if (!ai) {
-			throw new Error(`AI provider ${currentProvider} not configured properly`);
+			// Complete failure - yield graceful degradation message
+			console.error('[generator] No AI service available - returning context-based response');
+			yield `Based on the search results:\n\n${context}\n\nNote: AI summarization is temporarily unavailable.`;
+			return;
 		}
 		
-		console.log(`[generator] Generating response with ${currentProvider}...`);
+		console.log(`[generator] Generating response with resilient AI service...`);
 		
-		// Generate the full response
+		// Generate the full response with circuit breaker protection
 		const result = await ai.generateText(prompt);
 		const fullResponse = result.text || '';
 		
@@ -117,7 +146,7 @@ export async function* streamAnswerTokens(query: string, context: string) {
 		}
 		
 	} catch (error) {
-		console.error(`[generator] Error with AI provider ${currentProvider}:`, error);
+		console.error(`[generator] Error with AI service:`, error);
 		
 		// Provide a graceful fallback with the context data
 		console.log('[generator] Returning fallback response due to AI error');
