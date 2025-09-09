@@ -119,13 +119,14 @@ export async function POST(req: NextRequest) {
       return corsify(req, NextResponse.json({ error: 'Invalid body. Expected { "query": string }', code: 'BAD_REQUEST' }, { status: 400 }));
     }
 
-    const { query, state, useHybridSearch, minVcActivity, minAum, limit } = body as {
+    const { query, state, useHybridSearch, minVcActivity, minAum, limit, fundType } = body as {
       query: string;
       state?: string;
       useHybridSearch?: boolean;
       minVcActivity?: number;
       minAum?: number;
       limit?: number;
+      fundType?: string;  // Added fund type filter
     };
 
     // Auth and allowance check
@@ -200,7 +201,8 @@ export async function POST(req: NextRequest) {
         match_count: limit || 20,
         state_filter: state || null,
         min_vc_activity: minVcActivity || 0,
-        min_aum: minAum || 0
+        min_aum: minAum || 0,
+        fund_type_filter: fundType || null  // Pass fund type filter
       });
 
       if (error) {
@@ -216,7 +218,8 @@ export async function POST(req: NextRequest) {
         match_threshold: 0.5,
         match_count: limit || 20,
         state_filter: state || null,
-        min_aum: minAum || 0
+        min_aum: minAum || 0,
+        fund_type_filter: fundType || null  // Pass fund type filter
       });
       
       if (error) {

@@ -15,6 +15,7 @@ export interface QueryParams {
   limit?: number;
   offset?: number;
   hybrid?: boolean;
+  fundType?: string;  // Added fund type filter
 }
 
 /**
@@ -31,6 +32,7 @@ export async function GET(request: NextRequest) {
     const limit = Number(searchParams.get('limit') || '20');
     const offset = Number(searchParams.get('offset') || '0');
     const hybrid = searchParams.get('hybrid') === 'true';
+    const fundType = searchParams.get('fundType')?.trim() || null;
 
     // Validate input
     if (!query) {
@@ -64,6 +66,7 @@ export async function GET(request: NextRequest) {
         state_filter: state || null,
         min_vc_activity: minVcActivity,
         min_aum: minAum,
+        fund_type_filter: fundType,  // Pass fund type filter
       });
     } else {
       // Use vector search only
@@ -74,6 +77,7 @@ export async function GET(request: NextRequest) {
         state_filter: state || null,
         min_vc_activity: minVcActivity,
         min_aum: minAum,
+        fund_type_filter: fundType,  // Pass fund type filter
       });
     }
 
