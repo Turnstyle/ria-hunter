@@ -150,17 +150,31 @@ function parseFiltersFromDecomposition(decomposition: QueryPlan): { state?: stri
 async function executeSemanticQuery(decomposition: QueryPlan, filters: { state?: string; city?: string; min_aum?: number } = {}, limit = 10) {
   try {
     console.log('🧠 Starting semantic-first search...')
+    console.log('📝 Decomposition:', decomposition)
+    console.log('🔍 Filters:', filters)
     
     // STEP 1: Always attempt semantic search first
     const embedding = await generateVertex768Embedding(decomposition.semantic_query)
     
     if (!embedding || embedding.length !== 768) {
-      throw new Error('Embedding generation failed')
+      console.error(`❌ Embedding generation failed. Got ${embedding?.length || 0} dimensions instead of 768`)
+      throw new Error(`Embedding generation failed: ${embedding?.length || 0} dimensions`)
     }
     
     console.log(`✅ Generated embedding with ${embedding.length} dimensions`)
+    console.log(`📊 First 5 embedding values:`, embedding.slice(0, 5))
     
     // STEP 2: Use hybrid_search_rias RPC which combines semantic and full-text search with proper state filtering
+    console.log('🔄 Calling hybrid_search_rias with params:', {
+      query_text: decomposition.semantic_query,
+      embedding_length: embedding.length,
+      match_threshold: 0.3,
+      match_count: limit * 2,
+      state_filter: filters.state || null,
+      min_vc_activity: 0,
+      min_aum: filters.min_aum || 0
+    })
+    
     const { data: searchResults, error } = await supabaseAdmin.rpc('hybrid_search_rias', {
       query_text: decomposition.semantic_query,  // Pass the text query for full-text search
       query_embedding: embedding,
@@ -172,12 +186,16 @@ async function executeSemanticQuery(decomposition: QueryPlan, filters: { state?:
     })
     
     if (error) {
-      console.error('RPC hybrid_search_rias error:', error)
+      console.error('❌ RPC hybrid_search_rias error:', error)
+      console.error('Error details:', JSON.stringify(error, null, 2))
       throw error
     }
     
+    console.log(`📊 RPC returned ${searchResults?.length || 0} results`)
+    
     if (!searchResults || searchResults.length === 0) {
-      console.warn('No semantic matches found, falling back to structured search')
+      console.warn('⚠️ No semantic matches found from hybrid_search_rias')
+      console.log('Attempting structured fallback with filters:', filters)
       return executeStructuredFallback(filters, limit)
     }
     
@@ -369,17 +387,20 @@ async function executeSemanticQuery(decomposition: QueryPlan, filters: { state?:
 async function executeStructuredFallback(filters: { state?: string; city?: string; min_aum?: number }, limit: number) {
   try {
     console.log('📊 Executing structured fallback search...')
+    console.log('🔍 Structured fallback filters:', filters)
     
     let query = supabaseAdmin
       .from('ria_profiles')
       .select('crd_number, legal_name, city, state, aum, private_fund_count, private_fund_aum')
     
     if (filters.state) {
+      console.log(`  Adding state filter: ${filters.state}`)
       query = query.eq('state', filters.state)
     }
     
     if (filters.city) {
       const cityVariants = generateCityVariants(filters.city)
+      console.log(`  Adding city filter: ${filters.city}, variants:`, cityVariants)
       if (cityVariants.length === 1) {
         query = query.ilike('city', `%${cityVariants[0]}%`)
       } else if (cityVariants.length > 1) {
@@ -389,6 +410,7 @@ async function executeStructuredFallback(filters: { state?: string; city?: strin
     }
     
     if (filters.min_aum) {
+      console.log(`  Adding min AUM filter: ${filters.min_aum}`)
       query = query.gte('aum', filters.min_aum)
     }
     
@@ -398,9 +420,12 @@ async function executeStructuredFallback(filters: { state?: string; city?: strin
     const { data: rows, error } = await query
     
     if (error) {
-      console.error('Structured fallback error:', error)
+      console.error('❌ Structured fallback error:', error)
+      console.error('Error details:', JSON.stringify(error, null, 2))
       return []
     }
+    
+    console.log(`✅ Structured fallback returned ${rows?.length || 0} results`)
     
     // NEW: Enrich with executives and private funds
     const enrichedResults = await Promise.all((rows || []).map(async (r) => {

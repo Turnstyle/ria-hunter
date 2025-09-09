@@ -104,11 +104,18 @@ export async function POST(request: NextRequest) {
 		const filters = body?.filters || {}
 		console.log(`[${requestId}] Filters from body:`, filters)
 		
-		const plan = await callLLMToDecomposeQuery(query)
-		console.log(`[${requestId}] Query decomposed:`, {
-			semantic_query: plan.semantic_query,
-			structured_filters: plan.structured_filters
-		})
+		let plan;
+		try {
+			plan = await callLLMToDecomposeQuery(query)
+			console.log(`[${requestId}] Query decomposed:`, {
+				semantic_query: plan.semantic_query,
+				structured_filters: plan.structured_filters
+			})
+		} catch (decompositionError) {
+			console.error(`[${requestId}] ❌ Query decomposition failed:`, decompositionError)
+			// Return error to frontend
+			return corsError(request, 'Failed to process query', 500);
+		}
 		
 		// Execute the query using unified semantic search with structured filters
 		console.log(`[${requestId}] Starting unified semantic search for streaming...`)
@@ -123,9 +130,21 @@ export async function POST(request: NextRequest) {
 		}
 		console.log(`[${requestId}] Search options:`, searchOptions)
 		
-		const searchResult = await unifiedSemanticSearch(query, searchOptions)
+		let searchResult;
+		try {
+			searchResult = await unifiedSemanticSearch(query, searchOptions)
+			console.log(`[${requestId}] Search result metadata:`, searchResult.metadata)
+		} catch (searchError) {
+			console.error(`[${requestId}] ❌ Unified search failed:`, searchError)
+			// Return error to frontend
+			return corsError(request, 'Search failed', 500);
+		}
+		
 		const rows = searchResult.results
 		console.log(`[${requestId}] Search complete, ${rows.length} results found`)
+		if (rows.length === 0) {
+			console.warn(`[${requestId}] ⚠️ No results returned from unifiedSemanticSearch`)
+		}
 		
 		// Apply hasVcActivity filter if specified (post-search filtering)
 		let filteredRows = rows
