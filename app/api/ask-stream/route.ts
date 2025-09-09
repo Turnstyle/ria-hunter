@@ -100,20 +100,53 @@ export async function POST(request: NextRequest) {
 			}
 		}
 		
-		// Process the query
+		// Process the query with filters from body
+		const filters = body?.filters || {}
+		console.log(`[${requestId}] Filters from body:`, filters)
+		
 		const plan = await callLLMToDecomposeQuery(query)
 		console.log(`[${requestId}] Query decomposed:`, {
 			semantic_query: plan.semantic_query,
 			structured_filters: plan.structured_filters
 		})
 		
-		// Execute the query using unified semantic search
+		// Execute the query using unified semantic search with structured filters
 		console.log(`[${requestId}] Starting unified semantic search for streaming...`)
-		const searchResult = await unifiedSemanticSearch(query, { limit: 10 })
+		const searchOptions = { 
+			limit: 10,
+			structuredFilters: {
+				state: filters.state,
+				city: filters.city,
+				fundType: filters.fundType
+			},
+			forceStructured: !!filters.hasVcActivity // Force structured search if VC activity filtering needed
+		}
+		console.log(`[${requestId}] Search options:`, searchOptions)
+		
+		const searchResult = await unifiedSemanticSearch(query, searchOptions)
 		const rows = searchResult.results
 		console.log(`[${requestId}] Search complete, ${rows.length} results found`)
 		
-		const context = buildAnswerContext(rows as any, query)
+		// Apply hasVcActivity filter if specified (post-search filtering)
+		let filteredRows = rows
+		if (filters.hasVcActivity) {
+			console.log(`[${requestId}] Applying hasVcActivity filter...`)
+			filteredRows = rows.filter(ria => {
+				const hasFunds = ria.private_funds && ria.private_funds.length > 0
+				if (!hasFunds) return false
+				
+				return ria.private_funds.some((fund: any) => {
+					const fundType = (fund.fund_type || '').toLowerCase()
+					return fundType.includes('venture') || 
+						   fundType.includes('vc') || 
+						   fundType.includes('private equity') || 
+						   fundType.includes('pe')
+				})
+			})
+			console.log(`[${requestId}] After VC filtering: ${filteredRows.length} results`)
+		}
+		
+		const context = buildAnswerContext(filteredRows as any, query)
 		
 		// Calculate metadata for the response
 		const demoCheck = checkDemoLimit(request, isSubscriber)
@@ -122,20 +155,55 @@ export async function POST(request: NextRequest) {
 			isSubscriber: isSubscriber
 		}
 		
-		// Set up SSE stream with proper error handling and guaranteed completion
+		// Set up SSE stream with heartbeat and inactivity timeout prevention
 		const encoder = new TextEncoder()
 		const sse = new ReadableStream<Uint8Array>({
 			async start(controller) {
 				let streamStarted = false;
+				let lastTokenTime = Date.now();
+				
+				// Heartbeat function to prevent inactivity timeout
+				const sendHeartbeat = () => {
+					try {
+						const heartbeat = JSON.stringify('.');
+						controller.enqueue(encoder.encode(`data: {"token":${heartbeat}}\n\n`));
+						lastTokenTime = Date.now();
+					} catch (err) {
+						console.error(`[${requestId}] Heartbeat error:`, err);
+					}
+				};
+				
+				// Set up heartbeat interval (every 2 seconds)
+				const heartbeatInterval = setInterval(() => {
+					const timeSinceLastToken = Date.now() - lastTokenTime;
+					// Send heartbeat if more than 3 seconds since last token
+					if (timeSinceLastToken > 3000) {
+						sendHeartbeat();
+					}
+				}, 2000);
+				
 				try {
 					// Send initial connection confirmation with metadata
 					controller.enqueue(encoder.encode(`data: {"type":"connected","metadata":${JSON.stringify(metadata)}}\n\n`));
 					streamStarted = true;
 					
+					// Send processing status update
+					const statusToken = JSON.stringify('🔍 Searching database...');
+					controller.enqueue(encoder.encode(`data: {"token":${statusToken}}\n\n`));
+					lastTokenTime = Date.now();
+					
 					console.log(`[${requestId}] Starting token stream...`)
 					
-					// Stream tokens with proper SSE format
+					// Send another status update before AI generation
+					const aiStatusToken = JSON.stringify('\n\n✨ Generating response...\n\n');
+					controller.enqueue(encoder.encode(`data: {"token":${aiStatusToken}}\n\n`));
+					lastTokenTime = Date.now();
+					
+					// Stream tokens with proper SSE format and timeout protection
 					for await (const token of streamAnswerTokens(query, context)) {
+						// Clear heartbeat since we got a real token
+						lastTokenTime = Date.now();
+						
 						// Properly format each token for SSE (escape newlines if needed)
 						const escapedToken = JSON.stringify(token);
 						controller.enqueue(encoder.encode(`data: {"token":${escapedToken}}\n\n`));
@@ -143,8 +211,11 @@ export async function POST(request: NextRequest) {
 					
 					console.log(`[${requestId}] Token streaming complete`)
 					
-					// Send metadata at the end too
+					// Send metadata and sources at the end
+					const sourcesToken = JSON.stringify(`\n\n📊 **Sources**: ${filteredRows.length} RIAs found`);
+					controller.enqueue(encoder.encode(`data: {"token":${sourcesToken}}\n\n`));
 					controller.enqueue(encoder.encode(`data: {"type":"metadata","metadata":${JSON.stringify(metadata)}}\n\n`));
+					
 				} catch (err) {
 					console.error(`[${requestId}] Stream error:`, err);
 					
@@ -157,6 +228,9 @@ export async function POST(request: NextRequest) {
 					const errorMessage = `I encountered an issue processing your request. Here's what I found: ${context ? context.substring(0, 500) + '...' : 'No context available'}`;
 					controller.enqueue(encoder.encode(`data: {"token":${JSON.stringify(errorMessage)}}\n\n`));
 				} finally {
+					// Clear heartbeat interval
+					clearInterval(heartbeatInterval);
+					
 					// ALWAYS send completion marker, no matter what happened
 					try {
 						controller.enqueue(encoder.encode('data: [DONE]\n\n'));

@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     console.log(`[${requestId}] Query: "${query}"`);
     console.log(`[${requestId}] Filters:`, filters);
 
-    // Start with base query - with indexes this should be fast
+    // Build the base query - using same logic as browse endpoint which works correctly
     let dbQuery = supabaseAdmin
       .from('ria_profiles')
       .select(`
@@ -43,16 +43,20 @@ export async function POST(req: NextRequest) {
         website,
         narratives(narrative),
         control_persons(person_name, title),
-        ria_private_funds(fund_name, fund_type, gross_asset_value)
+        ria_private_funds(
+          fund_name,
+          fund_type,
+          gross_asset_value
+        )
       `);
 
-    // Apply geographic filters
+    // Apply geographic filters - same logic as browse
     if (state) {
       dbQuery = dbQuery.eq('state', state.toUpperCase());
     }
-    
+
     if (city) {
-      // Handle St. Louis variations
+      // Handle St. Louis and other city variations - same logic as browse
       if (city.toLowerCase().includes('st') && city.toLowerCase().includes('louis')) {
         dbQuery = dbQuery.or('city.ilike.%ST LOUIS%,city.ilike.%ST. LOUIS%');
       } else {
@@ -60,13 +64,15 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Apply AUM filter
     if (minAum) {
       dbQuery = dbQuery.gte('aum', minAum);
     }
 
-    // Text search on query if provided
-    if (query) {
+    // Text search on query if provided, but skip if we're doing filtered searches
+    // When filters are applied, the query is more of a description than a literal search term
+    const hasFilters = state || city || fundType || hasVcActivity || minAum;
+    
+    if (query && !hasFilters) {
       // Check if query is a CRD number
       const isNumber = /^\d+$/.test(query);
       if (isNumber) {
@@ -75,14 +81,17 @@ export async function POST(req: NextRequest) {
         // Search in legal name and optionally in narratives
         dbQuery = dbQuery.ilike('legal_name', `%${query}%`);
       }
+    } else if (query && hasFilters) {
+      // When we have filters, treat query as descriptive - don't search literal text
+      console.log(`[${requestId}] Skipping text search due to filters - query is descriptive: "${query}"`);
     }
 
-    // Order by AUM for relevance
+    // Apply sorting
     dbQuery = dbQuery.order('aum', { ascending: false, nullsFirst: false });
 
-    // Execute the query with higher limit for filtering
-    // St. Louis alone has 446 RIAs, so we need a much higher initial limit
-    dbQuery = dbQuery.limit(Math.max(limit * 20, 1000));
+    // Execute the query - get a large limit to handle post-filtering
+    // We need high limit because VC filtering happens after the main query
+    dbQuery = dbQuery.limit(5000); // Much higher to ensure we get enough results for filtering
     
     const { data: riaProfiles, error } = await dbQuery;
 
@@ -122,7 +131,10 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Filter by VC activity flag
+    console.log(`[${requestId}] Before VC filtering: ${filteredResults.length} results`);
+    console.log(`[${requestId}] hasVcActivity filter: ${hasVcActivity}`);
+
+    // Filter by VC activity if specified - using exact same logic as browse endpoint
     if (hasVcActivity) {
       filteredResults = filteredResults.filter(ria => {
         if (!ria.ria_private_funds || ria.ria_private_funds.length === 0) {
@@ -136,6 +148,7 @@ export async function POST(req: NextRequest) {
                  fundType.includes('pe');
         });
       });
+      console.log(`[${requestId}] After VC filtering: ${filteredResults.length} results`);
     }
 
     // Format results
