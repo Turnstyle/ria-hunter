@@ -69,28 +69,10 @@ export async function POST(req: NextRequest) {
     console.log(`[${requestId}] Filters:`, filters);
     console.log(`[${requestId}] Weights: Semantic=${semanticWeight}, Database=${databaseWeight}`);
 
-    // Parse the query to extract intent
-    const queryLower = query.toLowerCase();
+    // Use the filters as provided - trust the AI to extract them properly
     let extractedState = state;
     let extractedCity = city;
     let extractedFundType = fundType;
-
-    // Extract location from query
-    if (!extractedCity && (queryLower.includes('st louis') || queryLower.includes('st. louis'))) {
-      extractedCity = 'St. Louis';
-    }
-    if (!extractedState && (queryLower.includes('missouri') || queryLower.includes(' mo '))) {
-      extractedState = 'MO';
-    }
-
-    // Extract fund type from query
-    if (!extractedFundType) {
-      if (queryLower.includes('vc') || queryLower.includes('venture')) {
-        extractedFundType = 'Venture Capital';
-      } else if (queryLower.includes('pe') || queryLower.includes('private equity')) {
-        extractedFundType = 'Private Equity';
-      }
-    }
 
     // STEP 1: Get ALL matching RIAs from database (comprehensive)
     console.log(`[${requestId}] Step 1: Retrieving all matching RIAs from database...`);

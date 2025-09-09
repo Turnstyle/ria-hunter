@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { callLLMToDecomposeQuery, fallbackDecompose } from './planner';
+import { callLLMToDecomposeQuery } from './planner';
 import { unifiedSemanticSearch } from './unified-search';
 import { buildAnswerContext } from './context-builder';
 import { generateNaturalLanguageAnswer, streamAnswerTokens } from './generator';
@@ -94,96 +94,27 @@ export async function POST(req: NextRequest) {
     const filters = body?.filters || {};
     console.log(`[${requestId}] Filters from body:`, filters);
     
-    // Decompose the query to extract intent and location
-    let decomposition;
-    try {
-      decomposition = await callLLMToDecomposeQuery(query);
-      console.log(`[${requestId}] LLM Query decomposed:`, JSON.stringify({
-        query: query,
-        semantic_query: decomposition.semantic_query,
-        structured_filters: decomposition.structured_filters
-      }));
-    } catch (decompositionError) {
-      console.error(`[${requestId}] ❌ Query decomposition failed:`, decompositionError);
-      // Use proper fallback
-      decomposition = fallbackDecompose(query);
-      console.log(`[${requestId}] Fallback decomposition used:`, JSON.stringify({
-        query: query,
-        semantic_query: decomposition.semantic_query,
-        structured_filters: decomposition.structured_filters
-      }));
-    }
+    // Decompose the query using AI - let Gemini handle ALL location understanding naturally
+    const decomposition = await callLLMToDecomposeQuery(query);
+    console.log(`[${requestId}] AI Query decomposed:`, JSON.stringify({
+      query: query,
+      semantic_query: decomposition.semantic_query,
+      structured_filters: decomposition.structured_filters
+    }));
     
-    // BYPASS: For St. Louis queries, use simple direct search
-    const queryLowerCheck = query.toLowerCase();
-    if (queryLowerCheck.includes('st. louis') || queryLowerCheck.includes('st louis') || queryLowerCheck.includes('saint louis')) {
-      console.log(`[${requestId}] 🚀 BYPASS: Using direct St. Louis search`);
-      
-      // Direct database query for St. Louis RIAs
-      const { data: stLouisRias, error: dbError } = await supabaseAdmin
-        .from('ria_profiles')
-        .select('*')
-        .eq('state', 'MO')
-        .or('city.ilike.%St. Louis%,city.ilike.%ST LOUIS%,city.ilike.%Saint Louis%')
-        .order('aum', { ascending: false })
-        .limit(body?.limit || 10);
-      
-      if (!dbError && stLouisRias && stLouisRias.length > 0) {
-        console.log(`[${requestId}] ✅ Found ${stLouisRias.length} St. Louis RIAs`);
-        
-        const context = buildAnswerContext(stLouisRias, query);
-        const demoCheck = checkDemoLimit(req, isSubscriber);
-        
-        const headers = corsHeaders(req);
-        if (!userId) {
-          const newCount = demoCheck.searchesUsed + 1;
-          headers.set('Set-Cookie', `rh_demo=${newCount}; HttpOnly; Secure; SameSite=Lax; Max-Age=${24 * 60 * 60}; Path=/`);
-        }
-        
-        // Handle streaming vs non-streaming
-        if (isStreaming) {
-          return handleStreamingResponse(req, requestId, query, context, stLouisRias, {
-            searchStrategy: 'direct_st_louis',
-            confidence: 1.0
-          }, headers);
-        } else {
-          const answer = await generateNaturalLanguageAnswer(query, context);
-          return NextResponse.json({
-            answer,
-            sources: stLouisRias,
-            metadata: {
-              searchStrategy: 'direct_st_louis',
-              confidence: 1.0,
-              searchesRemaining: isSubscriber ? -1 : demoCheck.searchesRemaining - 1,
-              isSubscriber
-            }
-          }, { headers });
-        }
-      }
-    }
+    // NO MORE BYPASSES - Let the AI handle everything naturally
     
     // Execute unified semantic search
     console.log(`[${requestId}] Starting unified semantic search...`);
     
-    // Extract location - prioritize direct detection over decomposition
+    // Trust the AI's decomposition - it understands locations naturally
     let extractedCity = filters.city;
     let extractedState = filters.state;
     
-    // First, check the query directly for known patterns
-    const queryLower = query.toLowerCase();
-    console.log(`[${requestId}] 🔍 Checking query for location patterns: "${queryLower}"`);
-    
-    if (queryLower.includes('st. louis') || queryLower.includes('st louis') || queryLower.includes('saint louis')) {
-      extractedCity = 'St. Louis'; // Use the format that matches DB
-      extractedState = 'MO';
-      console.log(`[${requestId}] ✅✅✅ DETECTED ST. LOUIS! Setting city='${extractedCity}', state='${extractedState}'`);
-    } else if (queryLower.includes('missouri')) {
-      extractedState = 'MO';
-      console.log(`[${requestId}] ✅✅✅ DETECTED MISSOURI! Setting state='${extractedState}'`);
-    } else if (decomposition.structured_filters?.location) {
-      // Fall back to decomposition if no direct match
+    // Use AI's location extraction directly without overriding
+    if (decomposition.structured_filters?.location) {
       const extractedLocation = decomposition.structured_filters.location;
-      console.log(`[${requestId}] No direct match, using decomposed location: ${extractedLocation}`);
+      console.log(`[${requestId}] Using AI-decomposed location: ${extractedLocation}`);
       
       const locationParts = extractedLocation.split(',').map(p => p.trim());
       if (locationParts.length === 2) {
@@ -197,16 +128,13 @@ export async function POST(req: NextRequest) {
           extractedCity = loc;
         }
       }
-    } else {
-      console.log(`[${requestId}] ❌ No location detected in query or decomposition`);
     }
     
-    console.log(`[${requestId}] Location extraction details:`, JSON.stringify({
+    console.log(`[${requestId}] AI location extraction:`, JSON.stringify({
       query: query,
       decomposedFilters: decomposition.structured_filters,
-      finalCity: extractedCity,
-      finalState: extractedState,
-      willApplyFilters: !!(extractedCity || extractedState)
+      city: extractedCity,
+      state: extractedState
     }));
     
     // Force structured search for location-based superlative queries

@@ -31,30 +31,10 @@ export async function POST(req: NextRequest) {
     console.log(`[${requestId}] Query: "${query}"`);
     console.log(`[${requestId}] Filters:`, filters);
 
-    // Parse the query to extract location and fund type information
-    const queryLower = query.toLowerCase();
+    // Use the filters as provided - no manual extraction needed
     let extractedState = state;
     let extractedCity = city;
     let extractedFundType = fundType;
-
-    // Extract St. Louis from query if not in filters
-    if (!extractedCity && (queryLower.includes('st louis') || queryLower.includes('st. louis'))) {
-      extractedCity = 'St. Louis';
-    }
-
-    // Extract Missouri/MO from query if not in filters
-    if (!extractedState && (queryLower.includes('missouri') || queryLower.includes(' mo '))) {
-      extractedState = 'MO';
-    }
-
-    // Extract fund type from query if not in filters
-    if (!extractedFundType) {
-      if (queryLower.includes('vc') || queryLower.includes('venture')) {
-        extractedFundType = 'Venture Capital';
-      } else if (queryLower.includes('pe') || queryLower.includes('private equity')) {
-        extractedFundType = 'Private Equity';
-      }
-    }
 
     // Build comprehensive database query
     let dbQuery = supabaseAdmin
