@@ -12,20 +12,23 @@ interface LinkCardProps {
 }
 
 export function LinkCard({ title, description, href, ctaText, gradient, icon, onClick }: LinkCardProps) {
-  const getIcon = () => {
-    switch (icon) {
-      case "layers":
-        return <Layers className="h-6 w-6" />
-      case "search":
-        return <Search className="h-6 w-6" />
-      case "flame":
-        return <Flame className="h-6 w-6" />
-      case "apple":
-        return <Apple className="h-6 w-6" />
-      default:
-        return <Layers className="h-6 w-6" />
-    }
-  }
+  const iconMap = {
+    layers: Layers,
+    search: Search,
+    flame: Flame,
+    apple: Apple,
+  } as const
+
+  const IconComponent = iconMap[icon] || Layers
+
+  const buttonClasses = `group/button inline-flex items-center rounded-lg bg-gradient-to-r ${gradient} px-4 py-2 text-sm font-medium text-white transition-all duration-300 hover:shadow-lg`
+
+  const ButtonContent = () => (
+    <>
+      {ctaText}
+      <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover/button:translate-x-1" />
+    </>
+  )
 
   return (
     <div className="group relative overflow-hidden rounded-xl border border-white/50 bg-white/80 backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl dark:border-slate-700/50 dark:bg-slate-800/50">
@@ -40,10 +43,8 @@ export function LinkCard({ title, description, href, ctaText, gradient, icon, on
 
       <div className="relative z-10 p-6">
         <div className="mb-4 flex items-center">
-          <div
-            className={`mr-3 flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-r ${gradient} text-white`}
-          >
-            {getIcon()}
+          <div className={`mr-3 flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-r ${gradient} text-white`}>
+            <IconComponent className="h-6 w-6" />
           </div>
           <h2 className="text-xl font-bold text-slate-900 dark:text-white">{title}</h2>
         </div>
@@ -51,20 +52,12 @@ export function LinkCard({ title, description, href, ctaText, gradient, icon, on
         <p className="mb-4 text-slate-600 dark:text-slate-400">{description}</p>
 
         {onClick ? (
-          <button
-            onClick={onClick}
-            className={`group/button inline-flex items-center rounded-lg bg-gradient-to-r ${gradient} px-4 py-2 text-sm font-medium text-white transition-all duration-300 hover:shadow-lg`}
-          >
-            {ctaText}
-            <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover/button:translate-x-1" />
+          <button onClick={onClick} className={buttonClasses}>
+            <ButtonContent />
           </button>
         ) : (
-          <Link
-            href={href}
-            className={`group/button inline-flex items-center rounded-lg bg-gradient-to-r ${gradient} px-4 py-2 text-sm font-medium text-white transition-all duration-300 hover:shadow-lg`}
-          >
-            {ctaText}
-            <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover/button:translate-x-1" />
+          <Link href={href} className={buttonClasses}>
+            <ButtonContent />
           </Link>
         )}
       </div>
