@@ -132,10 +132,12 @@ export async function POST(req: NextRequest) {
     }
 
     console.log(`[${requestId}] Before VC filtering: ${filteredResults.length} results`);
-    console.log(`[${requestId}] hasVcActivity filter: ${hasVcActivity}`);
-
+    
     // Filter by VC activity if specified - using exact same logic as browse endpoint
     if (hasVcActivity) {
+      console.log(`[${requestId}] Applying hasVcActivity filter...`);
+      
+      const initialCount = filteredResults.length;
       filteredResults = filteredResults.filter(ria => {
         if (!ria.ria_private_funds || ria.ria_private_funds.length === 0) {
           return false;
@@ -148,7 +150,9 @@ export async function POST(req: NextRequest) {
                  fundType.includes('pe');
         });
       });
-      console.log(`[${requestId}] After VC filtering: ${filteredResults.length} results`);
+      
+      const filteredCount = filteredResults.length;
+      console.log(`[${requestId}] VC filtering complete: ${initialCount} → ${filteredCount} results (${Math.round((filteredCount/initialCount)*100)}% match rate)`);
     }
 
     // Format results
