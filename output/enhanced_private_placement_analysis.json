@@ -1,0 +1,158 @@
+{
+  "metadata": {
+    "generated_at": "2025-08-05T08:05:44.800Z",
+    "analysis_type": "Enhanced Private Placement Analysis with Semantic Search",
+    "total_rias_analyzed": 523,
+    "narratives_analyzed": 1000,
+    "specialization_categories": 6
+  },
+  "executive_summary": {
+    "original_top_5_st_louis": [
+      {
+        "name": "STIFEL, NICOLAUS & COMPANY, INCORPORATED",
+        "funds": 230,
+        "aum": 2991057185,
+        "rank": 1
+      },
+      {
+        "name": "FOCUS PARTNERS WEALTH, LLC",
+        "funds": 39,
+        "aum": 1770089252,
+        "rank": 2
+      },
+      {
+        "name": "THOMPSON STREET CAPITAL MANAGER LLC",
+        "funds": 17,
+        "aum": 9833460344,
+        "rank": 3
+      },
+      {
+        "name": "ELMTREE FUNDS, LLC",
+        "funds": 15,
+        "aum": 7217400625,
+        "rank": 4
+      },
+      {
+        "name": "ARGOS CAPITAL PARTNERS, LLC",
+        "funds": 15,
+        "aum": 2036184045,
+        "rank": 5
+      }
+    ],
+    "total_private_fund_rias": 523,
+    "st_louis_specialists_discovered": 0,
+    "top_markets_identified": 0,
+    "semantic_enhancement_impact": "Discovered investment specializations and hidden expertise areas"
+  },
+  "st_louis_enhanced_analysis": {
+    "total_rias_with_private_funds": 22,
+    "specialists_with_narratives": 0,
+    "top_10_by_specialization": []
+  },
+  "specialization_discovery": [
+    {
+      "category": "Alternative Investments",
+      "total_specialists": 1,
+      "top_5_nationwide": [
+        {
+          "legal_name": "PMG FAMILY OFFICE, LLC",
+          "location": "PLANO, TX",
+          "private_fund_count": 1,
+          "private_fund_aum": 1051145842,
+          "specialization_score": 1,
+          "matched_keywords": [
+            "family office"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Real Estate",
+      "total_specialists": 5,
+      "top_5_nationwide": [
+        {
+          "legal_name": "TENNENBAUM CAPITAL PARTNERS, LLC",
+          "location": "SANTA MONICA, CA",
+          "private_fund_count": 11,
+          "private_fund_aum": 6087355192,
+          "specialization_score": 1,
+          "matched_keywords": [
+            "development"
+          ]
+        },
+        {
+          "legal_name": "RESILIENCE MANAGEMENT",
+          "location": "CLEVELAND, OH",
+          "private_fund_count": 3,
+          "private_fund_aum": 563492000,
+          "specialization_score": 1,
+          "matched_keywords": [
+            "land"
+          ]
+        },
+        {
+          "legal_name": "NEON MONEY IA, LLC",
+          "location": "LONG ISLAND CITY, NY",
+          "private_fund_count": 2,
+          "private_fund_aum": 989358460,
+          "specialization_score": 1,
+          "matched_keywords": [
+            "land"
+          ]
+        },
+        {
+          "legal_name": "NORTHWEST ASSET MANAGEMENT",
+          "location": "MERCER ISLAND, WA",
+          "private_fund_count": 1,
+          "private_fund_aum": 1510381000,
+          "specialization_score": 1,
+          "matched_keywords": [
+            "land"
+          ]
+        },
+        {
+          "legal_name": "26NORTH DIRECT LENDING",
+          "location": "NEW YORK, NY",
+          "private_fund_count": 1,
+          "private_fund_aum": 21901237,
+          "specialization_score": 1,
+          "matched_keywords": [
+            "development"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Infrastructure/Energy",
+      "total_specialists": 0,
+      "top_5_nationwide": []
+    },
+    {
+      "category": "Venture Capital",
+      "total_specialists": 0,
+      "top_5_nationwide": []
+    },
+    {
+      "category": "Distressed/Credit",
+      "total_specialists": 0,
+      "top_5_nationwide": []
+    },
+    {
+      "category": "ESG/Impact",
+      "total_specialists": 0,
+      "top_5_nationwide": []
+    }
+  ],
+  "geographic_expansion_opportunities": [],
+  "semantic_search_impact": {
+    "before": "Keyword-based search limited to firm names and basic filters",
+    "after": "Semantic understanding of investment specializations and expertise areas",
+    "improvements": [
+      "Investment specialization taxonomy created",
+      "Hidden expertise areas discovered through narrative analysis",
+      "Geographic competitive intelligence mapped",
+      "Client-RIA matching optimization enabled",
+      "Alternative investment specialists identified beyond traditional metrics"
+    ]
+  }
+}

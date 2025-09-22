@@ -13,20 +13,17 @@ dist
 .env.local
 gcp-key.json
 
-# Data and generated artifacts
-public/raw_data/
-raw/
-output/
-seed/narratives.json
-output/narratives.json
-
-# OS/Editor
+# macOS system files
 .DS_Store
+**/.DS_Store
+
+# Logs
+logs/
+
+# Raw data files (too large for git)
+raw/
+public/raw_data/
 
 # Local env
 env.local
 .env
-
-# Logs
-logs/
-*.log
