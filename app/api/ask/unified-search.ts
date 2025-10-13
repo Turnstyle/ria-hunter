@@ -196,7 +196,10 @@ async function executeStructuredQuery(
 // Calculate average confidence score
 function calculateAverageConfidence(results: any[]): number {
   if (!results || results.length === 0) return 0
-  const scores = results.filter(r => r.similarity_score).map(r => r.similarity_score)
+  const scores = results.reduce((acc: number[], r) => {
+    if (r.similarity_score) acc.push(r.similarity_score);
+    return acc;
+  }, []);
   if (scores.length === 0) return 0.5
   return scores.reduce((sum, score) => sum + score, 0) / scores.length
 }
