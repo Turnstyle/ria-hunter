@@ -129,6 +129,15 @@ npx ts-node scripts/embed_narratives.ts
 CREATE EXTENSION IF NOT EXISTS vector;
 ```
 
+### Data Hygiene Scripts
+
+Keep the Supabase tables tidy before running audits or re-ingesting data. All scripts expect `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` to be present in `.env.local`.
+
+- `node scripts/normalize_ria_profiles.js` – trims state/city/phone/website fields for `ria_profiles`.
+- `node scripts/normalize_ria_private_funds.js` – standardises `fund_name`/`fund_type` values and reports missing identifiers.
+- `node scripts/clean_control_persons.js` – normalises executive names/titles and removes obvious duplicates.
+- `node scripts/check_mv_firm_activity_refresh.js [--refresh]` – compares the `mv_firm_activity` materialised view against its source view; add `--refresh` to rebuild when it reports drift. The script exits with code `2` when manual cleanup is required.
+
 ## Database Schema
 
 The main table `ria_profiles` stores adviser information:

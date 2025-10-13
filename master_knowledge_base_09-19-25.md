@@ -5,7 +5,7 @@ Canonical reference for SEC data relationships and processing logic for Vertex A
 This file will be converted to .txt and uploaded to GCS bucket for knowledge base ingestion.
 
 ## Important Note on Implementation Details
-This knowledge base contains historical implementation details from a custom PostgreSQL-based system for documentation completeness. Vertex AI Search will use its own optimized indexing and retrieval mechanisms. The specific SQL commands, database indexes, and vector search configurations documented here are provided for context about the data relationships and performance characteristics, but should NOT be replicated in the Vertex AI implementation. Vertex AI Search will automatically optimize indexing based on the raw data and usage patterns.
+This knowledge base contains historical implementation details from a custom PostgreSQL-based system for documentation completeness. Vertex AI Search will use its own optimized indexing and retrieval mechanisms. The specific SQL commands, database indexes, and vector search configurations documented here are provided for context about the data relationships and performance characteristics, but should NOT be required in the Vertex AI implementation. Vertex AI Search will automatically optimize indexing based on the raw data and usage patterns.
 
 ## Critical Architecture Notes
 - **Primary Key:** CRD number (1-8 digits) for adviser entities

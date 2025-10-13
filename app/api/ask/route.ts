@@ -5,7 +5,7 @@ import { buildAnswerContext } from './context-builder';
 import { generateNaturalLanguageAnswer, streamAnswerTokens } from './generator';
 import { checkDemoLimit } from '@/lib/demo-session';
 import { corsHeaders, handleOptionsRequest, corsError } from '@/lib/cors';
-import { supabaseAdmin } from '@/lib/supabaseAdmin';
+import { supabaseAdmin, supabaseAdminConfigured } from '@/lib/supabaseAdmin';
 
 // Handle OPTIONS requests for CORS
 export function OPTIONS(req: NextRequest) {
@@ -36,6 +36,10 @@ export async function POST(req: NextRequest) {
   console.log(`[${requestId}] Using unified semantic search`);
   
   try {
+    if (!supabaseAdminConfigured) {
+      return corsError(req, 'Supabase credentials are missing. Please configure SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.', 503)
+    }
+
     // Parse request body
     const body = await req.json().catch(() => ({} as any));
     const query = typeof body?.query === 'string' ? body.query : '';

@@ -27,3 +27,7 @@ public/raw_data/
 # Local env
 env.local
 .env
+# Generated data exports
+exports/
+output/
+fast_conversion.log

@@ -21,7 +21,11 @@ type ActivityRow = {
 	// Only city and state are available
 }
 
-export function buildAnswerContext(rows: ActivityRow[], originalQuery: string): string {
+export function buildAnswerContext(
+	rows: ActivityRow[],
+	originalQuery: string,
+	includeDetails = true
+): string {
 	// Dynamic header based on query content
 	const isVentureQuery = originalQuery.toLowerCase().includes('venture') || 
 	                      originalQuery.toLowerCase().includes('vc')
@@ -92,11 +96,11 @@ export function buildAnswerContext(rows: ActivityRow[], originalQuery: string): 
 		if (r.similarity && r.similarity > 0) {
 			parts.push(`Relevance: ${(r.similarity * 100).toFixed(1)}%`)
 		} else if (r.activity_score && r.activity_score > 0) {
-			parts.push(`Score: ${Number(r.activity_score).toFixed(2)}`)
+			parts.push(`Activity Score: ${Number(r.activity_score).toFixed(2)}`)
 		}
 		
 		// Add executives if available
-		if (execs) {
+		if (includeDetails && execs) {
 			parts.push(`Executives: ${execs}`)
 		}
 		
@@ -105,5 +109,4 @@ export function buildAnswerContext(rows: ActivityRow[], originalQuery: string): 
 	
 	return [header, addressNotice, '', ...lines].join('\n')
 }
-
 
