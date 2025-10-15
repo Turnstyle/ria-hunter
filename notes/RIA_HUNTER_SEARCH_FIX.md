@@ -20,22 +20,26 @@ When searching for "10 largest RIAs in St. Louis", the same company (EDWARD JONE
 ### Root Cause
 The `executeStructuredQuery` function in `unified-search.ts` was querying the database without deduplicating by CRD number. If multiple entries existed for the same company in the `ria_profiles` table, they would all be returned.
 
-### Solution (Updated)
-Updated `executeStructuredQuery` to deduplicate results by CRD number:
-- Uses standard Supabase query builder with filters
-- Fetches extra results (limit × 3) to account for duplicates
-- Manually deduplicates by CRD number in JavaScript
-- For each CRD number, keeps only the entry with the highest AUM
-- Results are sorted by AUM descending and limited to the requested count
+### Solution (Final - Oct 15, 2025)
+The issue had TWO parts:
+1. **Missing deduplication:** Database query returned all duplicate entries
+2. **City filter bug:** "St. Louis" wasn't matching because the database has "ST. LOUIS" (with period)
 
-**Note:** Initial attempt used a non-existent `exec_sql` RPC which caused "0 results" error. Fixed by using standard query builder.
+Fixed by:
+- Using standard Supabase query builder with filters
+- Fetching extra results (limit × 3) to account for duplicates  
+- Manually deduplicating by CRD number in JavaScript
+- For each CRD number, keeping only the entry with the highest AUM
+- **Special handling for St. Louis:** Using `.or('city.ilike.%ST LOUIS%,city.ilike.%ST. LOUIS%')` to match both variations
+- Adding detailed logging to track deduplication process
 
 ### Files Changed
-- `app/api/ask/unified-search.ts` - Lines 139-204
+- `app/api/ask/unified-search.ts` - Lines 139-220
 
-### Deployment
-- **Initial Commit:** ff3b2a384 (broken - returned 0 results)
-- **Fixed Commit:** 782b0806a ✅
+### Deployment History
+- **Initial Commit:** ff3b2a384 (broken - used non-existent RPC, returned 0 results)
+- **Second Commit:** 782b0806a (fixed RPC but still had St. Louis filter issue, returned duplicates)
+- **Final Commit:** 6b867da0d ✅ (fixed St. Louis variations + deduplication)
 - **Deployed:** Oct 15, 2025 via Vercel CLI
 - **Status:** ✅ Live in production
 
