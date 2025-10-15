@@ -111,22 +111,11 @@ async function executeSemanticQuery(decomposition: QueryPlan, filters: { state?:
       return []
     }
     
-    // STEP 3: Post-filter by city if needed (flexible matching)
-    let filteredResults = searchResults
-    if (filters.city) {
-      console.log(`🏙️ Filtering by city: ${filters.city}`)
-      // Flexible city matching: normalize by removing periods and extra spaces
-      const normalizeCity = (city: string) => city.toLowerCase().replace(/[.\s]+/g, ' ').trim()
-      const cityNormalized = normalizeCity(filters.city)
-      
-      filteredResults = searchResults.filter((ria: any) => {
-        const profileCity = normalizeCity(ria.city || '')
-        // Match if the normalized city includes the search term
-        // "st louis" will match "ST. LOUIS", "St. Louis", "St Louis", etc.
-        return profileCity.includes(cityNormalized)
-      })
-      console.log(`  After city filter: ${filteredResults.length} results (from ${searchResults.length})`)
-    }
+    // STEP 3: Trust semantic search to understand location naturally
+    // The embeddings in the query "largest RIAs in St. Louis" will naturally match
+    // narratives that mention St. Louis - no rigid filtering needed!
+    const filteredResults = searchResults
+    console.log(`🧠 Trusting AI embeddings to understand location naturally`)
     
     // STEP 4: Apply AI-determined sorting
     // The AI planner tells us HOW to sort based on understanding the query naturally
