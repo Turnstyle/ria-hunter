@@ -159,7 +159,13 @@ async function executeStructuredQuery(
     
     if (filters.city) {
       console.log(`  Adding city filter: ${filters.city}`)
-      query = query.ilike('city', `%${filters.city}%`)
+      // Handle St. Louis and other city variations (with or without period)
+      if (filters.city.toLowerCase().includes('st') && filters.city.toLowerCase().includes('louis')) {
+        query = query.or('city.ilike.%ST LOUIS%,city.ilike.%ST. LOUIS%')
+        console.log(`  Using St. Louis variation filter`)
+      } else {
+        query = query.ilike('city', `%${filters.city}%`)
+      }
     }
     
     if (filters.min_aum) {
@@ -179,6 +185,14 @@ async function executeStructuredQuery(
       return []
     }
     
+    // Log raw data before deduplication
+    console.log(`  Raw data (first 3):`, data.slice(0, 3).map(r => ({
+      crd: r.crd_number,
+      name: r.legal_name,
+      city: r.city,
+      aum: r.aum
+    })))
+    
     // Manually deduplicate by CRD number, keeping the one with highest AUM
     console.log(`  Deduplicating ${data.length} results...`)
     const deduped = new Map<number, any>()
@@ -189,10 +203,18 @@ async function executeStructuredQuery(
       }
     })
     
+    console.log(`  After deduplication: ${deduped.size} unique CRD numbers`)
+    
     // Sort by AUM descending and limit to requested count
     const results = Array.from(deduped.values())
       .sort((a, b) => (b.aum || 0) - (a.aum || 0))
       .slice(0, limit)
+    
+    console.log(`  Final results (first 5):`, results.slice(0, 5).map(r => ({
+      crd: r.crd_number,
+      name: r.legal_name,
+      aum: r.aum
+    })))
     
     console.log(`✅ Structured query complete (deduplicated): ${results.length} unique results from ${data.length} total`)
     return results
