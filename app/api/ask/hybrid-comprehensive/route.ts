@@ -108,11 +108,8 @@ export async function POST(req: NextRequest) {
 
     if (extractedCity || city) {
       const cityFilter = extractedCity || city;
-      if (cityFilter.toLowerCase().includes('st') && cityFilter.toLowerCase().includes('louis')) {
-        dbQuery = dbQuery.or('city.ilike.%ST LOUIS%,city.ilike.%ST. LOUIS%');
-      } else {
-        dbQuery = dbQuery.ilike('city', `%${cityFilter}%`);
-      }
+      // Trust AI embeddings to understand location variations naturally
+      dbQuery = dbQuery.ilike('city', `%${cityFilter}%`);
     }
 
     if (minAum) {

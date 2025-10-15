@@ -159,13 +159,8 @@ async function executeStructuredQuery(
     
     if (filters.city) {
       console.log(`  Adding city filter: ${filters.city}`)
-      // Handle St. Louis and other city variations (with or without period)
-      if (filters.city.toLowerCase().includes('st') && filters.city.toLowerCase().includes('louis')) {
-        query = query.or('city.ilike.%ST LOUIS%,city.ilike.%ST. LOUIS%')
-        console.log(`  Using St. Louis variation filter`)
-      } else {
-        query = query.ilike('city', `%${filters.city}%`)
-      }
+      // Trust AI embeddings to understand location variations naturally
+      query = query.ilike('city', `%${filters.city}%`)
     }
     
     if (filters.min_aum) {

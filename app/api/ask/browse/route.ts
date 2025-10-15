@@ -55,12 +55,8 @@ export async function GET(req: NextRequest) {
     }
 
     if (city) {
-      // Handle St. Louis and other city variations
-      if (city.toLowerCase().includes('st') && city.toLowerCase().includes('louis')) {
-        query = query.or('city.ilike.%ST LOUIS%,city.ilike.%ST. LOUIS%');
-      } else {
-        query = query.ilike('city', `%${city}%`);
-      }
+      // Trust semantic search to understand location variations naturally
+      query = query.ilike('city', `%${city}%`);
     }
 
     if (minAum) {

@@ -56,12 +56,8 @@ export async function POST(req: NextRequest) {
     }
 
     if (city) {
-      // Handle St. Louis and other city variations - same logic as browse
-      if (city.toLowerCase().includes('st') && city.toLowerCase().includes('louis')) {
-        dbQuery = dbQuery.or('city.ilike.%ST LOUIS%,city.ilike.%ST. LOUIS%');
-      } else {
-        dbQuery = dbQuery.ilike('city', `%${city}%`);
-      }
+      // Trust AI to understand location variations naturally
+      dbQuery = dbQuery.ilike('city', `%${city}%`);
     }
 
     if (minAum) {

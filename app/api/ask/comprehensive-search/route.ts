@@ -69,14 +69,9 @@ export async function POST(req: NextRequest) {
 
     if (extractedCity || city) {
       const cityFilter = extractedCity || city;
-      // Handle St. Louis variations
-      if (cityFilter.toLowerCase().includes('st') && cityFilter.toLowerCase().includes('louis')) {
-        dbQuery = dbQuery.or('city.ilike.%ST LOUIS%,city.ilike.%ST. LOUIS%');
-        console.log(`[${requestId}] Filtering by St. Louis variations`);
-      } else {
-        dbQuery = dbQuery.ilike('city', `%${cityFilter}%`);
-        console.log(`[${requestId}] Filtering by city: ${cityFilter}`);
-      }
+      // Trust AI to understand location variations naturally
+      dbQuery = dbQuery.ilike('city', `%${cityFilter}%`);
+      console.log(`[${requestId}] Filtering by city: ${cityFilter}`);
     }
 
     // Apply AUM filter
