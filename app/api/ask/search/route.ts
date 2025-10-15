@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (city) {
-      // Trust AI to understand location variations naturally
+      // Simple ILIKE - semantic search handles location variations naturally
       dbQuery = dbQuery.ilike('city', `%${city}%`);
     }
 

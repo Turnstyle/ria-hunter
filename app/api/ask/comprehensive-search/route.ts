@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
 
     if (extractedCity || city) {
       const cityFilter = extractedCity || city;
-      // Trust AI to understand location variations naturally
+      // Simple ILIKE - semantic search handles location variations naturally
       dbQuery = dbQuery.ilike('city', `%${cityFilter}%`);
       console.log(`[${requestId}] Filtering by city: ${cityFilter}`);
     }

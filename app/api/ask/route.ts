@@ -142,12 +142,7 @@ export async function POST(req: NextRequest) {
       state: extractedState
     }));
     
-    // Force structured search for location-based superlative queries
-    const isSuperlativeQuery = /\b(largest|biggest|top\s+\d+)\b/i.test(query);
-    const hasLocation = !!(extractedCity || extractedState);
-    const shouldForceStructured = !!filters.hasVcActivity || (isSuperlativeQuery && hasLocation);
-    
-    // Build filters object only with defined values
+    // Build filters object - let semantic search with AI embeddings handle everything
     const structuredFilters: any = {};
     if (extractedState) structuredFilters.state = extractedState;
     if (extractedCity) structuredFilters.city = extractedCity;
@@ -155,15 +150,11 @@ export async function POST(req: NextRequest) {
     
     const searchOptions = { 
       limit: body?.limit || 10,
-      structuredFilters,
-      forceStructured: shouldForceStructured
+      structuredFilters
     };
-    console.log(`[${requestId}] 🚨 CRITICAL: Search options:`, JSON.stringify({
+    console.log(`[${requestId}] Search options:`, JSON.stringify({
       ...searchOptions,
-      detectedLocation: { city: extractedCity, state: extractedState },
-      isSuperlative: isSuperlativeQuery,
-      hasLocation: hasLocation,
-      shouldForce: shouldForceStructured
+      detectedLocation: { city: extractedCity, state: extractedState }
     }, null, 2));
     
     let searchResult;

@@ -55,7 +55,7 @@ export async function GET(req: NextRequest) {
     }
 
     if (city) {
-      // Trust semantic search to understand location variations naturally
+      // Simple ILIKE - semantic search handles location variations naturally
       query = query.ilike('city', `%${city}%`);
     }
 

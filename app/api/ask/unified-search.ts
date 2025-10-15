@@ -159,7 +159,8 @@ async function executeStructuredQuery(
     
     if (filters.city) {
       console.log(`  Adding city filter: ${filters.city}`)
-      // Trust AI embeddings to understand location variations naturally
+      // Note: This is only used as fallback when semantic search fails
+      // The AI embeddings understand location variations naturally
       query = query.ilike('city', `%${filters.city}%`)
     }
     
@@ -233,13 +234,11 @@ export async function unifiedSemanticSearch(query: string, options: {
   limit?: number; 
   threshold?: number;
   structuredFilters?: { state?: string; city?: string; fundType?: string };
-  forceStructured?: boolean;
 } = {}) {
-  const { limit = 10, threshold = 0.3, structuredFilters = {}, forceStructured = false } = options
+  const { limit = 10, threshold = 0.3, structuredFilters = {} } = options
   
   console.log(`🔍 Starting unified semantic search for: "${query}"`)
   console.log(`📋 Structured filters:`, structuredFilters)
-  console.log(`🎯 Force structured search:`, forceStructured)
   
   // ALWAYS decompose with AI - no fallbacks
   const decomposition = await callLLMToDecomposeQuery(query)
@@ -255,34 +254,17 @@ export async function unifiedSemanticSearch(query: string, options: {
   
   console.log(`🔀 Merged filters:`, JSON.stringify(filters, null, 2))
   
-  // Decision: Use structured search for location-based superlative queries
-  const isSuperlativeQuery = /\b(largest|biggest|top\s+\d+|leading|major)\b/i.test(query)
-  const hasLocationFilter = !!(filters.state || filters.city)
-  const shouldUseStructured = forceStructured || (isSuperlativeQuery && hasLocationFilter)
-  
-  console.log(`📊 Query analysis:`)
-  console.log(`  - Is superlative: ${isSuperlativeQuery}`)
-  console.log(`  - Has location: ${hasLocationFilter}`)
-  console.log(`  - Should use structured: ${shouldUseStructured}`)
-  
+  // ALWAYS use semantic search - let AI embeddings understand everything naturally
+  console.log('🔄 Using SEMANTIC search with AI embeddings')
   let results: any[] = []
   let searchStrategy = 'semantic'
   
-  if (shouldUseStructured) {
-    // Use structured database query for location-based superlatives
-    console.log('🔄 Using STRUCTURED search strategy')
-    searchStrategy = 'structured'
+  try {
+    results = await executeSemanticQuery(decomposition, filters, limit)
+  } catch (semanticError) {
+    console.warn('⚠️ Semantic search failed, falling back to structured:', semanticError)
+    searchStrategy = 'structured_fallback'
     results = await executeStructuredQuery(filters, limit)
-  } else {
-    // Use semantic search for everything else
-    console.log('🔄 Using SEMANTIC search strategy')
-    try {
-      results = await executeSemanticQuery(decomposition, filters, limit)
-    } catch (semanticError) {
-      console.warn('⚠️ Semantic search failed, falling back to structured:', semanticError)
-      searchStrategy = 'structured_fallback'
-      results = await executeStructuredQuery(filters, limit)
-    }
   }
   
   // Fetch additional data for each RIA
