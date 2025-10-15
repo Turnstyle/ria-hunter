@@ -12,7 +12,74 @@ This document contains step-by-step instructions to fix issues in the RIA Hunter
 
 ---
 
-## 🚀 MAJOR ARCHITECTURAL CHANGE: Full AI-First Search (Oct 15, 2025)
+## 🎯 AI GUARDRAIL SOLUTION: Gemini Determines Sorting (Oct 15, 2025)
+
+### The RIGHT Way - AI Intelligence, Not Regex Patterns
+
+**Problem:** After removing forced structured search, semantic search found the right firms but sorted by similarity instead of size.
+
+**WRONG Solution:** Add regex pattern `/\b(largest|biggest|top)\b/` to detect superlatives ❌
+
+**RIGHT Solution:** Let Gemini tell us how to sort through function calling ✅
+
+### How It Works Now
+
+**1. Enhanced AI Planner Schema**
+```typescript
+{
+  sort_by: {
+    type: 'string',
+    enum: ['aum', 'relevance', 'fund_count', 'name'],
+    description: 'How to sort results. Use "aum" for largest/biggest/top...'
+  }
+}
+```
+
+**2. Query Flow Example**
+```
+User: "what are the 10 largest RIAs in St. Louis?"
+
+Gemini Function Call:
+{
+  semantic_query: "largest RIAs",
+  city: "St. Louis",
+  state: "Missouri",
+  sort_by: "aum"  ← AI DECIDES THIS!
+}
+
+→ Semantic search finds St. Louis firms
+→ Sort by `sort_by` value (aum)
+→ Deduplicate by CRD
+→ Return top 10
+```
+
+### Why This Is the AI-First Way
+
+**AI Understands Naturally:**
+- "largest RIAs" → `sort_by: "aum"`
+- "most active firms" → `sort_by: "fund_count"` 
+- "RIAs alphabetically" → `sort_by: "name"`
+- "RIAs in Texas" → `sort_by: "relevance"`
+
+**No Hardcoded Patterns:**
+- ✅ No regex for "largest|biggest|top"
+- ✅ No string matching
+- ✅ AI guardrail through function calling
+- ✅ Works for ANY sorting request
+
+### Files Changed
+- `app/api/ask/planner-v2.ts` - Added `sort_by` to function schema
+- `app/api/ask/planner.ts` - Added `sort_by` to types
+- `app/api/ask/unified-search.ts` - Use AI's `sort_by` instruction
+
+### Deployment
+- **Commit:** 1f97499a1 ✅
+- **Deployed:** Oct 15, 2025
+- **Status:** ✅ Live - TRUE AI-first architecture
+
+---
+
+## 🚀 PREVIOUS: Full AI-First Search (Oct 15, 2025) [INCOMPLETE]
 
 ### What Changed
 **Removed ALL forced structured search logic** - the system now ALWAYS uses semantic search with AI embeddings. No more bypassing the AI.
