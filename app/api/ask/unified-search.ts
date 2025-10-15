@@ -111,17 +111,21 @@ async function executeSemanticQuery(decomposition: QueryPlan, filters: { state?:
       return []
     }
     
-    // STEP 3: Post-filter by city if needed (using simple contains check)
+    // STEP 3: Post-filter by city if needed (flexible matching)
     let filteredResults = searchResults
     if (filters.city) {
       console.log(`🏙️ Filtering by city: ${filters.city}`)
-      // Simple city filter - let the semantic search handle variations
-      const cityLower = filters.city.toLowerCase()
+      // Flexible city matching: normalize by removing periods and extra spaces
+      const normalizeCity = (city: string) => city.toLowerCase().replace(/[.\s]+/g, ' ').trim()
+      const cityNormalized = normalizeCity(filters.city)
+      
       filteredResults = searchResults.filter((ria: any) => {
-        const profileCity = (ria.city || '').toLowerCase()
-        return profileCity.includes(cityLower)
+        const profileCity = normalizeCity(ria.city || '')
+        // Match if the normalized city includes the search term
+        // "st louis" will match "ST. LOUIS", "St. Louis", "St Louis", etc.
+        return profileCity.includes(cityNormalized)
       })
-      console.log(`  After city filter: ${filteredResults.length} results`)
+      console.log(`  After city filter: ${filteredResults.length} results (from ${searchResults.length})`)
     }
     
     // STEP 4: Apply AI-determined sorting
