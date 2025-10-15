@@ -1,25 +1,15 @@
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { callLLMToDecomposeQuery } from './planner'
 import type { QueryPlan } from './planner'
-import { createAIService, getAIProvider } from '@/lib/ai-providers'
+import { createAIService } from '@/lib/ai-providers'
 
-// Generate embedding using the configured AI provider (supports both Vertex and OpenAI)
+// Generate embedding using Vertex AI
 async function generateVertex768Embedding(text: string): Promise<number[] | null> {
   try {
-    const provider = getAIProvider() // This will return 'vertex' when AI_PROVIDER=google
-    console.log(`🔧 Using AI provider: ${provider} for embeddings`)
-    
-    const aiService = createAIService({ provider })
+    const aiService = createAIService()
     
     if (!aiService) {
       console.error('❌ Failed to create AI service - check credentials configuration')
-      console.log('Environment check:', {
-        AI_PROVIDER: process.env.AI_PROVIDER,
-        GOOGLE_PROJECT_ID: !!process.env.GOOGLE_PROJECT_ID,
-        GOOGLE_CLOUD_PROJECT: !!process.env.GOOGLE_CLOUD_PROJECT,
-        GOOGLE_APPLICATION_CREDENTIALS: !!process.env.GOOGLE_APPLICATION_CREDENTIALS,
-        OPENAI_API_KEY: !!process.env.OPENAI_API_KEY
-      })
       return null
     }
     

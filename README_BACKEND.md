@@ -17,7 +17,7 @@ The following tables have been created:
 
 2. **narratives**: Stores text descriptions and vector embeddings
    - Text narratives summarizing each RIA
-   - Vector embeddings (384-dimension) for semantic search
+   - Vector embeddings (768-dimension) for semantic search with Vertex AI
 
 3. **control_persons**: Stores executive and owner information
    - Names, positions, and ownership percentages
@@ -52,7 +52,7 @@ The following scripts have been implemented:
 
 - `scripts/embed_narratives_sample.py`: Generates embeddings for narratives
   - Usage: `python3 scripts/embed_narratives_sample.py <SUPABASE_SERVICE_ROLE_KEY> [batch_size]`
-  - Supports mock embeddings (default), Vertex AI, and OpenAI
+  - Uses Vertex AI (with mock mode available for local testing)
 
 ## API Endpoints
 
@@ -79,18 +79,9 @@ The following environment variables need to be set:
 ```
 SUPABASE_URL=https://llusjnpltqxhokycwzry.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=<your-service-key>
-AI_PROVIDER=vertex # or openai, or mock
-```
-
-For Vertex AI:
-```
 GOOGLE_PROJECT_ID=ria-hunter-backend
-GOOGLE_APPLICATION_CREDENTIALS_JSON=<json-credentials>
-```
-
-For OpenAI:
-```
-OPENAI_API_KEY=<your-key>
+GCP_SA_KEY_BASE64=<base64-encoded-service-account-json>
+VERTEX_AI_LOCATION=us-central1
 ```
 
 ## Running the Backend
@@ -134,3 +125,12 @@ Ensure all necessary environment variables are set in the Vercel project setting
 ## Next Steps
 
 With the backend implementation complete, the focus now shifts to the frontend implementation, which will build a user interface for the RAG search functionality.
+
+## Authentication
+
+The backend issues passwordless emails through Supabase Magic Links.
+
+- `POST /api/auth/magic-link` – accepts `{ email, redirectTo? }` and sends the OTP email via Supabase.
+- `POST /api/auth/sync` – accepts the Supabase access token in the `Authorization` header and ensures the `user_accounts` row exists/updates metadata.
+
+Both routes run with the Node.js runtime and expect Supabase environment variables outlined in `ENVIRONMENT_SETUP.md`.

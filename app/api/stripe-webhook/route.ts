@@ -4,13 +4,18 @@ export const dynamic = 'force-dynamic';
 
 import Stripe from 'stripe';
 import { NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabaseAdmin';
+import { recordProcessedEvent, upsertSubscriptionFromEvent, upsertCustomerLink } from '@/lib/billing';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { 
   apiVersion: '2024-06-20' 
 });
 
 export async function POST(req: Request) {
+  if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
+    console.error('stripe_webhook_missing_config');
+    return NextResponse.json({ ok: false, error: 'Webhook not configured' }, { status: 500 });
+  }
+
   const sig = req.headers.get('stripe-signature');
   if (!sig) {
     console.warn('stripe_webhook_missing_signature');
@@ -35,20 +40,48 @@ export async function POST(req: Request) {
     id: event.id, 
     type: event.type
   });
+  
+  const alreadyProcessed = await recordProcessedEvent(event.id);
+  if (alreadyProcessed) {
+    console.log('stripe_webhook_duplicate_event', { id: event.id });
+    return NextResponse.json({ ok: true }, { status: 200 });
+  }
 
   try {
     switch (event.type) {
       case 'checkout.session.completed':
-        // Handle successful checkout
         const session = event.data.object as Stripe.Checkout.Session;
-        console.log('Checkout completed:', session.id);
+        console.log('stripe_checkout_completed', { sessionId: session.id });
+
+        {
+          const customerId = typeof session.customer === 'string'
+            ? session.customer
+            : session.customer?.id;
+          const email = session.customer_details?.email || session.customer_email || session.metadata?.email;
+          const userId = session.metadata?.user_id || session.metadata?.supabase_user_id || null;
+
+          if (customerId) {
+            await upsertCustomerLink({
+              userId,
+              email: email?.toLowerCase() ?? null,
+              stripeCustomerId: customerId
+            });
+          } else {
+            console.warn('stripe_checkout_missing_customer', { sessionId: session.id });
+          }
+        }
         break;
       case 'customer.subscription.created':
       case 'customer.subscription.updated':  
       case 'customer.subscription.deleted':
-        // Handle subscription changes
         const subscription = event.data.object as Stripe.Subscription;
-        console.log('Subscription event:', subscription.id);
+        console.log('stripe_subscription_event', { subscriptionId: subscription.id, status: subscription.status });
+        await upsertSubscriptionFromEvent(event);
+        break;
+      case 'invoice.paid':
+      case 'invoice.payment_failed':
+        console.log('stripe_invoice_event', { invoiceId: (event.data.object as Stripe.Invoice).id, type: event.type });
+        await upsertSubscriptionFromEvent(event);
         break;
       default:
         console.log('Unhandled event type:', event.type);

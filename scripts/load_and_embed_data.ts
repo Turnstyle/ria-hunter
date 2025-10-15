@@ -15,7 +15,7 @@ import * as dotenv from 'dotenv';
 import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { parse } from 'csv-parse/sync';
-import { createAIService, getAIProvider } from '../lib/ai-providers';
+import { createAIService } from '../lib/ai-providers';
 
 // Load environment variables
 dotenv.config({ path: '.env.local' });
@@ -34,7 +34,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // Configuration
 const EMBEDDING_BATCH_SIZE = 10;
 const LOAD_LIMIT = parseInt(process.env.LOAD_LIMIT || '0', 10) || undefined; // Optional limit for testing
-const EMBEDDING_MODEL_DIMENSION = 768; // Vertex AI text-embedding-005 = 768, OpenAI embedding = 1536
+const EMBEDDING_MODEL_DIMENSION = 768; // Vertex AI text-embedding-005 dimensions
 
 // Interfaces
 interface RIAProfile {
@@ -194,11 +194,10 @@ async function generateAndInsertNarratives(profiles: RIAProfile[]): Promise<numb
 
 // Generate embeddings for narratives
 async function generateEmbeddings(texts: string[]): Promise<number[][]> {
-  const provider = getAIProvider();
-  const ai = createAIService({ provider });
+  const ai = createAIService();
   
   if (!ai) {
-    throw new Error('AI provider not configured. Check AI_PROVIDER environment variable.');
+    throw new Error('Vertex AI provider is not configured. Check GOOGLE_PROJECT_ID and GCP_SA_KEY_BASE64.');
   }
   
   const embeddings: number[][] = [];

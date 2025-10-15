@@ -134,16 +134,10 @@ async function testVertexAICredentials() {
     }
   }
   
-  // Check AI provider setting
-  const provider = process.env.AI_PROVIDER || 'not set';
-  console.log(`\n🤖 AI Provider: ${provider}`);
-  
-  if (provider === 'google' || provider === 'vertex') {
-    console.log('✅ Configured to use Vertex AI');
-  } else if (provider === 'openai') {
-    console.log('⚠️  Configured to use OpenAI (not Vertex AI)');
-  } else {
-    console.log('⚠️  AI provider not explicitly set');
+  // Confirm Vertex-only configuration
+  console.log('\n🤖 AI Provider: Vertex AI (exclusive)');
+  if (!process.env.GOOGLE_PROJECT_ID && !process.env.GOOGLE_CLOUD_PROJECT) {
+    console.log('⚠️  GOOGLE_PROJECT_ID is missing');
   }
 }
 

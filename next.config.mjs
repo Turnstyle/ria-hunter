@@ -10,11 +10,6 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  env: {
-    OPENAI_API_KEY: process.env.OPENAI_API_KEY,
-    AI_PROVIDER: process.env.AI_PROVIDER,
-  },
-
   // Avoid bundling optional native deps and node-fetch encoding for serverless funcs
   webpack: (config) => {
     config.externals = config.externals || []

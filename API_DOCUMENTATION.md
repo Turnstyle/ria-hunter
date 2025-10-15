@@ -209,10 +209,11 @@ The following environment variables are required for deployment:
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Anonymous key for client-side Supabase access
 
 ### AI Provider
-- `AI_PROVIDER`: AI provider to use ('openai' or 'vertex')
-- `OPENAI_API_KEY`: OpenAI API key (if using OpenAI)
-- `GOOGLE_CLOUD_PROJECT`: Google Cloud project ID (if using Vertex AI)
-- `GOOGLE_APPLICATION_CREDENTIALS`: Path to Google Cloud credentials (if using Vertex AI)
+- `GOOGLE_PROJECT_ID`: Google Cloud project ID for Vertex AI
+- `GCP_SA_KEY_BASE64`: Base64 encoded Google service account JSON for Vertex AI
+- `VERTEX_AI_LOCATION`: Google Cloud region for Vertex AI models
+- `GOOGLE_CLOUD_PROJECT`: Optional alias for the Google Cloud project ID
+- `GOOGLE_APPLICATION_CREDENTIALS`: Optional path to Google Cloud credentials (local development)
 
 ### CORS
 - `CORS_ORIGINS`: Comma-separated list of allowed origins

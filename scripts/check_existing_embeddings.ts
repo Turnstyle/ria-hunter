@@ -40,7 +40,7 @@ async function checkExistingEmbeddings() {
       const dimensions = data[0].embedding?.length;
       console.log(`\n🔍 Analysis:`);
       if (dimensions === 1536) {
-        console.log('- Likely OpenAI text-embedding-ada-002 (1536 dimensions)');
+        console.log('- Legacy 1536-dimensional embeddings detected (replace with Vertex AI 768-dim embeddings)');
       } else if (dimensions === 768) {
         console.log('- Likely Vertex AI textembedding-gecko (768 dimensions)');
       } else if (dimensions === 384) {

@@ -22,15 +22,14 @@ if (!serviceKey) {
 const supabase = createClient(url, serviceKey);
 
 /**
- * Generate embedding for a given text using OpenAI (simulated)
- * In a real implementation, you would use OpenAI, Google Vertex AI, or another embedding service
+ * Generate embedding for a given text (simulated)
+ * In production, replace this with Google Vertex AI or another managed embedding service.
  */
 async function generateEmbedding(text: string): Promise<number[]> {
   try {
     // For now, we'll create a simple placeholder embedding
     // In production, you would use a real embedding service like:
-    // - OpenAI's text-embedding-ada-002
-    // - Google's textembedding-gecko
+    // - Vertex AI text-embedding-005
     // - Sentence Transformers
     
     console.log(`Generating embedding for text: ${text.substring(0, 50)}...`);

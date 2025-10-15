@@ -7,7 +7,7 @@
  */
 
 import { VertexAI } from '@google-cloud/vertexai';
-import { createAIService, getAIProvider, type AIProvider } from '@/lib/ai-providers';
+import { createAIService } from '@/lib/ai-providers';
 import { createResilientAIService } from '@/lib/ai-resilience';
 
 export type StructuredFilters = {
@@ -238,25 +238,14 @@ Important guidelines:
 /**
  * Fallback to the legacy LLM decomposition for backward compatibility
  */
-export async function callLLMToDecomposeQuery(userQuery: string, provider?: AIProvider): Promise<QueryPlan> {
-  // First try Gemini 2.0 Flash with function calling if using Vertex
-  const currentProvider = getAIProvider(provider);
-  if (currentProvider === 'vertex') {
-    const geminiResult = await callGeminiToDecomposeQuery(userQuery);
-    // If Gemini succeeded with meaningful decomposition, use it
-    if (geminiResult.semantic_query !== userQuery || 
-        Object.values(geminiResult.structured_filters).some(v => v !== null)) {
-      return geminiResult;
-    }
+export async function callLLMToDecomposeQuery(userQuery: string): Promise<QueryPlan> {
+  const geminiResult = await callGeminiToDecomposeQuery(userQuery);
+  const hasStructuredFilters = Object.values(geminiResult.structured_filters).some(v => v !== null);
+  if (geminiResult.semantic_query !== userQuery || hasStructuredFilters) {
+    return geminiResult;
   }
-  
-  // Otherwise fall back to the original implementation
-  let selectedProvider = currentProvider;
-  const primaryService = createAIService({ provider: selectedProvider });
-  const fallbackProvider = selectedProvider === 'vertex' ? 'openai' : 'vertex';
-  const fallbackService = createAIService({ provider: fallbackProvider });
-  
-  const aiService = createResilientAIService(primaryService, fallbackService);
+
+  const aiService = createResilientAIService(createAIService());
   
   if (!aiService) {
     console.warn('AI service not configured - using basic decomposition');

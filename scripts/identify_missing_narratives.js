@@ -82,8 +82,8 @@ if (require.main === module) {
       console.log(`Total RIAs: ${results.total}`);
       console.log(`RIAs with narratives: ${results.existing} (${100 - results.percentage}%)`);
       console.log(`RIAs missing narratives: ${results.missing} (${results.percentage}%)`);
-      console.log('\nUse the targeted_narrative_generator.js with the --batch=N parameter to process each batch.');
-      console.log('Example: node scripts/targeted_narrative_generator.js --batch=1');
+      console.log('\nLoad the batches with the unified pipeline when you are ready:');
+      console.log('Example: LOAD_LIMIT=1000 npx tsx scripts/load_and_embed_data.ts');
     })
     .catch(error => {
       console.error('Failed to identify missing narratives:', error);

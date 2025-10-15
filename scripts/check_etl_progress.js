@@ -110,9 +110,8 @@ async function checkETLProgress() {
     
     // Provide recommendations based on status
     if (narrativeCoverage < 95) {
-      console.log(`${colors.yellow}• Run narrative generation process to reach 100% coverage${colors.reset}`);
-      console.log(`  node scripts/identify_missing_narratives.js`);
-      console.log(`  AI_PROVIDER=vertex node scripts/targeted_narrative_generator.js --batch=1`);
+      console.log(`${colors.yellow}• Run the unified load + embedding pipeline to increase coverage${colors.reset}`);
+      console.log(`  LOAD_LIMIT=1000 npx tsx scripts/load_and_embed_data.ts`);
     }
     
     if (controlPersonsCoverage < 50) {

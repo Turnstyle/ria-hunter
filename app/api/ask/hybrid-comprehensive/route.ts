@@ -1,20 +1,17 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { corsHeaders, handleOptionsRequest, corsError } from '@/lib/cors';
-import { createAIService, getAIProvider } from '@/lib/ai-providers';
+import { createAIService } from '@/lib/ai-providers';
 
 // Handle OPTIONS requests for CORS
 export function OPTIONS(req: NextRequest) {
   return handleOptionsRequest(req);
 }
 
-// Generate embedding using the configured AI provider (supports both Vertex and OpenAI)
+// Generate embedding using Vertex AI
 async function generateVertex768Embedding(text: string): Promise<number[] | null> {
   try {
-    const provider = getAIProvider(); // This will return 'vertex' when AI_PROVIDER=google
-    console.log(`Using AI provider: ${provider} for embeddings`);
-    
-    const aiService = createAIService({ provider });
+    const aiService = createAIService();
     
     if (!aiService) {
       console.error('Failed to create AI service - check credentials configuration');

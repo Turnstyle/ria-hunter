@@ -504,9 +504,8 @@ async function monitorETLProgress() {
     
     // Provide recommendations based on status
     if (narrativeCoverage < 95) {
-      console.log(\`\${colors.yellow}• Run narrative generation process to reach 100% coverage\${colors.reset}\`);
-      console.log(\`  node scripts/identify_missing_narratives.js\`);
-      console.log(\`  AI_PROVIDER=vertex node scripts/targeted_narrative_generator.js --batch=1\`);
+      console.log(\`\${colors.yellow}• Run the unified load/embedding pipeline to raise narrative coverage\${colors.reset}\`);
+      console.log(\`  LOAD_LIMIT=1000 npx tsx scripts/load_and_embed_data.ts\`);
     }
     
     if (controlPersonsCoverage < 50) {
@@ -778,8 +777,8 @@ async function main() {
     console.log('\nNext steps:');
     console.log('1. Run the identify_missing_narratives.js script:');
     console.log('   node scripts/identify_missing_narratives.js');
-    console.log('2. Run the targeted narrative generator for each batch:');
-    console.log('   AI_PROVIDER=vertex node scripts/targeted_narrative_generator.js --batch=1');
+    console.log('2. Run the unified load + embedding pipeline on the batches:');
+    console.log('   LOAD_LIMIT=1000 npx tsx scripts/load_and_embed_data.ts');
     console.log('3. Run the fixed control persons ETL:');
     console.log('   node scripts/backfill_control_persons_fixed.js');
     console.log('4. Monitor progress:');

@@ -168,16 +168,16 @@ async function fixNarrativeConstraints() {
   console.log('You can now restart the narrative generation processes with:');
   console.log(`
   # Terminal 1 - first quarter (CRDs 1000-17000)
-  AI_PROVIDER=vertex node scripts/etl_narrative_generator.js --start-crd 1000 --end-crd 17000 > logs/narrative_1000_17000.log 2>&1 &
+  node scripts/etl_narrative_generator.js --start-crd 1000 --end-crd 17000 > logs/narrative_1000_17000.log 2>&1 &
   
   # Terminal 2 - second quarter (CRDs 17001-33000)
-  AI_PROVIDER=vertex node scripts/etl_narrative_generator.js --start-crd 17001 --end-crd 33000 > logs/narrative_17001_33000.log 2>&1 &
+  node scripts/etl_narrative_generator.js --start-crd 17001 --end-crd 33000 > logs/narrative_17001_33000.log 2>&1 &
   
   # Terminal 3 - third quarter (CRDs 33001-49000)
-  AI_PROVIDER=vertex node scripts/etl_narrative_generator.js --start-crd 33001 --end-crd 49000 > logs/narrative_33001_49000.log 2>&1 &
+  node scripts/etl_narrative_generator.js --start-crd 33001 --end-crd 49000 > logs/narrative_33001_49000.log 2>&1 &
   
   # Terminal 4 - fourth quarter (CRDs 49001-66000)
-  AI_PROVIDER=vertex node scripts/etl_narrative_generator.js --start-crd 49001 --end-crd 66000 > logs/narrative_49001_66000.log 2>&1 &
+  node scripts/etl_narrative_generator.js --start-crd 49001 --end-crd 66000 > logs/narrative_49001_66000.log 2>&1 &
   `);
 }
 

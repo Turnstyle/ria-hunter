@@ -60,16 +60,16 @@ RANGE4_MIN=$(( RANGE3_MAX + 1 ))
 RANGE4_MAX=$MAX_CRD
 
 # Start the narrative generation processes
-AI_PROVIDER=vertex node scripts/improved_narrative_generator.js --start-crd $RANGE1_MIN --end-crd $RANGE1_MAX --batch-size 10 --delay 5 > logs/narrative_gen_p1.log 2>&1 &
+node scripts/improved_narrative_generator.js --start-crd $RANGE1_MIN --end-crd $RANGE1_MAX --batch-size 10 --delay 5 > logs/narrative_gen_p1.log 2>&1 &
 echo "Process 1 started with PID $! (CRD range $RANGE1_MIN-$RANGE1_MAX)"
 
-AI_PROVIDER=vertex node scripts/improved_narrative_generator.js --start-crd $RANGE2_MIN --end-crd $RANGE2_MAX --batch-size 10 --delay 5 > logs/narrative_gen_p2.log 2>&1 &
+node scripts/improved_narrative_generator.js --start-crd $RANGE2_MIN --end-crd $RANGE2_MAX --batch-size 10 --delay 5 > logs/narrative_gen_p2.log 2>&1 &
 echo "Process 2 started with PID $! (CRD range $RANGE2_MIN-$RANGE2_MAX)"
 
-AI_PROVIDER=vertex node scripts/improved_narrative_generator.js --start-crd $RANGE3_MIN --end-crd $RANGE3_MAX --batch-size 10 --delay 5 > logs/narrative_gen_p3.log 2>&1 &
+node scripts/improved_narrative_generator.js --start-crd $RANGE3_MIN --end-crd $RANGE3_MAX --batch-size 10 --delay 5 > logs/narrative_gen_p3.log 2>&1 &
 echo "Process 3 started with PID $! (CRD range $RANGE3_MIN-$RANGE3_MAX)"
 
-AI_PROVIDER=vertex node scripts/improved_narrative_generator.js --start-crd $RANGE4_MIN --end-crd $RANGE4_MAX --batch-size 10 --delay 5 > logs/narrative_gen_p4.log 2>&1 &
+node scripts/improved_narrative_generator.js --start-crd $RANGE4_MIN --end-crd $RANGE4_MAX --batch-size 10 --delay 5 > logs/narrative_gen_p4.log 2>&1 &
 echo "Process 4 started with PID $! (CRD range $RANGE4_MIN-$RANGE4_MAX)"
 
 echo "All narrative generation processes started. To monitor progress, use:"

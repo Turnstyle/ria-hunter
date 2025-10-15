@@ -10,8 +10,7 @@ Make sure you have the following:
 2. Supabase service role key and anon key
 3. Node.js and npm installed
 4. Vercel CLI installed (`npm install -g vercel`)
-5. Access to Google Cloud for Vertex AI (if using `vertex` as AI provider)
-6. OpenAI API key (if using `openai` as AI provider)
+5. Access to Google Cloud for Vertex AI
 
 ## Step 1: Environment Setup
 
@@ -24,13 +23,10 @@ NEXT_PUBLIC_SUPABASE_URL=https://llusjnpltqxhokycwzry.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 
-# AI Provider Configuration
-AI_PROVIDER=vertex  # or 'openai'
-# OPENAI_API_KEY=your-openai-key  # Uncomment if using OpenAI
-
 # Google Cloud Configuration (for Vertex AI)
 GOOGLE_PROJECT_ID=ria-hunter-backend
-# GOOGLE_APPLICATION_CREDENTIALS_JSON=your-base64-encoded-json  # Base64 encoded credentials
+GCP_SA_KEY_BASE64=your-base64-encoded-service-account-json
+VERTEX_AI_LOCATION=us-central1
 
 # Stripe Configuration
 STRIPE_SECRET_KEY=your-stripe-secret-key
@@ -115,7 +111,7 @@ Test the deployed API endpoints:
 If you encounter issues:
 
 1. **Database connection errors**: Verify the Supabase URL and service role key
-2. **AI provider errors**: Check that AI_PROVIDER is set correctly and credentials are valid
+2. **AI provider errors**: Confirm that Google Cloud credentials are present and valid (GOOGLE_PROJECT_ID, GCP_SA_KEY_BASE64, VERTEX_AI_LOCATION)
 3. **Missing tables**: Verify that all migrations were applied successfully
 4. **CORS errors**: Make sure the CORS_ORIGINS environment variable includes all necessary domains
 

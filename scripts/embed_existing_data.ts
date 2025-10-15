@@ -69,9 +69,7 @@ async function processExistingData() {
   console.log(`📝 Existing narratives: ${existingNarratives}`);
   console.log(`🎯 Need to process: ${totalProfiles} profiles\n`);
 
-  const aiService = createAIService({ 
-    provider: (process.env.AI_PROVIDER as 'vertex' | 'openai') || 'vertex' 
-  });
+  const aiService = createAIService();
   
   if (!aiService) {
     console.error('❌ Failed to initialize AI service');

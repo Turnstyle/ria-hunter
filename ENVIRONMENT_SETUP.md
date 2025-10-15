@@ -1,106 +1,60 @@
 # Environment Setup for RIA Hunter
 
-## Environment Files Explained
+## Environment Files
 
-There are multiple environment files in the project, which can be confusing:
-
-1. `.env.example` - An example template that shows what variables are needed
-2. `.env.local` - The main environment file used by Next.js/Vercel locally
-3. `env.local` - A file that appears to contain actual configuration values
-
-## What to Do With These Files
-
-You should use `.env.local` (with the dot at the beginning) as your main environment file. Based on what I can see, your current `.env.local` is minimal, while the `env.local` (without the dot) contains all the necessary values.
-
-## Step 1: Copy Environment Variables
-
-**Copy the contents from `env.local` to `.env.local`**
-
-You can do this by running:
+The project expects environment variables in `.env.local`. If you already have an `env.local` file with working values, copy it to `.env.local` so Next.js can read it:
 
 ```bash
 cp env.local .env.local
 ```
 
-## Step 2: Edit the AI Provider Setting
+Keep `env.local` around as a backup if you like, but `.env.local` should be the file you edit.
 
-Since you mentioned that Vercel is configured to use Vertex AI, you should change the AI provider setting in `.env.local`:
+## Required Variables
 
-Find this section:
-```
-# AI Provider Configuration
-# Options: 'vertex' (Google Vertex AI) or 'openai' (OpenAI)
-# Default: openai (due to current Vertex AI billing limitations)
-AI_PROVIDER=openai
-```
-
-Change it to:
-```
-# AI Provider Configuration
-# Options: 'vertex' (Google Vertex AI) or 'openai' (OpenAI)
-AI_PROVIDER=vertex
-```
-
-This will make your local environment match what's configured in Vercel.
-
-## Step 3: Update Frontend URL if Needed
-
-If you're deploying to a specific URL, update the Frontend URL:
+At minimum the backend needs:
 
 ```
-# ---- Frontend URL for Stripe redirects ----
+SUPABASE_URL=https://llusjnpltqxhokycwzry.supabase.co
+NEXT_PUBLIC_SUPABASE_URL=https://llusjnpltqxhokycwzry.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=<service-role-key>
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon-key>
+GOOGLE_PROJECT_ID=<google-project-id>
+GCP_SA_KEY_BASE64=<base64-encoded-service-account-json>
+VERTEX_AI_LOCATION=us-central1
+STRIPE_SECRET_KEY=<stripe-secret-key>
+STRIPE_WEBHOOK_SECRET=<stripe-webhook-secret>
+STRIPE_PRICE_ID=<stripe-price-id>
 FRONTEND_URL=https://ria-hunter.app
 ```
 
-Change it to your actual deployed frontend URL. If you're testing locally, leave it as `http://localhost:3000`.
+### Vertex AI Credentials
 
-## Environment Variables Explained
+The backend now uses Google Vertex AI exclusively. Provide credentials with one of the following options (in order of preference):
 
-Here's what each variable is for:
+1. `GCP_SA_KEY_BASE64` containing a base64-encoded service account JSON.
+2. `GOOGLE_APPLICATION_CREDENTIALS_B64` (legacy base64 field).
+3. `GOOGLE_APPLICATION_CREDENTIALS_JSON` containing the raw JSON string.
+4. `GOOGLE_APPLICATION_CREDENTIALS` pointing to a local JSON file (development only).
 
-### Supabase Configuration
-- `SUPABASE_URL` - The URL of your Supabase project (already correct)
-- `SUPABASE_SERVICE_ROLE_KEY` - Admin key for Supabase (already correct)
-- `NEXT_PUBLIC_SUPABASE_URL` - Same as SUPABASE_URL, but available to the client (already correct)
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Public key for Supabase (already correct)
+The service account must include `private_key`, `client_email`, and `project_id` fields and have access to Vertex AI.
 
-### Google Cloud Configuration
-- `GOOGLE_CLOUD_PROJECT` - Your Google Cloud project ID (already correct)
-- `GOOGLE_PROJECT_ID` - Same as above (already correct)
-- `DOCUMENT_AI_PROCESSOR_ID` - ID for Document AI processor (already correct)
-- `DOCUMENT_AI_PROCESSOR_LOCATION` - Region for Document AI (already correct)
-- `GOOGLE_APPLICATION_CREDENTIALS` - Path to your Google Cloud credentials file (already correct)
+### Stripe
 
-### SEC API Configuration
-- `SEC_API_KEY` - API key for SEC data (already correct)
-- `SEC_API_BASE_URL` - Base URL for SEC API (already correct)
+Confirm `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` match the keys configured in the Stripe Dashboard. `FRONTEND_URL` should point to the domain that handles checkout redirects.
 
-### AI Configuration
-- `OPENAI_API_KEY` - API key for OpenAI (already correct)
-- `AI_PROVIDER` - **Change this to "vertex"** to match Vercel settings
+## Verifying Configuration
 
-### Stripe Configuration
-- `STRIPE_SECRET_KEY` - Secret key for Stripe payments (already correct)
-- `STRIPE_WEBHOOK_SECRET` - Secret for verifying Stripe webhooks (already correct)
-- `STRIPE_PRICE_ID` - ID for your Stripe product pricing (already correct)
-
-### Frontend URL
-- `FRONTEND_URL` - URL for redirects after Stripe payments (update if needed)
-
-## Verifying Environment Variables
-
-After updating `.env.local`, you can run the following command to verify that Node.js can read your environment variables:
+Run a quick check to confirm the key Vertex variables resolve:
 
 ```bash
-node -e "console.log('AI Provider:', process.env.AI_PROVIDER)"
+node -e "console.log({ project: process.env.GOOGLE_PROJECT_ID, hasKey: !!process.env.GCP_SA_KEY_BASE64 })"
 ```
 
-If set up correctly, this should print "AI Provider: vertex".
+If you see the expected project and `hasKey: true`, the Vertex configuration is wired correctly.
 
-## Important Notes
+## Good Practices
 
-1. **The Keys Are Correct**: As you mentioned, all the API keys and credentials in `env.local` are correct and functional. You don't need to get new keys from Google Cloud or Supabase.
-
-2. **AI Provider Setting**: The main change needed is to set `AI_PROVIDER=vertex` to match what's configured in Vercel.
-
-3. **File with Dot**: In Node.js/Next.js projects, environment files should start with a dot (`.env.local`), not just `env.local`. That's why we need to copy the contents to the correct file.
+- Store secrets only in `.env.local` (do **not** commit this file).
+- Keep `env.local` updated if teammates rely on it as a reference, but treat `.env.local` as the source of truth for local development.
+- When deploying to Vercel, mirror the same variables in the Vercel dashboard.

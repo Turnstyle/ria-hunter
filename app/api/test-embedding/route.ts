@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createAIService, AIConfig } from '../../../lib/ai-providers';
+import { createAIService } from '../../../lib/ai-providers';
 
 export async function POST(request: NextRequest) {
   try {
@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
 
     // Check environment variables
     const projectId = process.env.GOOGLE_PROJECT_ID || process.env.GOOGLE_CLOUD_PROJECT;
-    const location = process.env.DOCUMENT_AI_PROCESSOR_LOCATION || 'us-central1';
+    const location = process.env.VERTEX_AI_LOCATION || 'us-central1';
     const credentialsJson = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
 
     if (!projectId) {
@@ -28,8 +28,7 @@ export async function POST(request: NextRequest) {
     const testText = "ABC Investment Advisers, LLC is a registered investment adviser based in St. Louis, Missouri (SEC Number: 12345). The firm manages $500 million in assets under management with 25 employees. They provide investment advisory services to high net worth individuals and institutional clients, specializing in equity and fixed income strategies.";
 
     // Create AI service
-    const config: AIConfig = { provider: 'vertex' };
-    const aiService = createAIService(config);
+    const aiService = createAIService();
     
     if (!aiService) {
       return NextResponse.json({
@@ -78,7 +77,7 @@ export async function POST(request: NextRequest) {
         first_values: result.embedding.slice(0, 5),
         projectId,
         location,
-        model: 'textembedding-gecko@003'
+        model: 'text-embedding-005'
       }
     });
 

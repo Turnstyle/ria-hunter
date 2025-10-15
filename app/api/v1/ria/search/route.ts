@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
-import { createAIService, getAIProvider } from '@/lib/ai-providers';
+import { createAIService } from '@/lib/ai-providers';
 // Credits config removed - now using demo session system
 // Local CORS helper function
 function corsify(req: NextRequest, res: Response, preflight = false): Response {
@@ -97,8 +97,7 @@ function withAnonCookie(res: Response, newCount: number): Response {
 // Function to generate embedding for search query
 async function generateEmbedding(text: string): Promise<number[] | null> {
   try {
-    const provider = getAIProvider();
-    const ai = createAIService({ provider });
+    const ai = createAIService();
     if (!ai) throw new Error('AI provider not configured');
 
     const embedding = await ai.generateEmbedding(text);

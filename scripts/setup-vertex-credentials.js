@@ -60,7 +60,6 @@ GCP_SA_KEY_BASE64=${base64Encoded}
 # Also ensure these are set:
 GOOGLE_PROJECT_ID=${keyJson.project_id}
 VERTEX_AI_LOCATION=us-central1
-AI_PROVIDER=vertex
 `;
   
   fs.writeFileSync(envPath, envContent);
@@ -70,8 +69,7 @@ AI_PROVIDER=vertex
   console.log('======================');
   console.log('1. LOCAL DEVELOPMENT:');
   console.log('   - Add the above GCP_SA_KEY_BASE64 to your .env.local file');
-  console.log('   - Remove or comment out GOOGLE_APPLICATION_CREDENTIALS_JSON');
-  console.log('   - Keep AI_PROVIDER=google (or vertex)');
+  console.log('   - Remove or comment out GOOGLE_APPLICATION_CREDENTIALS_JSON if present');
   console.log('\n2. VERCEL PRODUCTION:');
   console.log('   a. Go to your Vercel project settings');
   console.log('   b. Navigate to Environment Variables');
@@ -79,7 +77,6 @@ AI_PROVIDER=vertex
   console.log('   d. IMPORTANT: Mark it as "Sensitive" (checkbox)');
   console.log('   e. Ensure GOOGLE_PROJECT_ID is set to:', keyJson.project_id);
   console.log('   f. Set VERTEX_AI_LOCATION to: us-central1');
-  console.log('   g. Set AI_PROVIDER to: vertex');
   console.log('\n3. SECURITY NOTES:');
   console.log('   - Never commit the .env.vertex-setup file');
   console.log('   - The Base64 value is sensitive - treat it like a password');

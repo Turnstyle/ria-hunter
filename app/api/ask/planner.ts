@@ -1,4 +1,4 @@
-import { createAIService, getAIProvider, type AIProvider } from '@/lib/ai-providers'
+import { createAIService } from '@/lib/ai-providers'
 
 export type StructuredFilters = {
 	location?: string | null
@@ -12,13 +12,9 @@ export type QueryPlan = {
 	structured_filters: StructuredFilters
 }
 
-export async function callLLMToDecomposeQuery(userQuery: string, provider?: AIProvider): Promise<QueryPlan> {
-	let selectedProvider = getAIProvider(provider)
-	let aiService = createAIService({ provider: selectedProvider })
-	if (!aiService) {
-		selectedProvider = 'openai'
-		aiService = createAIService({ provider: selectedProvider })
-	}
+export async function callLLMToDecomposeQuery(userQuery: string): Promise<QueryPlan> {
+	const aiService = createAIService()
+
 	// If no AI service is available, return a simple decomposition
 	if (!aiService) {
 		console.warn('AI service not configured - using basic decomposition')

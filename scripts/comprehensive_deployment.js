@@ -61,8 +61,13 @@ class ComprehensiveDeployment {
       console.log(`   ✅ RLS: Access working`)
       
       // Check environment
-      prerequisites.environment = process.env.OPENAI_API_KEY ? true : false
-      console.log(`   ${prerequisites.environment ? '✅' : '❌'} Environment: OpenAI API key ${prerequisites.environment ? 'found' : 'missing'}`)
+      prerequisites.environment = Boolean(
+        process.env.GCP_SA_KEY_BASE64 ||
+        process.env.GOOGLE_APPLICATION_CREDENTIALS_B64 ||
+        process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON ||
+        process.env.GOOGLE_APPLICATION_CREDENTIALS
+      )
+      console.log(`   ${prerequisites.environment ? '✅' : '❌'} Environment: Vertex credentials ${prerequisites.environment ? 'found' : 'missing'}`)
       
       // Check if SQL functions are deployed
       try {

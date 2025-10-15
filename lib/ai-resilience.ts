@@ -97,7 +97,7 @@ export class ResilientAIServiceWrapper implements ResilientAIService {
     this.embeddingBreaker.fallback(async (text: string) => {
       console.warn('⚠️ Using fallback for embedding generation');
       
-      // If we have a fallback service (e.g., OpenAI), try it
+      // If we have a fallback service, try it
       if (this.fallbackService) {
         try {
           console.log('Attempting fallback service for embedding...');
