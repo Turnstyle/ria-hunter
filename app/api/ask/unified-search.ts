@@ -260,7 +260,7 @@ export async function unifiedSemanticSearch(query: string, options: {
     
     // Fetch private funds
     const { data: allFunds } = await supabaseAdmin
-      .from('private_funds')
+      .from('ria_private_funds')
       .select('*')
       .in('crd_number', crdNumbers)
     
