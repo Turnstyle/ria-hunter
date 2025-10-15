@@ -55,6 +55,14 @@ function parseContext(context: string): ParsedContext {
 	return { entries, notes }
 }
 
+function formatEntry(entry: ParsedEntry): string[] {
+	const lines = [`${entry.rank}. ${entry.name}`]
+	entry.details.forEach((detail) => {
+		lines.push(`   ${detail}`)
+	})
+	return lines
+}
+
 function buildStructuredFallback(query: string, parsed: ParsedContext): string {
 	const total = parsed.entries.length
 
@@ -70,11 +78,13 @@ function buildStructuredFallback(query: string, parsed: ParsedContext): string {
 	const topEntries = parsed.entries.slice(0, 10)
 	const lines: string[] = [
 		`Semantic search found ${total} RIAs matching "${query}". Top ${topEntries.length}:`,
+		''
 	]
 
 	for (const entry of topEntries) {
-		const detailText = entry.details.length > 0 ? entry.details.join('; ') : ''
-		lines.push(detailText ? `- ${entry.rank}. ${entry.name}: ${detailText}` : `- ${entry.rank}. ${entry.name}`)
+		const entryLines = formatEntry(entry)
+		lines.push(...entryLines)
+		lines.push('')
 	}
 
 	for (const note of parsed.notes) {
@@ -82,7 +92,7 @@ function buildStructuredFallback(query: string, parsed: ParsedContext): string {
 	}
 
 	lines.push(`Sources: ${total} RIAs from semantic search.`)
-	return lines.join('\n')
+	return lines.join('\n').replace(/\n{3,}/g, '\n\n')
 }
 
 function ensureSourcesSummary(text: string, parsed: ParsedContext): string {
@@ -95,8 +105,9 @@ function ensureSourcesSummary(text: string, parsed: ParsedContext): string {
 	}
 
 	const suffix = `Sources: ${parsed.entries.length} RIAs from semantic search.`
-	const needsNewline = !text.endsWith('\n')
-	return needsNewline ? `${text}\n${suffix}` : `${text}${suffix}`
+	const needsBlankLine = !/\n\s*\n$/.test(text)
+	const separator = needsBlankLine ? '\n\n' : '\n'
+	return `${text}${separator}${suffix}`
 }
 
 function normalizeGeneratedText(resultText: string | undefined, query: string, context: string): string {
@@ -104,11 +115,11 @@ function normalizeGeneratedText(resultText: string | undefined, query: string, c
 	const cleaned = (resultText || '').trim()
 	const isEmpty = cleaned.length === 0
 	const matchesResilienceFallback = cleaned.toLowerCase().includes(RESILIENCE_FALLBACK_SNIPPET)
-	const base = !isEmpty && !matchesResilienceFallback
-		? cleaned
+	const candidate = !isEmpty && !matchesResilienceFallback
+		? cleaned.replace(/^\s*-\s*(\d+\.)/gm, '$1').replace(/-\s{2,}/g, '- ')
 		: buildStructuredFallback(query, parsed)
 
-	return ensureSourcesSummary(base, parsed)
+	return ensureSourcesSummary(candidate, parsed)
 }
 
 function buildPrompt(query: string, context: string): string {
@@ -116,11 +127,12 @@ function buildPrompt(query: string, context: string): string {
 		'You are a factual analyst. Answer the user question using ONLY the provided context.',
 		'Formatting rules:',
 		'1. Begin with a short sentence summarizing what the data shows for the query.',
-		'2. Provide a "-" bullet list for each firm (limit 10). Include rank, location, AUM, private fund activity, and executives when available. Separate facts with semicolons.',
+		'2. Present each firm on its own line as a numbered list (e.g., "1. Firm Name"). Under each firm, add indented lines for key facts such as location, AUM, private fund activity, and executives.',
 		'3. If details are missing, say "Not available" instead of inventing values.',
 		'4. Restate any data limitations noted in the context (for example, only city and state are available).',
 		'5. Keep the response scannable—avoid dense paragraphs or conversational filler.',
-		'6. Conclude with `Sources: <count> RIAs from semantic search.` using the count from the context when possible.',
+		'6. Leave a blank line between firms to prevent cramped text.',
+		'7. Conclude with `Sources: <count> RIAs from semantic search.` using the count from the context when possible.',
 		'',
 		`Context:\n${context}`,
 		'',
@@ -213,4 +225,3 @@ export async function* streamAnswerTokens(query: string, context: string) {
 		yield fallbackResponse(query, context)
 	}
 }
-

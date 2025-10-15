@@ -1,7 +1,7 @@
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
-import { callLLMToDecomposeQuery } from './planner'
-import type { QueryPlan } from './planner'
+import { callLLMToDecomposeQuery, type QueryPlan } from './planner-v2'
 import { createAIService } from '@/lib/ai-providers'
+import { cityMatchesFilter, createCityPattern, normalizeCityInput, normalizeStateInput } from './location-utils'
 
 // Generate embedding using Vertex AI
 async function generateVertex768Embedding(text: string): Promise<number[] | null> {
@@ -29,35 +29,46 @@ async function generateVertex768Embedding(text: string): Promise<number[] | null
   }
 }
 
+type SearchFilters = {
+  state?: string | null
+  city?: string | null
+  min_aum?: number | null
+  cityPattern?: string | null
+}
+
 // Parse filters from decomposition
-function parseFiltersFromDecomposition(decomposition: QueryPlan): { state?: string; city?: string; min_aum?: number } {
-  const filters: { state?: string; city?: string; min_aum?: number } = {}
+function parseFiltersFromDecomposition(decomposition: QueryPlan): SearchFilters {
+  const filters: SearchFilters = {}
   
-  const location = decomposition.structured_filters?.location
-  if (location) {
-    const parts = location.split(',').map(p => p.trim()).filter(Boolean)
-    if (parts.length === 2) {
+  const structured = decomposition.structured_filters || {}
+
+  if (structured.state) {
+    filters.state = structured.state
+  }
+
+  if (structured.city) {
+    filters.city = structured.city
+  }
+
+  if (structured.location && (!filters.city || !filters.state)) {
+    const parts = structured.location.split(',').map(p => p.trim()).filter(Boolean)
+    if (!filters.city && parts[0]) {
       filters.city = parts[0]
-      filters.state = parts[1].toUpperCase()
-    } else if (parts.length === 1) {
-      // Check if it's a state code
-      if (parts[0].length === 2) {
-        filters.state = parts[0].toUpperCase()
-      } else {
-        filters.city = parts[0]
-      }
+    }
+    if (!filters.state && parts[1]) {
+      filters.state = parts[1]
     }
   }
   
-  if (decomposition.structured_filters?.min_aum) {
-    filters.min_aum = decomposition.structured_filters.min_aum
+  if (typeof structured.min_aum === 'number') {
+    filters.min_aum = structured.min_aum
   }
   
   return filters
 }
 
 // Execute semantic-first search with fallbacks
-async function executeSemanticQuery(decomposition: QueryPlan, filters: { state?: string; city?: string; min_aum?: number } = {}, limit = 10) {
+async function executeSemanticQuery(decomposition: QueryPlan, filters: SearchFilters = {}, limit = 10) {
   try {
     console.log('🧠 Starting semantic-first search...')
     console.log('📝 Decomposition:', decomposition)
@@ -96,7 +107,7 @@ async function executeSemanticQuery(decomposition: QueryPlan, filters: { state?:
       state_filter: null,  // Let AI embeddings handle location naturally
       min_vc_activity: 0,
       min_aum: filters.min_aum || 0,
-      fund_type_filter: null
+      fund_type_filter: filters.fundType || null
     })
     
     if (error) {
@@ -115,8 +126,18 @@ async function executeSemanticQuery(decomposition: QueryPlan, filters: { state?:
     // STEP 3: Trust semantic search to understand location naturally
     // The embeddings in the query "largest RIAs in St. Louis" will naturally match
     // narratives that mention St. Louis - no rigid filtering needed!
-    const filteredResults = searchResults
+    let filteredResults = searchResults
     console.log(`🧠 Trusting AI embeddings to understand location naturally`)
+    
+    if (filters.city) {
+      filteredResults = filteredResults.filter((ria: any) => cityMatchesFilter(ria.city, filters.city))
+      console.log(`🏙️ Applied city filter "${filters.city}", ${filteredResults.length} results remain`)
+    }
+    
+    if (filters.state) {
+      filteredResults = filteredResults.filter((ria: any) => (ria.state || '').toUpperCase() === filters.state)
+      console.log(`🗺️ Applied state filter "${filters.state}", ${filteredResults.length} results remain`)
+    }
     
     // STEP 4: Apply AI-determined sorting
     // The AI planner tells us HOW to sort based on understanding the query naturally
@@ -158,7 +179,7 @@ async function executeSemanticQuery(decomposition: QueryPlan, filters: { state?:
 
 // Execute structured database query (no semantic search)
 async function executeStructuredQuery(
-  filters: { state?: string; city?: string; min_aum?: number; fundType?: string } = {},
+  filters: SearchFilters & { fundType?: string | null } = {},
   limit = 10
 ) {
   try {
@@ -177,10 +198,11 @@ async function executeStructuredQuery(
       query = query.eq('state', filters.state.toUpperCase())
     }
     
-    if (filters.city) {
+    if (filters.cityPattern) {
+      console.log(`  Adding city pattern filter: ${filters.cityPattern}`)
+      query = query.ilike('city', filters.cityPattern)
+    } else if (filters.city) {
       console.log(`  Adding city filter: ${filters.city}`)
-      // Note: This is only used as fallback when semantic search fails
-      // The AI embeddings understand location variations naturally
       query = query.ilike('city', `%${filters.city}%`)
     }
     
@@ -253,38 +275,71 @@ function calculateAverageConfidence(results: any[]): number {
 export async function unifiedSemanticSearch(query: string, options: { 
   limit?: number; 
   threshold?: number;
-  structuredFilters?: { state?: string; city?: string; fundType?: string };
+  structuredFilters?: { state?: string | null; city?: string | null; fundType?: string | null; min_aum?: number | null; minAum?: number | null };
+  decomposition?: QueryPlan | null;
 } = {}) {
-  const { limit = 10, threshold = 0.3, structuredFilters = {} } = options
+  const { limit = 10, structuredFilters = {}, decomposition: providedPlan = null } = options
   
   console.log(`🔍 Starting unified semantic search for: "${query}"`)
   console.log(`📋 Structured filters:`, structuredFilters)
   
-  // ALWAYS decompose with AI - no fallbacks
-  const decomposition = await callLLMToDecomposeQuery(query)
+  // Use provided decomposition when available to avoid duplicate LLM calls
+  const decomposition = providedPlan || await callLLMToDecomposeQuery(query)
   console.log('✅ AI decomposition successful')
   
   // Extract filters from decomposition and merge with structured filters
   const decomposedFilters = parseFiltersFromDecomposition(decomposition)
-  // IMPORTANT: structuredFilters (from route.ts) should override decomposed filters
-  const filters = {
+  const mergedFilters = {
     ...decomposedFilters,
-    ...structuredFilters, // This spreads all structuredFilters, overriding decomposed ones
+    ...structuredFilters
+  }
+
+  // Support both camelCase and snake_case min AUM
+  if (structuredFilters.minAum !== undefined && structuredFilters.min_aum === undefined) {
+    mergedFilters.min_aum = structuredFilters.minAum
+  }
+  
+  const normalizedState = normalizeStateInput(mergedFilters.state || null)
+  const normalizedCity = normalizeCityInput(mergedFilters.city || null)
+  
+  const filters: SearchFilters & { fundType?: string | null } = {
+    ...mergedFilters,
+    state: normalizedState,
+    city: normalizedCity,
+    cityPattern: createCityPattern(normalizedCity),
+    min_aum: mergedFilters.min_aum ?? null,
+    fundType: mergedFilters.fundType ?? null
   }
   
   console.log(`🔀 Merged filters:`, JSON.stringify(filters, null, 2))
   
-  // ALWAYS use semantic search - let AI embeddings understand everything naturally
-  console.log('🔄 Using SEMANTIC search with AI embeddings')
   let results: any[] = []
   let searchStrategy = 'semantic'
+  const sortBy = decomposition.structured_filters?.sort_by || 'relevance'
   
-  try {
-    results = await executeSemanticQuery(decomposition, filters, limit)
-  } catch (semanticError) {
-    console.warn('⚠️ Semantic search failed, falling back to structured:', semanticError)
-    searchStrategy = 'structured_fallback'
+  if (sortBy === 'aum') {
+    console.log('🏆 Sort strategy is AUM - prioritizing structured query for accuracy')
     results = await executeStructuredQuery(filters, limit)
+    searchStrategy = 'structured_aum'
+    
+    if (results.length === 0) {
+      console.log('⚠️ Structured query returned no results - falling back to semantic search')
+      try {
+        results = await executeSemanticQuery(decomposition, filters, limit)
+        searchStrategy = 'semantic_fallback'
+      } catch (semanticError) {
+        console.warn('⚠️ Semantic search also failed:', semanticError)
+      }
+    }
+  } else {
+    console.log('🔄 Using SEMANTIC search with AI embeddings')
+    try {
+      results = await executeSemanticQuery(decomposition, filters, limit)
+    } catch (semanticError) {
+      console.warn('⚠️ Semantic search failed, falling back to structured:', semanticError)
+      searchStrategy = 'structured_fallback'
+      results = await executeStructuredQuery(filters, limit)
+    }
   }
   
   // Fetch additional data for each RIA

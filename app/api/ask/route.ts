@@ -6,6 +6,7 @@ import { generateNaturalLanguageAnswer, streamAnswerTokens } from './generator';
 import { checkDemoLimit } from '@/lib/demo-session';
 import { corsHeaders, handleOptionsRequest, corsError } from '@/lib/cors';
 import { supabaseAdmin, supabaseAdminConfigured } from '@/lib/supabaseAdmin';
+import { normalizeCityInput, normalizeStateInput } from './location-utils';
 
 // Handle OPTIONS requests for CORS
 export function OPTIONS(req: NextRequest) {
@@ -113,8 +114,8 @@ export async function POST(req: NextRequest) {
     
     // Trust the AI's decomposition - it understands locations naturally
     // The enhanced planner now provides city and state separately
-    let extractedCity = filters.city || decomposition.structured_filters?.city || null;
-    let extractedState = filters.state || decomposition.structured_filters?.state || null;
+    let extractedCity = normalizeCityInput(filters.city || decomposition.structured_filters?.city || null);
+    let extractedState = normalizeStateInput(filters.state || decomposition.structured_filters?.state || null);
     
     // Also check the combined location field for backward compatibility
     if (!extractedCity && !extractedState && decomposition.structured_filters?.location) {
@@ -123,14 +124,14 @@ export async function POST(req: NextRequest) {
       
       const locationParts = extractedLocation.split(',').map(p => p.trim());
       if (locationParts.length === 2) {
-        extractedCity = locationParts[0];
-        extractedState = locationParts[1];
+        extractedCity = normalizeCityInput(locationParts[0]);
+        extractedState = normalizeStateInput(locationParts[1]);
       } else if (locationParts.length === 1) {
         const loc = locationParts[0];
         if (loc.length === 2 && loc === loc.toUpperCase()) {
-          extractedState = loc;
+          extractedState = normalizeStateInput(loc);
         } else {
-          extractedCity = loc;
+          extractedCity = normalizeCityInput(loc);
         }
       }
     }
@@ -150,7 +151,8 @@ export async function POST(req: NextRequest) {
     
     const searchOptions = { 
       limit: body?.limit || 10,
-      structuredFilters
+      structuredFilters,
+      decomposition
     };
     console.log(`[${requestId}] Search options:`, JSON.stringify({
       ...searchOptions,
