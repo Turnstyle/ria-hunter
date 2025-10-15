@@ -124,8 +124,28 @@ async function executeSemanticQuery(decomposition: QueryPlan, filters: { state?:
       console.log(`  After city filter: ${filteredResults.length} results`)
     }
     
-    // STEP 4: Limit results to requested amount
-    const finalResults = filteredResults.slice(0, limit)
+    // STEP 4: For superlative queries, re-sort by AUM after semantic matching
+    // Semantic search finds the RIGHT firms, but we need to rank them by size
+    const isSuperlativeQuery = /\b(largest|biggest|top\s+\d+|leading|major)\b/i.test(decomposition.semantic_query)
+    if (isSuperlativeQuery) {
+      console.log(`📊 Superlative query detected - sorting by AUM`)
+      filteredResults.sort((a: any, b: any) => (b.aum || 0) - (a.aum || 0))
+    }
+    
+    // STEP 5: Deduplicate by CRD number before limiting
+    const deduped = new Map<number, any>()
+    filteredResults.forEach((ria: any) => {
+      const existing = deduped.get(ria.crd_number)
+      if (!existing || (ria.aum || 0) > (existing.aum || 0)) {
+        deduped.set(ria.crd_number, ria)
+      }
+    })
+    
+    const uniqueResults = Array.from(deduped.values())
+    console.log(`📊 After deduplication: ${uniqueResults.length} unique firms from ${filteredResults.length} total`)
+    
+    // STEP 6: Limit results to requested amount
+    const finalResults = uniqueResults.slice(0, limit)
     console.log(`✅ Semantic search complete: ${finalResults.length} results`)
     
     return finalResults
