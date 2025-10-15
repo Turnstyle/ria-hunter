@@ -20,18 +20,22 @@ When searching for "10 largest RIAs in St. Louis", the same company (EDWARD JONE
 ### Root Cause
 The `executeStructuredQuery` function in `unified-search.ts` was querying the database without deduplicating by CRD number. If multiple entries existed for the same company in the `ria_profiles` table, they would all be returned.
 
-### Solution
+### Solution (Updated)
 Updated `executeStructuredQuery` to deduplicate results by CRD number:
-- First attempts to use `DISTINCT ON (crd_number)` with raw SQL for efficiency
-- Falls back to manual deduplication in JavaScript if the RPC call fails
+- Uses standard Supabase query builder with filters
+- Fetches extra results (limit × 3) to account for duplicates
+- Manually deduplicates by CRD number in JavaScript
 - For each CRD number, keeps only the entry with the highest AUM
 - Results are sorted by AUM descending and limited to the requested count
 
+**Note:** Initial attempt used a non-existent `exec_sql` RPC which caused "0 results" error. Fixed by using standard query builder.
+
 ### Files Changed
-- `app/api/ask/unified-search.ts` - Lines 139-239
+- `app/api/ask/unified-search.ts` - Lines 139-204
 
 ### Deployment
-- **Commit:** ff3b2a384
+- **Initial Commit:** ff3b2a384 (broken - returned 0 results)
+- **Fixed Commit:** 782b0806a ✅
 - **Deployed:** Oct 15, 2025 via Vercel CLI
 - **Status:** ✅ Live in production
 
