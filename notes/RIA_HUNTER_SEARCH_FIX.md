@@ -1,13 +1,43 @@
 # RIA Hunter - Fix Search Functionality
 
 ## Overview
-This document contains step-by-step instructions to fix the "0 RIAs found" search issue in the RIA Hunter backend. The problem is caused by missing database functions and a table name bug.
+This document contains step-by-step instructions to fix issues in the RIA Hunter backend search functionality.
 
 **Repository:** `Turnstyle/ria-hunter` (backend)
 
-**Issues to Fix:**
+**Issues Fixed:**
 1. ✅ Missing Supabase RPC functions for semantic search
 2. ✅ Incorrect table name in unified-search.ts
+3. ✅ **NEW (Oct 15, 2025):** Duplicate results in structured search queries
+
+---
+
+## 🔧 LATEST FIX: Duplicate Results (Oct 15, 2025)
+
+### Issue
+When searching for "10 largest RIAs in St. Louis", the same company (EDWARD JONES) appeared 10 times instead of showing different firms like Stifel, Moneta, and Buckingham.
+
+### Root Cause
+The `executeStructuredQuery` function in `unified-search.ts` was querying the database without deduplicating by CRD number. If multiple entries existed for the same company in the `ria_profiles` table, they would all be returned.
+
+### Solution
+Updated `executeStructuredQuery` to deduplicate results by CRD number:
+- First attempts to use `DISTINCT ON (crd_number)` with raw SQL for efficiency
+- Falls back to manual deduplication in JavaScript if the RPC call fails
+- For each CRD number, keeps only the entry with the highest AUM
+- Results are sorted by AUM descending and limited to the requested count
+
+### Files Changed
+- `app/api/ask/unified-search.ts` - Lines 139-239
+
+### Deployment
+- **Commit:** ff3b2a384
+- **Deployed:** Oct 15, 2025 via Vercel CLI
+- **Status:** ✅ Live in production
+
+### Testing
+To verify the fix, search for: "what are the 10 largest RIAs in St. Louis?"
+Expected result: Should show 10 different companies (Stifel, Moneta, Buckingham, etc.), not duplicates.
 
 ---
 
