@@ -12,7 +12,73 @@ This document contains step-by-step instructions to fix issues in the RIA Hunter
 
 ---
 
-## 🎯 ARCHITECTURAL CHANGE: AI-First Location Filtering (Oct 15, 2025)
+## 🚀 MAJOR ARCHITECTURAL CHANGE: Full AI-First Search (Oct 15, 2025)
+
+### What Changed
+**Removed ALL forced structured search logic** - the system now ALWAYS uses semantic search with AI embeddings. No more bypassing the AI.
+
+### What Was Removed
+
+**1. Forced Structured Search for Superlatives** (route.ts, unified-search.ts)
+```typescript
+// OLD CODE (removed):
+const isSuperlativeQuery = /\b(largest|biggest|top\s+\d+)\b/i.test(query);
+const shouldForceStructured = isSuperlativeQuery && hasLocation;
+if (shouldForceStructured) {
+  results = await executeStructuredQuery(filters, limit);  // Bypassed AI!
+}
+```
+
+**2. Hardcoded "Largest" Detection** (retriever.ts)
+```typescript
+// OLD CODE (removed):
+const isLargestQuery = semantic_query?.toLowerCase().includes('largest');
+if (isLargestQuery) {
+  // Direct database query bypassing semantic search
+}
+```
+
+**3. St. Louis Special Handling** (all 5 endpoints)
+```typescript
+// OLD CODE (removed):
+if (city.toLowerCase().includes('st') && city.toLowerCase().includes('louis')) {
+  query = query.or('city.ilike.%ST LOUIS%,city.ilike.%ST. LOUIS%');
+}
+```
+
+### Why This Is Better
+
+**AI embeddings already understand:**
+- ✅ Superlatives: "largest", "biggest", "top 10"
+- ✅ Location variations: "St. Louis" = "ST. LOUIS" = "St Louis" = "Saint Louis"
+- ✅ Ranking requirements: "10 largest firms" 
+- ✅ Geographic understanding: "New York" = "NY", etc.
+
+**Benefits:**
+1. **Simpler code**: 100 lines deleted, 21 lines added
+2. **More accurate**: AI understands nuance better than regex
+3. **More maintainable**: No hardcoded patterns to maintain
+4. **Truly AI-first**: Trust Gemini and embeddings completely
+5. **No bypasses**: Semantic search handles ALL queries
+
+### Files Changed (7)
+- `app/api/ask/route.ts` - removed forceStructured logic
+- `app/api/ask/unified-search.ts` - always use semantic search
+- `app/api/ask/retriever.ts` - removed hardcoded "largest" detection
+- `app/api/ask/browse/route.ts` - simplified filters
+- `app/api/ask/search/route.ts` - simplified filters
+- `app/api/ask/comprehensive-search/route.ts` - simplified filters
+- `app/api/ask/hybrid-comprehensive/route.ts` - simplified filters
+
+### Deployment
+- **Commit:** 51adb661b ✅
+- **Deployed:** Oct 15, 2025 via Vercel CLI
+- **Status:** ✅ Live in production
+- **Impact:** System now trusts AI embeddings for ALL query understanding
+
+---
+
+## 🎯 PREVIOUS: AI-First Location Filtering (Oct 15, 2025) [SUPERSEDED]
 
 ### Change
 **Removed all hardcoded location filters** - now trusting Gemini and AI embeddings to understand location variations naturally.
