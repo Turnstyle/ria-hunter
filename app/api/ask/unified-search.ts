@@ -87,12 +87,13 @@ async function executeSemanticQuery(decomposition: QueryPlan, filters: { state?:
     
     // Call the native function directly with the embedding array
     // Supabase client will handle the array-to-vector conversion
+    // Trust semantic embeddings to understand location completely - no rigid state filtering!
     const { data: searchResults, error } = await supabaseAdmin.rpc('hybrid_search_rias', {
       query_text: decomposition.semantic_query,
       query_embedding: embedding,  // Pass as array directly
       match_threshold: 0.3,
       match_count: limit * 2,
-      state_filter: filters.state || null,
+      state_filter: null,  // Let AI embeddings handle location naturally
       min_vc_activity: 0,
       min_aum: filters.min_aum || 0,
       fund_type_filter: null
