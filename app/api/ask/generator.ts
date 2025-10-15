@@ -1,15 +1,126 @@
 import { createAIService } from '@/lib/ai-providers'
 import { createResilientAIService } from '@/lib/ai-resilience'
 
+const RESILIENCE_FALLBACK_SNIPPET = 'temporarily unable to generate a detailed response'
+
+type ParsedEntry = {
+	rank: number
+	name: string
+	details: string[]
+}
+
+type ParsedContext = {
+	entries: ParsedEntry[]
+	notes: string[]
+}
+
+function parseContext(context: string): ParsedContext {
+	const entries: ParsedEntry[] = []
+	const notes: string[] = []
+	const lines = (context || '').split('\n')
+
+	for (const rawLine of lines) {
+		const line = rawLine.trim()
+		if (!line) continue
+
+		if (/^note[:\s]/i.test(line)) {
+			const noteText = line.replace(/^note[:\s]*/i, '').trim()
+			if (noteText) {
+				notes.push(noteText)
+			}
+			continue
+		}
+
+		const match = line.match(/^(\d+)\.\s*(.+)$/)
+		if (!match) continue
+
+		const rank = Number.parseInt(match[1], 10)
+		const remainder = match[2]
+		const parts = remainder
+			.split('|')
+			.map((part) => part.trim())
+			.filter(Boolean)
+
+		if (parts.length === 0) continue
+
+		const [name, ...details] = parts
+
+		entries.push({
+			rank: Number.isFinite(rank) ? rank : entries.length + 1,
+			name,
+			details: details.map((detail) => detail.replace(/\s+/g, ' ').trim()),
+		})
+	}
+
+	return { entries, notes }
+}
+
+function buildStructuredFallback(query: string, parsed: ParsedContext): string {
+	const total = parsed.entries.length
+
+	if (total === 0) {
+		const lines = [`Semantic search did not return any RIAs for "${query}".`]
+		for (const note of parsed.notes) {
+			lines.push(`Data note: ${note}`)
+		}
+		lines.push('Sources: 0 RIAs from semantic search.')
+		return lines.join('\n')
+	}
+
+	const topEntries = parsed.entries.slice(0, 10)
+	const lines: string[] = [
+		`Semantic search found ${total} RIAs matching "${query}". Top ${topEntries.length}:`,
+	]
+
+	for (const entry of topEntries) {
+		const detailText = entry.details.length > 0 ? entry.details.join('; ') : ''
+		lines.push(detailText ? `- ${entry.rank}. ${entry.name}: ${detailText}` : `- ${entry.rank}. ${entry.name}`)
+	}
+
+	for (const note of parsed.notes) {
+		lines.push(`Data note: ${note}`)
+	}
+
+	lines.push(`Sources: ${total} RIAs from semantic search.`)
+	return lines.join('\n')
+}
+
+function ensureSourcesSummary(text: string, parsed: ParsedContext): string {
+	if (!text) {
+		return `Sources: ${parsed.entries.length} RIAs from semantic search.`
+	}
+
+	if (text.toLowerCase().includes('sources:')) {
+		return text
+	}
+
+	const suffix = `Sources: ${parsed.entries.length} RIAs from semantic search.`
+	const needsNewline = !text.endsWith('\n')
+	return needsNewline ? `${text}\n${suffix}` : `${text}${suffix}`
+}
+
+function normalizeGeneratedText(resultText: string | undefined, query: string, context: string): string {
+	const parsed = parseContext(context)
+	const cleaned = (resultText || '').trim()
+	const isEmpty = cleaned.length === 0
+	const matchesResilienceFallback = cleaned.toLowerCase().includes(RESILIENCE_FALLBACK_SNIPPET)
+	const base = !isEmpty && !matchesResilienceFallback
+		? cleaned
+		: buildStructuredFallback(query, parsed)
+
+	return ensureSourcesSummary(base, parsed)
+}
+
 function buildPrompt(query: string, context: string): string {
 	return [
 		'You are a factual analyst. Answer the user question using ONLY the provided context.',
-		'IMPORTANT RULES:',
-		'1. If the user asks for addresses: Note that only city and state are available, not street addresses',
-		'2. If the user asks for private fund activity: Show the fund count and total private fund AUM if available',
-		'3. If specific details are missing: Provide what information you can and clearly state what is not available',
-		'4. Always be transparent about data limitations while providing the best possible answer with available data',
-		'Be concise, structured, and include a brief ranked list if relevant.',
+		'Formatting rules:',
+		'1. Begin with a short sentence summarizing what the data shows for the query.',
+		'2. Provide a "-" bullet list for each firm (limit 10). Include rank, location, AUM, private fund activity, and executives when available. Separate facts with semicolons.',
+		'3. If details are missing, say "Not available" instead of inventing values.',
+		'4. Restate any data limitations noted in the context (for example, only city and state are available).',
+		'5. Keep the response scannable—avoid dense paragraphs or conversational filler.',
+		'6. Conclude with `Sources: <count> RIAs from semantic search.` using the count from the context when possible.',
 		'',
 		`Context:\n${context}`,
 		'',
@@ -18,7 +129,8 @@ function buildPrompt(query: string, context: string): string {
 }
 
 function fallbackResponse(query: string, context: string): string {
-	return `Based on the search results:\n\n${context}\n\nNote: AI summarization is temporarily unavailable for the query "${query}".`
+	const parsed = parseContext(context)
+	return buildStructuredFallback(query, parsed)
 }
 
 export async function generateNaturalLanguageAnswer(query: string, context: string): Promise<string> {
@@ -32,7 +144,7 @@ export async function generateNaturalLanguageAnswer(query: string, context: stri
 	try {
 		const prompt = buildPrompt(query, context)
 		const result = await ai.generateText(prompt)
-		return (result.text || '').trim()
+		return normalizeGeneratedText(result.text, query, context)
 	} catch (error) {
 		console.error('Failed to generate AI response:', error)
 		return fallbackResponse(query, context)
@@ -55,21 +167,14 @@ export function generateNaturalLanguageAnswerStream(query: string, context: stri
 			try {
 				const prompt = buildPrompt(query, context)
 				const result = await ai.generateText(prompt)
-				const text = (result.text || '').trim()
-
-				if (!text) {
-					controller.enqueue(encoder.encode(fallbackResponse(query, context)))
-					controller.close()
-					return
-				}
-
+				const text = normalizeGeneratedText(result.text, query, context)
 				const words = text.split(' ')
 				for (let i = 0; i < words.length; i++) {
 					const chunk = i === 0 ? words[i] : ' ' + words[i]
 					controller.enqueue(encoder.encode(chunk))
 
 					if (process.env.NODE_ENV === 'development') {
-						await new Promise(resolve => setTimeout(resolve, 20))
+						await new Promise((resolve) => setTimeout(resolve, 20))
 					}
 				}
 
@@ -93,18 +198,14 @@ export async function* streamAnswerTokens(query: string, context: string) {
 	try {
 		const prompt = buildPrompt(query, context)
 		const result = await ai.generateText(prompt)
-		const fullResponse = (result.text || '').trim()
-
-		if (!fullResponse) {
-			throw new Error('AI provider returned empty response')
-		}
+		const fullResponse = normalizeGeneratedText(result.text, query, context)
 
 		const words = fullResponse.split(' ')
 		for (let i = 0; i < words.length; i++) {
 			const word = i === 0 ? words[i] : ' ' + words[i]
 			yield word
 			if (process.env.NODE_ENV === 'development') {
-				await new Promise(resolve => setTimeout(resolve, 20))
+				await new Promise((resolve) => setTimeout(resolve, 20))
 			}
 		}
 	} catch (error) {
@@ -112,3 +213,4 @@ export async function* streamAnswerTokens(query: string, context: string) {
 		yield fallbackResponse(query, context)
 	}
 }
+
