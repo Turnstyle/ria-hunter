@@ -72,23 +72,35 @@ Gemini Function Call:
 - `app/api/ask/planner.ts` - Added `sort_by` to types
 - `app/api/ask/unified-search.ts` - Use AI's `sort_by` instruction, removed city post-filter
 
-### Key Insight: Remove City Post-Filter Too!
+### Key Insight: Remove ALL Location Filters!
 
-**Initially kept:** City post-filter with string normalization for "St. Louis" variations ❌
+**Initially kept:** 
+- State filter → exact match on state code/name ❌
+- City post-filter with string normalization ❌
 
-**Realized:** The semantic embeddings ALREADY understand location! ✅
+**Realized:** The semantic embeddings ALREADY understand location completely! ✅
 
 **Why it works:**
 - Query: "largest RIAs in St. Louis" → embedding vector
-- That vector naturally has high similarity to narratives mentioning St. Louis
-- State filter (Missouri) narrows search space
-- Semantic similarity ranks St. Louis firms highest
-- No rigid string matching needed!
+- That vector naturally has high similarity to narratives mentioning "St. Louis, Missouri"
+- No need for rigid state='MO' or city='St. Louis' filters
+- Semantic similarity naturally ranks St. Louis firms highest
+- Works even with "Missouri" vs "MO" mismatches!
+
+**The Problem We Had:**
+- Gemini returns: "Missouri" (full name)
+- Database stores: "MO" (abbreviation)
+- State filter exact match: FAILED → 0 results
+
+**The AI Solution:**
+- Remove state_filter from RPC call
+- Remove city post-filter
+- Trust embeddings 100%
 
 ### Deployment
-- **Initial:** 1f97499a1 (with city filter)
-- **Final:** c9b0409b3 ✅ (removed city filter - pure AI)
-- **Status:** ✅ Live - FULLY AI-first, zero rigid filters
+- **With filters:** 1f97499a1 → c9b0409b3 (failed - 0 results)
+- **Final pure AI:** 90b8501d3 ✅
+- **Status:** ✅ Live - PURE AI, ZERO location filters
 
 ---
 
