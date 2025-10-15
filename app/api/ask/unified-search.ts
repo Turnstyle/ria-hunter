@@ -145,37 +145,92 @@ async function executeStructuredQuery(
     console.log('📊 Starting structured database query...')
     console.log('Filters:', filters)
     
-    let query = supabaseAdmin
-      .from('ria_profiles')
-      .select('*')
-      .order('aum', { ascending: false })
-      .limit(limit)
-    
+    // Build WHERE clause conditions
+    const conditions: string[] = []
     if (filters.state) {
       console.log(`  Adding state filter: ${filters.state}`)
-      query = query.eq('state', filters.state.toUpperCase())
+      conditions.push(`state = '${filters.state.toUpperCase()}'`)
     }
     
     if (filters.city) {
       console.log(`  Adding city filter: ${filters.city}`)
-      // Simple ilike for city - no variants needed, let the database handle it
-      query = query.ilike('city', `%${filters.city}%`)
+      conditions.push(`city ILIKE '%${filters.city}%'`)
     }
     
     if (filters.min_aum) {
       console.log(`  Adding min AUM filter: ${filters.min_aum}`)
-      query = query.gte('aum', filters.min_aum)
+      conditions.push(`aum >= ${filters.min_aum}`)
     }
     
-    const { data, error } = await query
+    const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : ''
     
+    // Use DISTINCT ON to get only one row per CRD number (the one with highest AUM)
+    // This prevents duplicates when the same company has multiple entries
+    const query = `
+      SELECT DISTINCT ON (crd_number) *
+      FROM ria_profiles
+      ${whereClause}
+      ORDER BY crd_number, aum DESC NULLS LAST
+      LIMIT ${limit * 2}
+    `
+    
+    console.log('  Executing SQL:', query)
+    
+    const { data, error } = await supabaseAdmin.rpc('exec_sql', { query })
+    
+    // If RPC doesn't work, fall back to regular query without deduplication
     if (error) {
-      console.error('❌ Structured query error:', error)
-      throw error
+      console.warn('⚠️ RPC query failed, using standard query:', error)
+      
+      let standardQuery = supabaseAdmin
+        .from('ria_profiles')
+        .select('*')
+        .order('aum', { ascending: false, nullsFirst: false })
+        .limit(limit * 3) // Get more results to account for potential duplicates
+      
+      if (filters.state) {
+        standardQuery = standardQuery.eq('state', filters.state.toUpperCase())
+      }
+      
+      if (filters.city) {
+        standardQuery = standardQuery.ilike('city', `%${filters.city}%`)
+      }
+      
+      if (filters.min_aum) {
+        standardQuery = standardQuery.gte('aum', filters.min_aum)
+      }
+      
+      const { data: standardData, error: standardError } = await standardQuery
+      
+      if (standardError) {
+        console.error('❌ Structured query error:', standardError)
+        throw standardError
+      }
+      
+      // Manually deduplicate by CRD number, keeping the one with highest AUM
+      const deduped = new Map<number, any>()
+      standardData?.forEach(ria => {
+        const existing = deduped.get(ria.crd_number)
+        if (!existing || (ria.aum || 0) > (existing.aum || 0)) {
+          deduped.set(ria.crd_number, ria)
+        }
+      })
+      
+      const results = Array.from(deduped.values())
+        .sort((a, b) => (b.aum || 0) - (a.aum || 0))
+        .slice(0, limit)
+      
+      console.log(`✅ Structured query complete (deduplicated): ${results.length} unique results`)
+      return results
     }
     
-    console.log(`✅ Structured query complete: ${data?.length || 0} results`)
-    return data || []
+    // Sort by AUM and limit
+    const results = (data || [])
+      .sort((a: any, b: any) => (b.aum || 0) - (a.aum || 0))
+      .slice(0, limit)
+    
+    console.log(`✅ Structured query complete: ${results.length} results`)
+    return results
     
   } catch (error) {
     console.error('❌ Structured query failed:', error)
