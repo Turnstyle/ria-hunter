@@ -70,12 +70,25 @@ Gemini Function Call:
 ### Files Changed
 - `app/api/ask/planner-v2.ts` - Added `sort_by` to function schema
 - `app/api/ask/planner.ts` - Added `sort_by` to types
-- `app/api/ask/unified-search.ts` - Use AI's `sort_by` instruction
+- `app/api/ask/unified-search.ts` - Use AI's `sort_by` instruction, removed city post-filter
+
+### Key Insight: Remove City Post-Filter Too!
+
+**Initially kept:** City post-filter with string normalization for "St. Louis" variations ❌
+
+**Realized:** The semantic embeddings ALREADY understand location! ✅
+
+**Why it works:**
+- Query: "largest RIAs in St. Louis" → embedding vector
+- That vector naturally has high similarity to narratives mentioning St. Louis
+- State filter (Missouri) narrows search space
+- Semantic similarity ranks St. Louis firms highest
+- No rigid string matching needed!
 
 ### Deployment
-- **Commit:** 1f97499a1 ✅
-- **Deployed:** Oct 15, 2025
-- **Status:** ✅ Live - TRUE AI-first architecture
+- **Initial:** 1f97499a1 (with city filter)
+- **Final:** c9b0409b3 ✅ (removed city filter - pure AI)
+- **Status:** ✅ Live - FULLY AI-first, zero rigid filters
 
 ---
 
