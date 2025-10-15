@@ -124,13 +124,19 @@ async function executeSemanticQuery(decomposition: QueryPlan, filters: { state?:
       console.log(`  After city filter: ${filteredResults.length} results`)
     }
     
-    // STEP 4: For superlative queries, re-sort by AUM after semantic matching
-    // Semantic search finds the RIGHT firms, but we need to rank them by size
-    const isSuperlativeQuery = /\b(largest|biggest|top\s+\d+|leading|major)\b/i.test(decomposition.semantic_query)
-    if (isSuperlativeQuery) {
-      console.log(`📊 Superlative query detected - sorting by AUM`)
+    // STEP 4: Apply AI-determined sorting
+    // The AI planner tells us HOW to sort based on understanding the query naturally
+    const sortBy = decomposition.structured_filters?.sort_by || 'relevance'
+    console.log(`📊 AI determined sort strategy: ${sortBy}`)
+    
+    if (sortBy === 'aum') {
       filteredResults.sort((a: any, b: any) => (b.aum || 0) - (a.aum || 0))
+    } else if (sortBy === 'fund_count') {
+      filteredResults.sort((a: any, b: any) => (b.private_fund_count || 0) - (a.private_fund_count || 0))
+    } else if (sortBy === 'name') {
+      filteredResults.sort((a: any, b: any) => (a.legal_name || '').localeCompare(b.legal_name || ''))
     }
+    // If sort_by === 'relevance', keep semantic similarity order
     
     // STEP 5: Deduplicate by CRD number before limiting
     const deduped = new Map<number, any>()

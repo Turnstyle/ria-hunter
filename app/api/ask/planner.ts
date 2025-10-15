@@ -5,6 +5,7 @@ export type StructuredFilters = {
 	min_aum?: number | null
 	max_aum?: number | null
 	services?: string[] | null
+	sort_by?: 'aum' | 'relevance' | 'fund_count' | 'name' | null
 }
 
 export type QueryPlan = {

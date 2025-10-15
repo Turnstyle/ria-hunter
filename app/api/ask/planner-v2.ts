@@ -19,6 +19,7 @@ export type StructuredFilters = {
   services?: string[] | null;
   fund_type?: string | null;
   has_vc_activity?: boolean | null;
+  sort_by?: 'aum' | 'relevance' | 'fund_count' | 'name' | null;
 };
 
 export type QueryPlan = {
@@ -68,6 +69,11 @@ const SEARCH_PLAN_FUNCTION = {
         type: 'array',
         items: { type: 'string' },
         description: 'Specific services mentioned like "private placements", "401k", "financial planning", etc.'
+      },
+      sort_by: {
+        type: 'string',
+        enum: ['aum', 'relevance', 'fund_count', 'name'],
+        description: 'How to sort results. Use "aum" for queries about largest/biggest/top firms. Use "relevance" for general searches. Use "fund_count" for most active firms. Use "name" for alphabetical.'
       }
     },
     required: ['semantic_query']
@@ -85,7 +91,8 @@ Query: "Find the largest RIAs in St. Louis Missouri"
 Function Call: search_plan({
   semantic_query: "largest RIAs",
   city: "St. Louis",
-  state: "Missouri"
+  state: "Missouri",
+  sort_by: "aum"
 })
 
 Query: "Show me venture capital firms in California with over $1 billion AUM"
@@ -107,7 +114,15 @@ Function Call: search_plan({
 Query: "What are the top 10 largest RIAs in Missouri"
 Function Call: search_plan({
   semantic_query: "top 10 largest RIAs",
-  state: "Missouri"
+  state: "Missouri",
+  sort_by: "aum"
+})
+
+Query: "RIAs in Texas"
+Function Call: search_plan({
+  semantic_query: "RIAs",
+  state: "Texas",
+  sort_by: "relevance"
 })
 `;
 
