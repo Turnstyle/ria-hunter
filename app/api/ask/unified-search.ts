@@ -85,17 +85,17 @@ async function executeSemanticQuery(decomposition: QueryPlan, filters: { state?:
       min_aum: filters.min_aum || 0
     })
     
-    // Convert embedding array to JSON string for the RPC function
-    const embeddingString = JSON.stringify(embedding);
-    
-    const { data: searchResults, error } = await supabaseAdmin.rpc('hybrid_search_rias_with_string_embedding', {
-      query_text: decomposition.semantic_query,  // Pass the text query for full-text search
-      query_embedding_string: embeddingString,  // Pass as JSON string
+    // Call the native function directly with the embedding array
+    // Supabase client will handle the array-to-vector conversion
+    const { data: searchResults, error } = await supabaseAdmin.rpc('hybrid_search_rias', {
+      query_text: decomposition.semantic_query,
+      query_embedding: embedding,  // Pass as array directly
       match_threshold: 0.3,
-      match_count: limit * 2,  // Get extra for city filtering if needed
+      match_count: limit * 2,
       state_filter: filters.state || null,
       min_vc_activity: 0,
-      min_aum: filters.min_aum || 0
+      min_aum: filters.min_aum || 0,
+      fund_type_filter: null
     })
     
     if (error) {
