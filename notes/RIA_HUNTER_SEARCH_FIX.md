@@ -12,7 +12,43 @@ This document contains step-by-step instructions to fix issues in the RIA Hunter
 
 ---
 
-## 🔧 LATEST FIX: Duplicate Results (Oct 15, 2025)
+## 🎯 ARCHITECTURAL CHANGE: AI-First Location Filtering (Oct 15, 2025)
+
+### Change
+**Removed all hardcoded location filters** - now trusting Gemini and AI embeddings to understand location variations naturally.
+
+### What Was Removed
+Previously, the system had hardcoded special handling for "St. Louis":
+```typescript
+// OLD CODE (removed):
+if (city.toLowerCase().includes('st') && city.toLowerCase().includes('louis')) {
+  query = query.or('city.ilike.%ST LOUIS%,city.ilike.%ST. LOUIS%');
+}
+```
+
+This was legacy code from pre-AI days when we used rigid pattern matching.
+
+### Why This Change
+1. **Gemini understands location variations naturally** - "St. Louis", "ST. LOUIS", "St Louis", and "Saint Louis" are all understood as the same place through embeddings
+2. **The planner already documents this** - planner-v2.ts explicitly says "The AI understands that 'St. Louis', 'St Louis', and 'Saint Louis' all refer to the same city"
+3. **Simpler, more maintainable code** - No need to hardcode variations for every city
+4. **Eliminates monkeypatch cruft** - These filters were workarounds from before we had AI
+
+### Affected Files (5)
+- `app/api/ask/unified-search.ts`
+- `app/api/ask/browse/route.ts`
+- `app/api/ask/search/route.ts`
+- `app/api/ask/comprehensive-search/route.ts`
+- `app/api/ask/hybrid-comprehensive/route.ts`
+
+### Deployment
+- **Commit:** f24cb95cb ✅
+- **Deployed:** Oct 15, 2025 via Vercel CLI
+- **Status:** ✅ Live in production
+
+---
+
+## 🔧 PREVIOUS FIX: Duplicate Results (Oct 15, 2025)
 
 ### Issue
 When searching for "10 largest RIAs in St. Louis", the same company (EDWARD JONES) appeared 10 times instead of showing different firms like Stifel, Moneta, and Buckingham.
