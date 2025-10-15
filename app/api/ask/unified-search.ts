@@ -198,14 +198,6 @@ async function executeStructuredQuery(
       query = query.eq('state', filters.state.toUpperCase())
     }
     
-    if (filters.cityPattern) {
-      console.log(`  Adding city pattern filter: ${filters.cityPattern}`)
-      query = query.ilike('city', filters.cityPattern)
-    } else if (filters.city) {
-      console.log(`  Adding city filter: ${filters.city}`)
-      query = query.ilike('city', `%${filters.city}%`)
-    }
-    
     if (filters.min_aum) {
       console.log(`  Adding min AUM filter: ${filters.min_aum}`)
       query = query.gte('aum', filters.min_aum)
@@ -231,10 +223,17 @@ async function executeStructuredQuery(
       aum: r.aum
     })))
     
+    // Optional city filtering after fetch to handle synonyms like Saint vs St.
+    let filteredData = data
+    if (filters.city) {
+      filteredData = data.filter(ria => cityMatchesFilter(ria.city, filters.city || null))
+      console.log(`  City post-filter applied: ${filteredData.length} rows remain`)
+    }
+    
     // Manually deduplicate by CRD number, keeping the one with highest AUM
-    console.log(`  Deduplicating ${data.length} results...`)
+    console.log(`  Deduplicating ${filteredData.length} results...`)
     const deduped = new Map<number, any>()
-    data.forEach(ria => {
+    filteredData.forEach(ria => {
       const existing = deduped.get(ria.crd_number)
       if (!existing || (ria.aum || 0) > (existing.aum || 0)) {
         deduped.set(ria.crd_number, ria)
