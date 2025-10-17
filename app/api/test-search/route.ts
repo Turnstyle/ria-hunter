@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     const { count: withEmbeddings } = await supabaseAdmin
       .from('narratives')
       .select('*', { count: 'exact', head: true })
-      .not('embedding', 'is', null)
+      .not('embedding_vector', 'is', null)
     
     // Test result details
     const firstResult = searchResult.results[0]
@@ -37,20 +37,22 @@ export async function POST(req: NextRequest) {
       searchDuration: `${searchDuration}ms`,
       resultCount: searchResult.results.length,
       searchStrategy: searchResult.metadata.searchStrategy,
-      queryType: searchResult.metadata.queryType,
-      confidence: searchResult.metadata.confidence,
-      firstResultSimilarity: firstResult?.similarity || 0,
+      queryIntent: searchResult.metadata.queryPlan?.intent,
+      confidence: searchResult.metadata.routing?.confidence ?? searchResult.metadata.queryPlan?.confidence ?? 0,
+      firstResultSimilarity: firstResult?.semantic_score || firstResult?.combined_rank || 0,
       hasExecutives,
       databaseStatus: {
         totalNarratives,
         withEmbeddings,
-        coverage: `${((withEmbeddings / totalNarratives) * 100).toFixed(1)}%`
+        coverage: totalNarratives
+          ? `${((withEmbeddings / totalNarratives) * 100).toFixed(1)}%`
+          : '0%'
       },
       topResults: searchResult.results.slice(0, 3).map(r => ({
         firm: r.legal_name,
         location: `${r.city}, ${r.state}`,
         aum: r.aum,
-        similarity: r.similarity,
+        similarity: r.semantic_score,
         executives: r.executives?.length || 0
       }))
     }

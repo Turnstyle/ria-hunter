@@ -195,12 +195,10 @@ export async function POST(req: NextRequest) {
             {
               query_text: query,
               query_embedding: queryEmbedding,
-              match_threshold: 0.1,  // Low threshold to include more results
-              match_count: Math.min(filteredRIAs.length, 500),
-              state_filter: extractedState || state || null,
-              min_vc_activity: 0,
-              min_aum: minAum || 0,
-              fund_type_filter: targetFundType || null
+              location_city: extractedCity || city || null,
+              location_state: extractedState || state || null,
+              limit_count: Math.min(filteredRIAs.length, 500),
+              offset_count: 0,
             }
           );
 
@@ -209,13 +207,18 @@ export async function POST(req: NextRequest) {
             
             // Create a map of CRD to semantic score
             const semanticScores = new Map();
+            const filteredCrds = new Set(filteredRIAs.map((ria) => ria.crd_number));
             semanticResults.forEach((result: any, index: number) => {
+              if (!filteredCrds.has(result.crd_number)) {
+                return;
+              }
               // Higher rank = lower index = better score
               const score = 1 - (index / semanticResults.length);
               semanticScores.set(result.crd_number, {
-                similarity: result.similarity || 0,
-                textRank: result.text_rank || 0,
-                rankScore: score
+                similarity: result.semantic_score || 0,
+                textRank: result.fts_score || 0,
+                rankScore: score,
+                combinedRank: result.combined_rank || 0,
               });
             });
 

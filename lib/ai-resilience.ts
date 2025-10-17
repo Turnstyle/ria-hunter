@@ -7,7 +7,7 @@
  */
 
 import CircuitBreaker from 'opossum';
-import { AIService, EmbeddingResult, GenerationResult } from './ai-providers';
+import { AIService, EmbeddingResult, GenerationResult, StructuredJsonRequest } from './ai-providers';
 
 // Circuit breaker configuration as per Gemini spec section 4.2.1
 const CIRCUIT_BREAKER_OPTIONS = {
@@ -157,6 +157,31 @@ export class ResilientAIServiceWrapper implements ResilientAIService {
       console.error('Critical generation error bypassed circuit breaker:', error);
       throw error;
     }
+  }
+
+  async generateStructuredJson<T>(request: StructuredJsonRequest<T>): Promise<T> {
+    const primary = this.aiService as AIService & {
+      generateStructuredJson?: (req: StructuredJsonRequest<T>) => Promise<T>;
+    };
+
+    if (typeof primary.generateStructuredJson === 'function') {
+      try {
+        return await primary.generateStructuredJson(request);
+      } catch (error) {
+        console.error('Structured JSON generation failed on primary service:', error);
+        if (this.fallbackService && typeof (this.fallbackService as AIService & { generateStructuredJson?: (req: StructuredJsonRequest<T>) => Promise<T> }).generateStructuredJson === 'function') {
+          console.warn('Attempting structured JSON generation with fallback service');
+          return (this.fallbackService as AIService & { generateStructuredJson: (req: StructuredJsonRequest<T>) => Promise<T> }).generateStructuredJson(request);
+        }
+        throw error;
+      }
+    }
+
+    if (this.fallbackService && typeof (this.fallbackService as AIService & { generateStructuredJson?: (req: StructuredJsonRequest<T>) => Promise<T> }).generateStructuredJson === 'function') {
+      return (this.fallbackService as AIService & { generateStructuredJson: (req: StructuredJsonRequest<T>) => Promise<T> }).generateStructuredJson(request);
+    }
+
+    throw new Error('Structured JSON generation is not supported by the configured AI services');
   }
   
   /**

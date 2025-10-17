@@ -74,8 +74,10 @@ curl -X POST https://ria-hunter.app/api/ask \
       "state": "MO",
       "aum": 54000000000,
       "private_fund_count": 9,
-      "private_fund_aum": 93479356739,
-      "similarity": 0.85,
+      "combined_rank": 0.0185,
+      "semantic_score": 0.86,
+      "fts_score": 0.42,
+      "location_match_score": 0.94,
       "executives": [
         {
           "name": "Ronald James Kruszewski",
@@ -85,14 +87,33 @@ curl -X POST https://ria-hunter.app/api/ask \
     }
   ],
   "metadata": {
-    "searchStrategy": "semantic-first",
-    "queryType": "superlative-largest",
-    "confidence": 0.85,
-    "searchesRemaining": 4,
-    "searchesUsed": 1,
-    "isAuthenticated": false,
+    "remaining": 4,
     "isSubscriber": false,
-    "requestId": "req-1234567890-abc"
+    "strategy": "hybrid",
+    "totalResults": 10,
+    "queryPlan": {
+      "intent": "superlative",
+      "normalizedLocation": {
+        "city": "Saint Louis",
+        "state": "MO",
+        "variants": ["St Louis", "Saint Louis", "STL"],
+        "confidence": 0.93
+      },
+      "constraints": {
+        "sortBy": "aum",
+        "sortOrder": "desc"
+      },
+      "searchStrategy": "hybrid",
+      "confidence": 0.9
+    },
+    "routing": {
+      "strategy": "hybrid",
+      "needsLocationNormalization": true,
+      "isSuperlativeQuery": true,
+      "sortByAUM": true,
+      "confidence": 0.94,
+      "reasoning": "Detected superlative query about largest firms in Saint Louis."
+    }
   }
 }
 ```
@@ -101,6 +122,13 @@ curl -X POST https://ria-hunter.app/api/ask \
 - ✅ AUTOMATICALLY decrements search counter for non-subscribers
 - ✅ Sets/updates `rh_demo` cookie with search count
 - ✅ Returns 402 status when demo limit reached
+
+**AI-Native Pipeline:**
+- ✅ **Guardrail Preprocessing:** Vertex AI Gemini 2.0 Flash (JSON schema) normalizes location variants and produces deterministic query plans. LRU cache (1h TTL) prevents redundant calls.
+- ✅ **Semantic Router:** Gemini routes queries between `hybrid`, `structured`, and `executive_search` strategies with confidence scoring (30-minute cache).
+- ✅ **Hybrid Retrieval:** Supabase `hybrid_search_rias` (HNSW + pg_trgm + full-text) fuses semantic and lexical scores with Reciprocal Rank Fusion (`m=16`, `ef_construction=40`, `k=50`).
+- ✅ **Structured & Executive Paths:** Guardrail constraints feed structured SQL fallbacks and dedicated executive lookups when appropriate.
+- ✅ **Observability:** `metadata.queryPlan` and `metadata.routing` are returned on every response for auditability and frontend experimentation.
 
 ---
 
@@ -142,16 +170,25 @@ data: [DONE]
 
 ## Search Features
 
-### Semantic Search ✅ WORKING
-- Uses Vertex AI embeddings (768 dimensions)
-- Searches through narrative descriptions of RIAs
-- Falls back to structured search if semantic fails
-- Properly handles location variants (St. Louis, Saint Louis, St Louis, etc.)
+### Guardrail Preprocessing ✅ WORKING
+- Gemini 2.0 Flash JSON schema ensures deterministic query plans with 1-hour LRU caching.
+- Canonicalizes all city/state variants (St. Louis → Saint Louis, MO; NYC → New York, NY; LA → Los Angeles, CA).
+- Extracts constraints (sort order, minimum AUM, fund requirements) for downstream routing.
 
-### Superlative Queries ✅ WORKING  
-- Handles "largest", "biggest", "top" queries
-- Properly sorts by AUM
-- Returns enriched data with executives
+### Semantic Router ✅ WORKING
+- Gemini-powered classifier selects `hybrid`, `structured`, or `executive_search` strategy with confidence scores.
+- Detects superlative intent, forces AUM sorting, and flags location normalization requirements.
+- Caches routing decisions for 30 minutes to keep latency low.
+
+### Hybrid Semantic Search ✅ WORKING
+- Supabase `hybrid_search_rias` combines HNSW vector similarity, trigram fuzzy matching, and full-text search with Reciprocal Rank Fusion.
+- HNSW tuned for Micro tier: `m=16`, `ef_construction=40`, `vector_ip_ops` on `narratives.embedding_vector`.
+- Trigram indexes on `ria_profiles.city` and `ria_profiles.state` plus generated `fts_document` column with GIN index.
+
+### Superlative & Executive Queries ✅ WORKING
+- Superlative queries route to hybrid search with enforced AUM sorting.
+- Executive lookups pivot to `executives` table, merging back into firm profiles.
+- Structured fallback covers deterministic filters when AI router selects `structured`.
 
 ### Data Fields Available ✅ CORRECT
 The backend now returns the correct fields:

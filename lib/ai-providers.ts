@@ -10,6 +10,19 @@ type ServiceAccountCredentials = {
 
 export type AIProvider = 'vertex';
 
+export type JsonSchema = {
+  type: string;
+  [key: string]: any;
+};
+
+export interface StructuredJsonRequest<T> {
+  prompt: string;
+  schema: JsonSchema;
+  systemInstruction?: string;
+  temperature?: number;
+  topP?: number;
+}
+
 export interface EmbeddingResult {
   embedding: number[];
 }
@@ -21,6 +34,7 @@ export interface GenerationResult {
 export interface AIService {
   generateEmbedding(text: string): Promise<EmbeddingResult>;
   generateText(prompt: string): Promise<GenerationResult>;
+  generateStructuredJson<T>(request: StructuredJsonRequest<T>): Promise<T>;
 }
 
 export class VertexAIService implements AIService {
@@ -90,6 +104,52 @@ export class VertexAIService implements AIService {
     }
 
     throw new Error('Failed to generate text from Vertex AI');
+  }
+
+  async generateStructuredJson<T>(request: StructuredJsonRequest<T>): Promise<T> {
+    const { prompt, schema, systemInstruction, temperature, topP } = request;
+
+    const generationConfig: Record<string, unknown> = {
+      responseMimeType: 'application/json',
+      responseSchema: schema,
+    };
+
+    if (typeof temperature === 'number') {
+      generationConfig.temperature = temperature;
+    }
+
+    if (typeof topP === 'number') {
+      generationConfig.topP = topP;
+    }
+
+    const payload: Record<string, unknown> = {
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig,
+    };
+
+    if (systemInstruction) {
+      payload.systemInstruction = {
+        role: 'system',
+        parts: [{ text: systemInstruction }],
+      };
+    }
+
+    const result = await this.generativeModel.generateContent(payload);
+    const response = result.response;
+
+    const contentPart = response.candidates?.[0]?.content?.parts?.[0];
+    const text = contentPart?.text || null;
+
+    if (!text) {
+      throw new Error('Vertex AI did not return JSON content');
+    }
+
+    try {
+      return JSON.parse(text) as T;
+    } catch (error) {
+      console.error('Failed to parse structured JSON from Vertex AI', error, text);
+      throw new Error('Failed to parse structured JSON from Vertex AI');
+    }
   }
 }
 

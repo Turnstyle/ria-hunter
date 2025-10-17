@@ -38,8 +38,9 @@ export async function POST(req: NextRequest) {
         results: newResult.results,
         count: newResult.results.length,
         searchStrategy: newResult.metadata.searchStrategy,
-        queryType: newResult.metadata.queryType,
-        confidence: newResult.metadata.confidence,
+        queryPlan: newResult.metadata.queryPlan,
+        routing: newResult.metadata.routing,
+        confidence: newResult.metadata.routing?.confidence ?? newResult.metadata.queryPlan?.confidence ?? 0,
         processingTime: Date.now() - startTime
       }
     } catch (error) {
@@ -85,10 +86,10 @@ export async function POST(req: NextRequest) {
         }
       },
       analysis: {
-        improvement: newSearchResults && oldSearchResults ? 
-          newSearchResults.count > oldSearchResults.count : 
-          !newSearchError && !!oldSearchError,
-        aiUsed: newSearchResults?.searchStrategy === 'semantic-first',
+        improvement: newSearchResults && oldSearchResults
+          ? newSearchResults.count > oldSearchResults.count
+          : !newSearchError && !!oldSearchError,
+        aiUsed: newSearchResults?.searchStrategy !== 'structured',
         confidence: newSearchResults?.confidence || 0
       }
     }

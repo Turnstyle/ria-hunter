@@ -1,6 +1,9 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { createAIService } from '@/lib/ai-providers';
+import { createResilientAIService } from '@/lib/ai-resilience';
+import { performAINativeSearch } from '@/app/api/ask/ai-native-search';
+import type { SearchExecutionOptions } from '@/app/api/ask/ai-native-search';
 // Credits config removed - now using demo session system
 // Local CORS helper function
 function corsify(req: NextRequest, res: Response, preflight = false): Response {
@@ -94,20 +97,6 @@ function withAnonCookie(res: Response, newCount: number): Response {
   return new Response(res.body, { status: res.status, statusText: res.statusText, headers });
 }
 
-// Function to generate embedding for search query
-async function generateEmbedding(text: string): Promise<number[] | null> {
-  try {
-    const ai = createAIService();
-    if (!ai) throw new Error('AI provider not configured');
-
-    const embedding = await ai.generateEmbedding(text);
-    return embedding.embedding;
-  } catch (error) {
-    console.error('Error generating embedding:', error);
-    return null;
-  }
-}
-
 export async function POST(req: NextRequest) {
   try {
     const authHeader = req.headers.get('authorization');
@@ -123,7 +112,7 @@ export async function POST(req: NextRequest) {
       state?: string;
       useHybridSearch?: boolean;
       minVcActivity?: number;
-      minAum?: number;
+      minAum?: number | string;
       limit?: number;
       fundType?: string;  // Added fund type filter
     };
@@ -183,90 +172,80 @@ export async function POST(req: NextRequest) {
       needsCookieUpdate = true;
     }
 
-    // Generate embedding for the query
-    const embedding = await generateEmbedding(query);
-    if (!embedding) {
-      return corsify(req, NextResponse.json({ error: 'Failed to generate query embedding', code: 'INTERNAL_ERROR' }, { status: 500 }));
+    const aiService = createResilientAIService(createAIService());
+    if (!aiService) {
+      return corsify(
+        req,
+        NextResponse.json({ error: 'AI provider not configured', code: 'INTERNAL_ERROR' }, { status: 500 })
+      );
     }
 
-    let results;
-    
-    if (useHybridSearch) {
-      // Use hybrid search combining vector similarity and text search
-      const { data, error } = await supabaseAdmin.rpc('hybrid_search_rias', {
-        query_text: query,
-        query_embedding: embedding,
-        match_threshold: 0.5,
-        match_count: limit || 20,
-        state_filter: state || null,
-        min_vc_activity: minVcActivity || 0,
-        min_aum: minAum || 0,
-        fund_type_filter: fundType || null  // Pass fund type filter
-      });
-
-      if (error) {
-        console.error('Hybrid search error:', error);
-        return corsify(req, NextResponse.json({ error: 'Error performing hybrid search', code: 'INTERNAL_ERROR' }, { status: 500 }));
-      }
-      
-      results = data;
-    } else {
-      // Use vector similarity search only
-      const { data, error } = await supabaseAdmin.rpc('search_rias', {
-        query_embedding: embedding,
-        match_threshold: 0.5,
-        match_count: limit || 20,
-        state_filter: state || null,
-        min_aum: minAum || 0,
-        fund_type_filter: fundType || null  // Pass fund type filter
-      });
-      
-      if (error) {
-        console.error('Vector search error:', error);
-        return corsify(req, NextResponse.json({ error: 'Error performing vector search', code: 'INTERNAL_ERROR' }, { status: 500 }));
-      }
-      
-      results = data;
+    const overrides: SearchExecutionOptions['overrides'] = {};
+    const trimmedState = state?.trim();
+    if (trimmedState) {
+      overrides.location = { ...(overrides.location || {}), state: trimmedState };
     }
 
-    // Enrich results with executives data - fix N+1 query problem
-    let enrichedResults = results || [];
-    
-    if (results && results.length > 0) {
-      const crdNumbers = results.map((r: any) => r.crd_number);
-      
-      // Single query to get all executives for all results
-      const { data: allExecutives } = await supabaseAdmin
-        .from('control_persons')
-        .select('crd_number, person_name, title')
-        .in('crd_number', crdNumbers);
-      
-      // Group executives by CRD number
-      const executivesByCrd: Record<number, any[]> = {};
-      (allExecutives || []).forEach(exec => {
-        if (!executivesByCrd[exec.crd_number]) {
-          executivesByCrd[exec.crd_number] = [];
-        }
-        executivesByCrd[exec.crd_number].push({
-          name: exec.person_name,
-          title: exec.title
-        });
-      });
-      
-      // Attach executives to each result
-      enrichedResults = results.map((result: any) => ({
-        ...result,
-        executives: executivesByCrd[result.crd_number] || []
-      }));
+    const normalizedMinAum = typeof minAum === 'string' ? Number(minAum) : minAum;
+
+    if (typeof normalizedMinAum === 'number' && Number.isFinite(normalizedMinAum)) {
+      overrides.constraints = {
+        ...(overrides.constraints || {}),
+        minAum: normalizedMinAum,
+      };
+    }
+
+    const limitValue = typeof limit === 'number' && limit > 0 ? limit : 20;
+
+    const searchExecution = await performAINativeSearch({
+      query,
+      limit: limitValue,
+      offset: 0,
+      aiService,
+      overrides: overrides.location || overrides.constraints ? overrides : undefined,
+    });
+
+    let enrichedResults = searchExecution.results;
+
+    if (trimmedState) {
+      const upperState = trimmedState.toUpperCase();
+      enrichedResults = enrichedResults.filter(
+        (row) => (row.state || '').toUpperCase() === upperState
+      );
+    }
+
+    if (typeof minVcActivity === 'number' && Number.isFinite(minVcActivity)) {
+      enrichedResults = enrichedResults.filter(
+        (row) => Number(row.private_fund_count ?? 0) >= minVcActivity
+      );
+    }
+
+    if (fundType) {
+      const normalizedFundType = fundType.toLowerCase();
+      enrichedResults = enrichedResults.filter((row) =>
+        (row.private_funds || []).some((fund) =>
+          (fund.fund_type || '').toLowerCase().includes(normalizedFundType)
+        )
+      );
+    }
+
+    if (!userId && needsCookieUpdate) {
+      anonCount += 1;
     }
 
     const response = NextResponse.json({
       results: enrichedResults,
       query,
       total: enrichedResults.length,
+      availableResults: searchExecution.availableResults,
       credits: {
         remaining,
         isSubscriber
+      },
+      metadata: {
+        strategy: searchExecution.strategy,
+        queryPlan: searchExecution.queryPlan,
+        routing: searchExecution.routing,
       }
     });
 

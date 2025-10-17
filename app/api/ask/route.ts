@@ -1,12 +1,13 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { callLLMToDecomposeQuery } from './planner-v2'; // Use enhanced planner with Gemini function calling
-import { unifiedSemanticSearch } from './unified-search';
+import { performAINativeSearch } from './ai-native-search';
+import type { SearchExecutionOptions } from './ai-native-search';
 import { buildAnswerContext } from './context-builder';
 import { generateNaturalLanguageAnswer, streamAnswerTokens } from './generator';
 import { checkDemoLimit } from '@/lib/demo-session';
 import { corsHeaders, handleOptionsRequest, corsError } from '@/lib/cors';
-import { supabaseAdmin, supabaseAdminConfigured } from '@/lib/supabaseAdmin';
-import { normalizeCityInput, normalizeStateInput } from './location-utils';
+import { supabaseAdminConfigured } from '@/lib/supabaseAdmin';
+import { createAIService } from '@/lib/ai-providers';
+import { createResilientAIService } from '@/lib/ai-resilience';
 
 // Handle OPTIONS requests for CORS
 export function OPTIONS(req: NextRequest) {
@@ -34,17 +35,19 @@ export async function POST(req: NextRequest) {
   const requestId = `ask-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
   
   console.log(`[${requestId}] === UNIFIED ASK ENDPOINT ===`);
-  console.log(`[${requestId}] Using unified semantic search`);
+  console.log(`[${requestId}] Using AI-native search pipeline`);
   
   try {
     if (!supabaseAdminConfigured) {
-      return corsError(req, 'Supabase credentials are missing. Please configure SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.', 503)
+      return corsError(req, 'Supabase credentials are missing. Please configure SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.', 503);
     }
 
     // Parse request body
     const body = await req.json().catch(() => ({} as any));
     const query = typeof body?.query === 'string' ? body.query : '';
     const isStreaming = body?.streaming === true;
+    const limit = typeof body?.limit === 'number' ? body.limit : 10;
+    const offset = typeof body?.offset === 'number' ? body.offset : 0;
     
     if (!query) {
       return corsError(req, 'Query is required', 400);
@@ -66,21 +69,22 @@ export async function POST(req: NextRequest) {
     }
     
     // Check demo limits for anonymous users
+    let demoStatus = null as ReturnType<typeof checkDemoLimit> | null;
     if (!userId) {
-      const demoCheck = checkDemoLimit(req, isSubscriber);
+      demoStatus = checkDemoLimit(req, isSubscriber);
       console.log(`[${requestId}] Demo check:`, {
-        allowed: demoCheck.allowed,
-        searchesUsed: demoCheck.searchesUsed,
-        searchesRemaining: demoCheck.searchesRemaining
+        allowed: demoStatus.allowed,
+        searchesUsed: demoStatus.searchesUsed,
+        searchesRemaining: demoStatus.searchesRemaining
       });
       
-      if (!demoCheck.allowed) {
+      if (!demoStatus.allowed) {
         console.log(`[${requestId}] Demo limit reached, returning 402`);
         return new Response(
           JSON.stringify({
             error: 'You\'ve used your 5 free demo searches. Sign up for unlimited access.',
             code: 'DEMO_LIMIT_REACHED',
-            searchesUsed: demoCheck.searchesUsed,
+            searchesUsed: demoStatus.searchesUsed,
             searchesRemaining: 0,
             upgradeRequired: true
           }),
@@ -98,79 +102,60 @@ export async function POST(req: NextRequest) {
     // Process the query with filters from body
     const filters = body?.filters || {};
     console.log(`[${requestId}] Filters from body:`, filters);
-    
-    // Decompose the query using AI - let Gemini handle ALL location understanding naturally
-    const decomposition = await callLLMToDecomposeQuery(query);
-    console.log(`[${requestId}] AI Query decomposed:`, JSON.stringify({
-      query: query,
-      semantic_query: decomposition.semantic_query,
-      structured_filters: decomposition.structured_filters
-    }));
-    
-    // NO MORE BYPASSES - Let the AI handle everything naturally
-    
-    // Execute unified semantic search
-    console.log(`[${requestId}] Starting unified semantic search...`);
-    
-    // Trust the AI's decomposition - it understands locations naturally
-    // The enhanced planner now provides city and state separately
-    let extractedCity = normalizeCityInput(filters.city || decomposition.structured_filters?.city || null);
-    let extractedState = normalizeStateInput(filters.state || decomposition.structured_filters?.state || null);
-    
-    // Also check the combined location field for backward compatibility
-    if (!extractedCity && !extractedState && decomposition.structured_filters?.location) {
-      const extractedLocation = decomposition.structured_filters.location;
-      console.log(`[${requestId}] Using AI-decomposed location (legacy): ${extractedLocation}`);
-      
-      const locationParts = extractedLocation.split(',').map(p => p.trim());
-      if (locationParts.length === 2) {
-        extractedCity = normalizeCityInput(locationParts[0]);
-        extractedState = normalizeStateInput(locationParts[1]);
-      } else if (locationParts.length === 1) {
-        const loc = locationParts[0];
-        if (loc.length === 2 && loc === loc.toUpperCase()) {
-          extractedState = normalizeStateInput(loc);
-        } else {
-          extractedCity = normalizeCityInput(loc);
-        }
-      }
+
+    const overrides: SearchExecutionOptions['overrides'] = {};
+    const filterCity = typeof filters?.city === 'string' && filters.city.trim() ? filters.city.trim() : null;
+    const filterState = typeof filters?.state === 'string' && filters.state.trim() ? filters.state.trim() : null;
+
+    if (filterCity || filterState) {
+      overrides.location = {
+        city: filterCity,
+        state: filterState,
+      };
+    }
+
+    const minAumCandidates = [
+      filters?.minAum,
+      filters?.min_aum,
+      body?.minAum,
+    ];
+
+    const resolvedMinAum = minAumCandidates
+      .map((value) => (typeof value === 'string' ? Number(value) : value))
+      .find((value) => typeof value === 'number' && Number.isFinite(value));
+    const requirePrivateFunds = typeof filters?.requirePrivateFunds === 'boolean' ? filters.requirePrivateFunds : undefined;
+
+    if (resolvedMinAum !== undefined || requirePrivateFunds !== undefined) {
+      overrides.constraints = {
+        ...(overrides.constraints || {}),
+        ...(resolvedMinAum !== undefined ? { minAum: resolvedMinAum as number } : {}),
+        ...(requirePrivateFunds !== undefined ? { requirePrivateFunds } : {}),
+      };
     }
     
-    console.log(`[${requestId}] AI location extraction:`, JSON.stringify({
-      query: query,
-      decomposedFilters: decomposition.structured_filters,
-      city: extractedCity,
-      state: extractedState
-    }));
-    
-    // Build filters object - let semantic search with AI embeddings handle everything
-    const structuredFilters: any = {};
-    if (extractedState) structuredFilters.state = extractedState;
-    if (extractedCity) structuredFilters.city = extractedCity;
-    if (filters.fundType) structuredFilters.fundType = filters.fundType;
-    
-    const searchOptions = { 
-      limit: body?.limit || 10,
-      structuredFilters,
-      decomposition
-    };
-    console.log(`[${requestId}] Search options:`, JSON.stringify({
-      ...searchOptions,
-      detectedLocation: { city: extractedCity, state: extractedState }
-    }, null, 2));
-    
-    let searchResult;
-    try {
-      searchResult = await unifiedSemanticSearch(query, searchOptions);
-      console.log(`[${requestId}] Search result metadata:`, searchResult.metadata);
-    } catch (searchError) {
-      console.error(`[${requestId}] ❌ Unified search failed:`, searchError);
-      return corsError(req, 'Search failed', 500);
+    const aiService = createResilientAIService(createAIService());
+    if (!aiService) {
+      console.error(`[${requestId}] AI service unavailable`);
+      return corsError(req, 'AI service is not configured. Check Vertex AI credentials.', 503);
     }
-    
-    const rows = searchResult.results;
-    console.log(`[${requestId}] Search complete, ${rows.length} results found`);
-    
+
+    const hasOverrides = Boolean(overrides.location || overrides.constraints);
+
+    console.log(`[${requestId}] Running AI-native search orchestration...`);
+    const searchExecution = await performAINativeSearch({
+      query,
+      limit,
+      offset,
+      aiService,
+      overrides: hasOverrides ? overrides : undefined,
+    });
+
+    console.log(`[${requestId}] Query Plan:`, JSON.stringify(searchExecution.queryPlan));
+    console.log(`[${requestId}] Routing Decision:`, JSON.stringify(searchExecution.routing));
+
+    let rows = searchExecution.results;
+    console.log(`[${requestId}] Search complete using strategy "${searchExecution.strategy}", ${rows.length} results found`);
+
     // Apply hasVcActivity filter if specified (post-search filtering)
     let filteredRows = rows;
     if (filters.hasVcActivity) {
@@ -189,22 +174,37 @@ export async function POST(req: NextRequest) {
       });
       console.log(`[${requestId}] After VC filtering: ${filteredRows.length} results`);
     }
+
+    if (filters.fundType && typeof filters.fundType === 'string') {
+      const fundTypeNormalized = filters.fundType.toLowerCase();
+      console.log(`[${requestId}] Applying fundType filter: ${fundTypeNormalized}`);
+      filteredRows = filteredRows.filter((ria) =>
+        (ria.private_funds || []).some((fund: any) =>
+          (fund.fund_type || '').toLowerCase().includes(fundTypeNormalized)
+        )
+      );
+      console.log(`[${requestId}] After fundType filtering: ${filteredRows.length} results`);
+    }
     
     // Build context for AI generation
     const context = buildAnswerContext(filteredRows as any, query);
     
     // Calculate metadata for the response
-    const demoCheck = checkDemoLimit(req, isSubscriber);
     const metadata = {
-      remaining: isSubscriber ? -1 : demoCheck.searchesRemaining - 1,
-      isSubscriber: isSubscriber
+      remaining: isSubscriber ? -1 : (demoStatus ? demoStatus.searchesRemaining - 1 : -1),
+      isSubscriber: isSubscriber,
+      strategy: searchExecution.strategy,
+      queryPlan: searchExecution.queryPlan,
+      routing: searchExecution.routing,
+      totalResults: filteredRows.length,
+      availableResults: searchExecution.availableResults
     };
     
     // Update demo counter for anonymous users
     const headers = corsHeaders(req);
-    if (!userId) {
-      const newCount = demoCheck.searchesUsed + 1;
-      console.log(`[${requestId}] Updating demo session from ${demoCheck.searchesUsed} to ${newCount}`);
+    if (!userId && demoStatus) {
+      const newCount = demoStatus.searchesUsed + 1;
+      console.log(`[${requestId}] Updating demo session from ${demoStatus.searchesUsed} to ${newCount}`);
       headers.set('Set-Cookie', `rh_demo=${newCount}; HttpOnly; Secure; SameSite=Lax; Max-Age=${24 * 60 * 60}; Path=/`);
     }
     
@@ -247,7 +247,8 @@ export async function GET(req: NextRequest) {
       hasVcActivity: searchParams.get('hasVcActivity') === 'true' || searchParams.get('vc') === 'true'
     },
     limit: parseInt(searchParams.get('limit') || '10'),
-    streaming: searchParams.get('streaming') === 'true'
+    streaming: searchParams.get('streaming') === 'true',
+    offset: parseInt(searchParams.get('offset') || '0')
   };
 
   // Create a mock POST request with the body
@@ -361,7 +362,7 @@ async function handleStreamingResponse(
         
         // Send error as a proper message instead of error event
         const errorMessage = `I encountered an issue processing your request. Here's what I found: ${context ? context.substring(0, 500) + '...' : 'No context available'}`;
-        controller.enqueue(encoder.encode(`data: {"token":${JSON.stringify(errorMessage)}}\n\n`));
+          controller.enqueue(encoder.encode(`data: {"token":${JSON.stringify(errorMessage)}}\n\n`));
         
         // Send error response object for frontend
         const errorResponse = {
