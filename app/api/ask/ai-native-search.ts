@@ -288,7 +288,7 @@ async function executeStructuredSearch(
   const sortOrder = queryPlan.constraints.sortOrder === 'asc' ? true : false;
 
   if (sortBy === 'employees') {
-    builder = builder.order('employees', { ascending: sortOrder, nullsFirst: false });
+    builder = builder.order('aum', { ascending: sortOrder, nullsFirst: false });
   } else {
     builder = builder.order('aum', { ascending: sortOrder, nullsFirst: false });
   }
