@@ -1,6 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-import { execSync } from 'child_process';
 
 export interface ProjectContext {
   gcpProjectId: string | null;
@@ -47,28 +46,14 @@ function readGithubRepository(): string | null {
     return process.env.GITHUB_REPOSITORY;
   }
 
-  try {
-    const remote = execSync('git remote get-url origin', { stdio: ['ignore', 'pipe', 'ignore'] })
-      .toString()
-      .trim();
-    if (!remote) {
-      return null;
-    }
+  const owner = process.env.VERCEL_GIT_REPO_OWNER || process.env.GITHUB_ORG;
+  const repo = process.env.VERCEL_GIT_REPO_SLUG || process.env.GITHUB_REPO;
 
-    if (remote.startsWith('git@')) {
-      const parts = remote.split(':')[1]?.replace(/\.git$/, '');
-      return parts || null;
-    }
-
-    if (remote.startsWith('https://') || remote.startsWith('http://')) {
-      const cleaned = remote.replace(/^https?:\/\/(www\.)?github\.com\//, '').replace(/\.git$/, '');
-      return cleaned || null;
-    }
-
-    return remote.replace(/\.git$/, '') || null;
-  } catch {
-    return null;
+  if (owner && repo) {
+    return `${owner}/${repo}`;
   }
+
+  return null;
 }
 
 function readVercelProjectId(): string | null {
