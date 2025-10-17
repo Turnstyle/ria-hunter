@@ -12,13 +12,13 @@ export interface SearchResult {
   city: string;
   state: string;
   aum?: NumericLike;
-  employees?: NumericLike;
   private_fund_count?: NumericLike;
   combined_rank?: number | null;
   semantic_score?: number | null;
   fts_score?: number | null;
   location_match_score?: number | null;
   similarity?: number | null;
+  employees?: NumericLike;
   executives: Array<{ name?: string | null; title?: string | null }>;
   private_funds: Array<Record<string, any>>;
 }
@@ -131,7 +131,7 @@ type HybridRow = {
   city: string;
   state: string;
   aum: NumericLike;
-  employees: NumericLike;
+  employees?: NumericLike;
   private_fund_count: NumericLike;
   combined_rank: number | null;
   semantic_score: number | null;
@@ -149,8 +149,8 @@ async function enrichWithRelatedData(rows: HybridRow[]): Promise<SearchResult[]>
   const [executivesRes, fundsRes] = await Promise.all([
     crdNumbers.length
       ? supabaseAdmin
-          .from('executives')
-          .select('crd_number, name, title')
+          .from('control_persons')
+          .select('crd_number, person_name, title')
           .in('crd_number', crdNumbers)
       : { data: [], error: null },
     crdNumbers.length
@@ -171,7 +171,7 @@ async function enrichWithRelatedData(rows: HybridRow[]): Promise<SearchResult[]>
   const execByCrd = new Map<number, Array<{ name?: string | null; title?: string | null }>>();
   for (const exec of executivesRes.data || []) {
     const list = execByCrd.get(exec.crd_number) || [];
-    list.push({ name: exec.name, title: exec.title });
+    list.push({ name: exec.person_name, title: exec.title });
     execByCrd.set(exec.crd_number, list);
   }
 
@@ -241,7 +241,7 @@ async function executeStructuredSearch(
   let builder = supabaseAdmin
     .from('ria_profiles')
     .select(
-      'crd_number, legal_name, city, state, aum, employees, private_fund_count',
+      'crd_number, legal_name, city, state, aum, private_fund_count',
       { count: 'exact' }
     );
 
@@ -306,7 +306,7 @@ async function executeStructuredSearch(
     city: row.city,
     state: row.state,
     aum: row.aum,
-    employees: row.employees,
+    employees: (row as any).employees ?? null,
     private_fund_count: row.private_fund_count,
     combined_rank: null,
     semantic_score: null,
@@ -348,7 +348,7 @@ async function executeExecutiveSearch(
 
   const { data: profiles, error: profileError } = await supabaseAdmin
     .from('ria_profiles')
-    .select('crd_number, legal_name, city, state, aum, employees, private_fund_count')
+    .select('crd_number, legal_name, city, state, aum, private_fund_count')
     .in('crd_number', crdNumbers);
 
   if (profileError) {
@@ -378,7 +378,7 @@ async function executeExecutiveSearch(
       city: profile.city,
       state: profile.state,
       aum: profile.aum,
-      employees: profile.employees,
+      employees: (profile as any).employees ?? null,
       private_fund_count: profile.private_fund_count,
       combined_rank: null,
       semantic_score: null,
